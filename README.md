@@ -14,6 +14,13 @@ python setup.py install
 
 * Each application comes with an `-h` help menu
 
+## AD9545,46
+
+The two chip share similar functionnalities, except that
+AD9546 is more capable.
+Therefore, both can use the following API/binaries, it is up to the user
+to access the proper restricted register, when using an AD9545 chip.
+
 ## Profiles & Register map
 
 Profiles entirely describe a chip.   
@@ -25,8 +32,8 @@ Chip slave address on the `i2c` bus must be specified with `--address` or `-a` (
 * Load such a register map
 
 ```shell
-profile.py -b 0 -a 0x55 --load /tmp/map.json
-profile.py -b 1 -a 0xAA -l /tmp/map.json
+profile.py bus 0 address 0x55 --load /tmp/map.json
+profile.py bus 1 -a 0xAA -l /tmp/map.json
 ```
 
 A&D graphical interface can load a register map.
@@ -34,8 +41,8 @@ A&D graphical interface can load a register map.
 * Dump current settings into compatible format
 
 ```shell
-profile.py -b 0 -a 0x55 --dump /tmp/map.json
-profile.py -b 0 -a 0x55 -d /tmp/map.json
+profile.py 0 0x55 --dump /tmp/map.json
+profile.py 0 0xAA -d /tmp/map.json
 ```
 
 ## Clock ops
@@ -45,8 +52,7 @@ that are unlocked by A&D kernel drivers official support.
 Therefore, it is expected to use `clock-ops.py` along `ad9545` official driver loaded & deployed
 properly.
 
-Determine which operations are available for which clock, 
-for a given chipset (does not require a driver access):
+Determine which operations are available for which clock:
 
 ```shell
 clock_ops.py --list
