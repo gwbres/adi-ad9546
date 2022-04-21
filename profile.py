@@ -60,8 +60,8 @@ def main (argv):
             for addr in regmap:
                 value = int(regmap[addr], 16) # hex()
                 # 2 address bytes
-                msb = int(addr, 16) & 0xFF00)>>8
-                lsb = int(addr, 16) & 0x00FF)
+                msb = (int(addr, 16) & 0xFF00)>>8
+                lsb = int(addr, 16) & 0x00FF
                 handle.write_i2c_block_data(address, msb, [lsb])
 
     if args.dump:
