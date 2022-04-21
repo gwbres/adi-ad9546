@@ -13,8 +13,26 @@ from smbus import SMBus
 REGMAP = [0x00, 0x3A3B]
 KNOWN_DEVICES = ["ad9545","ad9546"]
 
+def progress_bar (progress, width=100):
+    """ displays progress bar,
+        progress: current progress [%],
+        width: `pixel` width
+    """
+    bar = "["
+    bar += "\x1b[0;32m" # green
+    r = 100 // width
+    for i in range (width):
+        if progress >= i * r:
+            bar += "█"
+        else:
+            bar += " "
+    bar += "\x1b[0m"    # stop
+    bar += "]    {}%".format(progress)
+    sys.stdout.write('\r' + bar)
+    sys.stdout.flush()
+
 def main (argv):
-    parser = argparse.ArgumentParser(description="Load / dump a profile into AD9545,AD9546 chip")
+    parser = argparse.ArgumentParser(description="Load /dump a profile into/from AD9545,46 chipset")
     parser.add_argument(
         "bus", 
         metavar="bus", 
@@ -47,22 +65,34 @@ def main (argv):
         default=KNOWN_DEVICES[0],
         help="Accurately describe the chip when --dumping a profile"
     )
+    parser.add_argument(
+        "-progress-bar",
+        help="Disable progress bar",
+    )
     args = parser.parse_args(argv)
 
     handle = SMBus()
     handle.open(int(args.bus))
-    address = int(args.address, 16)
-    
+    address = args.address
+
+    progress = 0
+    update_perc = 5
+
     if args.load:
         with open(args.load, encoding="utf-8-sig") as f:
             data = json.load(f)
             regmap = data["RegisterMap"]
+            N = len(regmap)
             for addr in regmap:
                 value = int(regmap[addr], 16) # hex()
                 # 2 address bytes
                 msb = (int(addr, 16) & 0xFF00)>>8
                 lsb = int(addr, 16) & 0x00FF
                 handle.write_i2c_block_data(address, msb, [lsb])
+                if not args.progress_bar:
+                    progress += 100 / N
+                    if int(progress) % update_perc:
+                        progress_bar(int(progress),width=50)
 
     if args.dump:
         # create a json struct
@@ -77,14 +107,21 @@ def main (argv):
         struct["wizard"] = {} 
         struct["wizard"]["version"] = "1.0.0.0"
         struct["RegisterMap"] = {}
-        for i in range (REGMAP[0],REGMAP[1]+1):
+        N = REGMAP[1]+1
+        for i in range (REGMAP[0],N):
             # 2 address bytes
             (msb, lsb) = ((i & 0xFF00)>>8, i & 0x00FF)
             handle.write_i2c_block_data(address, msb, [lsb])
             # 1 data byte
-            data = handle.read_i2c_block_data(dev, 0, 1)[0]
+            data = handle.read_i2c_block_data(address, 0, 1)[0]
             struct["RegisterMap"][hex(i)] = data
-        json.dumps(struct, sort_keys=True, indent=4)
+            if not args.progress_bar:
+                progress += 100 / N
+                if int(progress) % update_perc:
+                    progress_bar(int(progress),width=50)
+        struct = json.dumps(struct, sort_keys=True, indent=4)
+        with open(args.dump, "w") as fd:
+            fd.write(struct)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
