@@ -1,6 +1,6 @@
 # ADI-AD9546 
 
-Set of tools to interact & program AD9546,AD9545 chips by Analog Devices.    
+Set of tools to interact & program AD9546,AD9545 integrated circuits, by Analog Devices.
 
 These scripts are not Windows compatible.   
 
