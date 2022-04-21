@@ -6,7 +6,6 @@
 # small script to quickly monitor an AD9545,46 
 #################################################################
 import sys
-import json
 import math
 import argparse
 from smbus import SMBus
