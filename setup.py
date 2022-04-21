@@ -7,5 +7,10 @@ setup(name="distutils",
     description="Analog Devices (AD9545,46) management tools",
     author="Guillaume W. Bres",
     author_email="guillaume.bressaix@gmail.com",
-    scripts=["profile.py","status.py"],
+    scripts=[
+        "profile.py",
+        "status.py",
+        "calib.py",
+        "power-down.py",
+    ],
 )
