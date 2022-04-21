@@ -1,11 +1,2072 @@
 ﻿{
-    "ad9546": {
+  "ad9546": {
     "_gui_version": "1.0.0.0",
     "_die_version": "4198933",
     "notes": {},
     "bitfields": {
+      "AllCalibrateReg": "0",
+      "AllPdReg": "0",
+      "AllSyncReg": "0",
+      "SerialPort": {
+        "AddrLoopIoupdate": "1",
+        "AddrLoopLength": "0",
+        "IoUpdateReg": "0",
+        "RegReadbuf": "0",
+        "ResetSansregs": "0",
+        "ResetSoft": "0",
+        "ResetSoftDup": "0",
+        "Scratchpad": "0",
+        "Spi4wire": "0",
+        "Spi4wireDup": "0",
+        "SpiAddrAscension": "0",
+        "SpiAddrAscensionDup": "0",
+        "SpiLsbfirst": "0",
+        "SpiLsbfirstDup": "0"
+      },
+      "Mpins": {
+        "M0Config": "0",
+        "M1Config": "0",
+        "M2Config": "0",
+        "M3Config": "0",
+        "M4Config": "0",
+        "M5Config": "0",
+        "M6Config": "0",
+        "Mpin0Driver": "0",
+        "Mpin0FunctionControl": "48",
+        "Mpin0FunctionStatus": "48",
+        "Mpin0Oe": "0",
+        "Mpin0Receiver": "0",
+        "Mpin1Driver": "0",
+        "Mpin1FunctionControl": "49",
+        "Mpin1FunctionStatus": "49",
+        "Mpin1Oe": "0",
+        "Mpin1Receiver": "0",
+        "Mpin2Driver": "0",
+        "Mpin2FunctionControl": "112",
+        "Mpin2FunctionStatus": "112",
+        "Mpin2Oe": "0",
+        "Mpin2Receiver": "0",
+        "Mpin3Driver": "0",
+        "Mpin3FunctionControl": "0",
+        "Mpin3FunctionStatus": "0",
+        "Mpin3Oe": "0",
+        "Mpin3Receiver": "0",
+        "Mpin4Driver": "0",
+        "Mpin4FunctionControl": "112",
+        "Mpin4FunctionStatus": "112",
+        "Mpin4Oe": "0",
+        "Mpin4Receiver": "0",
+        "Mpin5Driver": "0",
+        "Mpin5FunctionControl": "0",
+        "Mpin5FunctionStatus": "0",
+        "Mpin5Oe": "0",
+        "Mpin5Receiver": "0",
+        "Mpin6Driver": "0",
+        "Mpin6FunctionControl": "0",
+        "Mpin6FunctionStatus": "0",
+        "Mpin6Oe": "0",
+        "Mpin6Receiver": "0",
+        "SpiConfig": "0",
+        "WdTimer": "0"
+      },
+      "TempSensor": {
+        "AlarmThresholdHigh": "0",
+        "AlarmThresholdLow": "0",
+        "ExtDelayComp0": "0",
+        "ExtDelayComp1": "0",
+        "ExtSysComp": "0",
+        "ExtTemperature": "0"
+      },
+      "DelaySkew": {
+        "EnDiv1": "0",
+        "EnMpinPullup": "0",
+        "LoopbackPath": "0",
+        "Pd": "1",
+        "SelReplicaPath": "0",
+        "Slew": "0"
+      },
+      "Eeprom": {
+        "NvCondition": "0",
+        "NvFastMode": "0",
+        "NvLoad": "0",
+        "NvLoadTestMode": "0",
+        "NvSave": "0",
+        "NvWriteEnable": "0"
+      },
+      "Irqs": {
+        "Mask": {
+          "AuxDpllFault": "0",
+          "AuxDpllLock": "0",
+          "AuxDpllUnfault": "0",
+          "AuxDpllUnlock": "0",
+          "DclkDeactivate": "0",
+          "DclkInvalid0": "0",
+          "DclkInvalid1": "0",
+          "DclkLock": "0",
+          "DclkPrimary": "0",
+          "DclkReady": "0",
+          "DclkSecondary": "0",
+          "DclkTodError": "0",
+          "DclkTodSlewEnd": "0",
+          "DclkTodSlewStart": "0",
+          "DclkUnlock": "0",
+          "DclkValid0": "0",
+          "DclkValid1": "0",
+          "DskewAvailable": "0",
+          "EepromComplete": "0",
+          "EepromFault": "0",
+          "Iuts0Invalid": "0",
+          "Iuts0Valid": "0",
+          "Iuts1Invalid": "0",
+          "Iuts1Valid": "0",
+          "Pps0Event": "0",
+          "Pps1Event": "0",
+          "RefaFault": "0",
+          "RefaPpsError": "0",
+          "RefaUnfault": "0",
+          "RefaValid": "0",
+          "RefaaFault": "0",
+          "RefaaPpsError": "0",
+          "RefaaUnfault": "0",
+          "RefaaValid": "0",
+          "Refaux0Fault": "0",
+          "Refaux0PpsError": "0",
+          "Refaux0Unfault": "0",
+          "Refaux0Valid": "0",
+          "Refaux1Fault": "0",
+          "Refaux1PpsError": "0",
+          "Refaux1Unfault": "0",
+          "Refaux1Valid": "0",
+          "Refaux2Fault": "0",
+          "Refaux2PpsError": "0",
+          "Refaux2Unfault": "0",
+          "Refaux2Valid": "0",
+          "Refaux3Fault": "0",
+          "Refaux3PpsError": "0",
+          "Refaux3Unfault": "0",
+          "Refaux3Valid": "0",
+          "RefbFault": "0",
+          "RefbPpsError": "0",
+          "RefbUnfault": "0",
+          "RefbValid": "0",
+          "RefbbFault": "0",
+          "RefbbPpsError": "0",
+          "RefbbUnfault": "0",
+          "RefbbValid": "0",
+          "SkewLimitExceeded": "0",
+          "SkewUpdate": "0",
+          "SysclkCalEnd": "0",
+          "SysclkCalStart": "0",
+          "SysclkLock": "0",
+          "SysclkStable": "0",
+          "SysclkUnlock": "0",
+          "TemperatureWarning": "0",
+          "Timestamp0Event": "0",
+          "Timestamp1Event": "0",
+          "UtsAvailable": "0",
+          "UtsError": "0",
+          "UtsUpdate": "0",
+          "Watchdog": "0",
+          "Channel": [
+            {
+              "_index": "0",
+              "ApllCalEnd": "0",
+              "ApllCalStart": "0",
+              "ApllLock": "0",
+              "ApllUnlock": "0",
+              "DistSync": "0",
+              "EnterHitless": "0",
+              "ExitHitless": "0",
+              "FaqCompleted": "0",
+              "FaqStarted": "0",
+              "Freerun": "0",
+              "FreqClamp": "0",
+              "FreqUnclamp": "0",
+              "Holdover": "0",
+              "HtwUpdate": "0",
+              "LockFreq": "0",
+              "LockPhase": "0",
+              "NDivPpsError": "0",
+              "Profile0": "0",
+              "Profile1": "0",
+              "Profile2": "0",
+              "Profile3": "0",
+              "Profile4": "0",
+              "Profile5": "0",
+              "PtcActive": "0",
+              "PtcInactive": "0",
+              "StepDetected": "0",
+              "Switching": "0",
+              "UnlockFreq": "0",
+              "UnlockPhase": "0"
+            },
+            {
+              "_index": "1",
+              "ApllCalEnd": "0",
+              "ApllCalStart": "0",
+              "ApllLock": "0",
+              "ApllUnlock": "0",
+              "DistSync": "0",
+              "EnterHitless": "0",
+              "ExitHitless": "0",
+              "FaqCompleted": "0",
+              "FaqStarted": "0",
+              "Freerun": "0",
+              "FreqClamp": "0",
+              "FreqUnclamp": "0",
+              "Holdover": "0",
+              "HtwUpdate": "0",
+              "LockFreq": "0",
+              "LockPhase": "0",
+              "NDivPpsError": "0",
+              "Profile0": "0",
+              "Profile1": "0",
+              "Profile2": "0",
+              "Profile3": "0",
+              "Profile4": "0",
+              "Profile5": "0",
+              "PtcActive": "0",
+              "PtcInactive": "0",
+              "StepDetected": "0",
+              "Switching": "0",
+              "UnlockFreq": "0",
+              "UnlockPhase": "0"
+            }
+          ]
+        },
+        "Clear": {
+          "AuxDpllFault": "0",
+          "AuxDpllLock": "0",
+          "AuxDpllUnfault": "0",
+          "AuxDpllUnlock": "0",
+          "DclkDeactivate": "0",
+          "DclkInvalid0": "0",
+          "DclkInvalid1": "0",
+          "DclkLock": "0",
+          "DclkPrimary": "0",
+          "DclkReady": "0",
+          "DclkSecondary": "0",
+          "DclkTodError": "0",
+          "DclkTodSlewEnd": "0",
+          "DclkTodSlewStart": "0",
+          "DclkUnlock": "0",
+          "DclkValid0": "0",
+          "DclkValid1": "0",
+          "DskewAvailable": "0",
+          "EepromComplete": "0",
+          "EepromFault": "0",
+          "Iuts0Invalid": "0",
+          "Iuts0Valid": "0",
+          "Iuts1Invalid": "0",
+          "Iuts1Valid": "0",
+          "Pps0Event": "0",
+          "Pps1Event": "0",
+          "RefaFault": "0",
+          "RefaPpsError": "0",
+          "RefaUnfault": "0",
+          "RefaValid": "0",
+          "RefaaFault": "0",
+          "RefaaPpsError": "0",
+          "RefaaUnfault": "0",
+          "RefaaValid": "0",
+          "Refaux0Fault": "0",
+          "Refaux0PpsError": "0",
+          "Refaux0Unfault": "0",
+          "Refaux0Valid": "0",
+          "Refaux1Fault": "0",
+          "Refaux1PpsError": "0",
+          "Refaux1Unfault": "0",
+          "Refaux1Valid": "0",
+          "Refaux2Fault": "0",
+          "Refaux2PpsError": "0",
+          "Refaux2Unfault": "0",
+          "Refaux2Valid": "0",
+          "Refaux3Fault": "0",
+          "Refaux3PpsError": "0",
+          "Refaux3Unfault": "0",
+          "Refaux3Valid": "0",
+          "RefbFault": "0",
+          "RefbPpsError": "0",
+          "RefbUnfault": "0",
+          "RefbValid": "0",
+          "RefbbFault": "0",
+          "RefbbPpsError": "0",
+          "RefbbUnfault": "0",
+          "RefbbValid": "0",
+          "SkewLimitExceeded": "0",
+          "SkewUpdate": "0",
+          "SysclkCalEnd": "0",
+          "SysclkCalStart": "0",
+          "SysclkLock": "0",
+          "SysclkStable": "0",
+          "SysclkUnlock": "0",
+          "TemperatureWarning": "0",
+          "Timestamp0Event": "0",
+          "Timestamp1Event": "0",
+          "UtsAvailable": "0",
+          "UtsError": "0",
+          "UtsUpdate": "0",
+          "Watchdog": "0",
+          "IrqAllClearReg": "0",
+          "IrqCommonClearReg": "0",
+          "IrqPll0ClearReg": "0",
+          "IrqPll1ClearReg": "0",
+          "WdClearReg": "0",
+          "Channel": [
+            {
+              "_index": "0",
+              "ApllCalEnd": "0",
+              "ApllCalStart": "0",
+              "ApllLock": "0",
+              "ApllUnlock": "0",
+              "DistSync": "0",
+              "EnterHitless": "0",
+              "ExitHitless": "0",
+              "FaqCompleted": "0",
+              "FaqStarted": "0",
+              "Freerun": "0",
+              "FreqClamp": "0",
+              "FreqUnclamp": "0",
+              "Holdover": "0",
+              "HtwUpdate": "0",
+              "LockFreq": "0",
+              "LockPhase": "0",
+              "NDivPpsError": "0",
+              "Profile0": "0",
+              "Profile1": "0",
+              "Profile2": "0",
+              "Profile3": "0",
+              "Profile4": "0",
+              "Profile5": "0",
+              "PtcActive": "0",
+              "PtcInactive": "0",
+              "StepDetected": "0",
+              "Switching": "0",
+              "UnlockFreq": "0",
+              "UnlockPhase": "0"
+            },
+            {
+              "_index": "1",
+              "ApllCalEnd": "0",
+              "ApllCalStart": "0",
+              "ApllLock": "0",
+              "ApllUnlock": "0",
+              "DistSync": "0",
+              "EnterHitless": "0",
+              "ExitHitless": "0",
+              "FaqCompleted": "0",
+              "FaqStarted": "0",
+              "Freerun": "0",
+              "FreqClamp": "0",
+              "FreqUnclamp": "0",
+              "Holdover": "0",
+              "HtwUpdate": "0",
+              "LockFreq": "0",
+              "LockPhase": "0",
+              "NDivPpsError": "0",
+              "Profile0": "0",
+              "Profile1": "0",
+              "Profile2": "0",
+              "Profile3": "0",
+              "Profile4": "0",
+              "Profile5": "0",
+              "PtcActive": "0",
+              "PtcInactive": "0",
+              "StepDetected": "0",
+              "Switching": "0",
+              "UnlockFreq": "0",
+              "UnlockPhase": "0"
+            }
+          ]
+        }
+      },
+      "Dclk": {
+        "Domain": {
+          "TimeOfDay": {
+            "GuardAdjustment": "0",
+            "GuardBypassLock": "0",
+            "GuardLatency": "0",
+            "Offset": "0",
+            "SlewLimit": "0"
+          },
+          "Dpll": {
+            "ClosedBandwidth": "500",
+            "ClosedSrcPath": "0",
+            "LockDrain": "1",
+            "LockFill": "1",
+            "LockStability": "0",
+            "LockThreshold": "0"
+          },
+          "Profile": [
+            {
+              "_index": "0",
+              "Den": "10000000",
+              "Enable": "1",
+              "FreqSource": "0",
+              "Num": "1",
+              "Skew": "0",
+              "TodSource": "0",
+              "TodSourceTag": "0"
+            },
+            {
+              "_index": "1",
+              "Den": "0",
+              "Enable": "0",
+              "FreqSource": "31",
+              "Num": "1",
+              "Skew": "0",
+              "TodSource": "0",
+              "TodSourceTag": "0"
+            }
+          ]
+        },
+        "Sink": {
+          "Destination": "0",
+          "Format": "0",
+          "Nanoseconds": "0",
+          "Restart": "0",
+          "Seconds": "0",
+          "Subseconds": "0",
+          "Timecode": "0"
+        },
+        "Skew": {
+          "SrcRef": "0",
+          "SrcMeas": "0",
+          "TagEnRef": "0",
+          "TagEnMeas": "0",
+          "Window": "0"
+        },
+        "Uts": [
+          {
+            "_index": "0",
+            "Enable": "0",
+            "Flags": "0",
+            "Format": "0",
+            "Offset": "0",
+            "Source": "0",
+            "Tag": "0"
+          },
+          {
+            "_index": "1",
+            "Enable": "0",
+            "Flags": "0",
+            "Format": "0",
+            "Offset": "0",
+            "Source": "0",
+            "Tag": "0"
+          },
+          {
+            "_index": "2",
+            "Enable": "0",
+            "Flags": "0",
+            "Format": "0",
+            "Offset": "0",
+            "Source": "0",
+            "Tag": "0"
+          },
+          {
+            "_index": "3",
+            "Enable": "0",
+            "Flags": "0",
+            "Format": "0",
+            "Offset": "0",
+            "Source": "0",
+            "Tag": "0"
+          },
+          {
+            "_index": "4",
+            "Enable": "0",
+            "Flags": "0",
+            "Format": "0",
+            "Offset": "0",
+            "Source": "0",
+            "Tag": "0"
+          },
+          {
+            "_index": "5",
+            "Enable": "0",
+            "Flags": "0",
+            "Format": "0",
+            "Offset": "0",
+            "Source": "0",
+            "Tag": "0"
+          },
+          {
+            "_index": "6",
+            "Enable": "0",
+            "Flags": "0",
+            "Format": "0",
+            "Offset": "0",
+            "Source": "0",
+            "Tag": "0"
+          },
+          {
+            "_index": "7",
+            "Enable": "0",
+            "Flags": "0",
+            "Format": "0",
+            "Offset": "0",
+            "Source": "0",
+            "Tag": "0"
+          },
+          {
+            "_index": "8",
+            "Enable": "0",
+            "Flags": "0",
+            "Format": "0",
+            "Offset": "0",
+            "Source": "0",
+            "Tag": "0"
+          }
+        ],
+        "Iuts": [
+          {
+            "_index": "0",
+            "BypassLock": "0",
+            "Offset": "0",
+            "Valid": "0"
+          },
+          {
+            "_index": "1",
+            "BypassLock": "0",
+            "Offset": "0",
+            "Valid": "0"
+          }
+        ]
+      },
+      "Sysclk": {
+        "DoublerEnable": "1",
+        "FbDivRatio": "48",
+        "InputDivRatio": "0",
+        "MampEnable": "1",
+        "RefFreq": "25000000000",
+        "StabilityTimer": "20",
+        "CalibrateReg": "0",
+        "Comp": {
+          "ChannelErrorSrc": "0",
+          "OpenCoefficient0": "0",
+          "OpenCoefficient1Exp": "0",
+          "OpenCoefficient1Sig": "0",
+          "OpenCoefficient2Exp": "0",
+          "OpenCoefficient2Sig": "0",
+          "OpenCoefficient3Exp": "0",
+          "OpenCoefficient3Sig": "0",
+          "OpenCoefficient4Exp": "0",
+          "OpenCoefficient4Sig": "0",
+          "OpenCoefficient5Exp": "0",
+          "OpenCoefficient5Sig": "0",
+          "OpenFilterCutoff": "0",
+          "RateLimit": "0",
+          "TgtClosedLoopSrcDpll": "0",
+          "TgtClosedLoopSrcOpenLoop": "0",
+          "TgtDpll0SrcClosedLoop": "1",
+          "TgtDpll0SrcDpll": "0",
+          "TgtDpll0SrcOpenLoop": "0",
+          "TgtDpll1SrcClosedLoop": "0",
+          "TgtDpll1SrcDpll": "0",
+          "TgtDpll1SrcOpenLoop": "0",
+          "TgtPps0SrcClosedLoop": "0",
+          "TgtPps0SrcDpll": "0",
+          "TgtPps0SrcOpenLoop": "0",
+          "TgtPps1SrcClosedLoop": "0",
+          "TgtPps1SrcDpll": "0",
+          "TgtPps1SrcOpenLoop": "0",
+          "TgtTdcSrcClosedLoop": "0",
+          "TgtTdcSrcDpll": "0",
+          "TgtTdcSrcOpenLoop": "0"
+        }
+      },
+      "LfCoefficients": [
+        {
+          "_index": "0",
+          "Alpha0": "61634",
+          "Alpha1": "-77",
+          "Beta0": "51541",
+          "Beta1": "-5",
+          "Delta0": "57105",
+          "Delta1": "-52",
+          "Gamma0": "63068",
+          "Gamma1": "-54"
+        },
+        {
+          "_index": "1",
+          "Alpha0": "41129",
+          "Alpha1": "-73",
+          "Beta0": "56269",
+          "Beta1": "-13",
+          "Delta0": "42829",
+          "Delta1": "-49",
+          "Gamma0": "54393",
+          "Gamma1": "-50"
+        }
+      ],
+      "Channel": [
+        {
+          "_index": "0",
+          "CalibrateReg": "0",
+          "PdReg": "0",
+          "RefFaultStepDetectEn": "0",
+          "Dpll": {
+            "Ftw": "36063981391053",
+            "HtwDelayLockFreq": "1",
+            "HtwDelayLockPhase": "1",
+            "HtwDelayNotSlewing": "1",
+            "HtwHoldoff": "0",
+            "HtwPauseSlewing": "0",
+            "HtwPauseUnlockFreq": "0",
+            "HtwPauseUnlockPhase": "0",
+            "HtwPersistent": "0",
+            "HtwQuickStart": "0",
+            "HtwSingleSample": "1",
+            "HtwTimer": "10",
+            "InactiveProfileIndex": "0",
+            "NgTwFilter": "0",
+            "OffsetTcFilter": "0",
+            "OffsetTcTerm1Exp": "0",
+            "OffsetTcTerm1Sig": "0",
+            "OffsetTcTerm2Exp": "0",
+            "OffsetTcTerm2Sig": "0",
+            "OffsetTcTerm3Exp": "0",
+            "OffsetTcTerm3Sig": "0",
+            "OffsetTcTerm4Exp": "0",
+            "OffsetTcTerm4Sig": "0",
+            "OffsetTcTerm5Exp": "0",
+            "OffsetTcTerm5Sig": "0",
+            "PtcFixed": "0",
+            "PtcRate": "100663296",
+            "Twc": "16777215",
+            "DpllFaqCompleteClear": "0",
+            "DpllFaqModeFirst": "1",
+            "DpllFaqModeFreerun": "1",
+            "DpllFaqModeHoldover": "1",
+            "DpllFaqModeNooutput": "1",
+            "DpllFreerunReg": "0",
+            "DpllHoldoverReg": "0",
+            "DpllHtwClearReg": "0",
+            "DpllSelectManual": "0",
+            "DpllSelectMode": "0"
+          },
+          "Apll": {
+            "CpDcDirection": "0",
+            "CpDcEn": "1",
+            "CpDcValue": "1",
+            "CpManCurrent": "20",
+            "CpManCurrentEnable": "1",
+            "FbdivRatio": "8",
+            "LfC2": "0",
+            "LfR1": "7",
+            "LfR3": "0"
+          },
+          "Distribution": {
+            "AutoSyncMode": "1",
+            "BypassMuteRetimingA": "0",
+            "BypassMuteRetimingB": "0",
+            "BypassMuteRetimingC": "0",
+            "Clk2EnA": "0",
+            "Clk2EnB": "0",
+            "Clk2EnC": "0",
+            "Clk2SyncMask": "0",
+            "CoupledModeSyncEn": "0",
+            "DistAutoMuteMaskA": "0",
+            "DistAutoMuteMaskAa": "0",
+            "DistAutoMuteMaskB": "0",
+            "DistAutoMuteMaskBb": "0",
+            "DistAutoMuteMaskC": "0",
+            "DistAutoMuteMaskCc": "0",
+            "DistAutoMuteMode": "0",
+            "DrvrCurrentA": "2",
+            "DrvrCurrentB": "2",
+            "DrvrCurrentC": "2",
+            "FbdivSyncEdge": "1",
+            "HcslEnA": "1",
+            "HcslEnB": "1",
+            "HcslEnC": "1",
+            "ModCounterA": "0",
+            "ModCounterB": "0",
+            "ModCounterC": "0",
+            "ModEnA": "0",
+            "ModEnB": "0",
+            "ModEnC": "0",
+            "ModNshotEnA": "0",
+            "ModNshotEnB": "0",
+            "ModNshotEnC": "0",
+            "ModPolA": "0",
+            "ModPolB": "0",
+            "ModPolC": "0",
+            "ModSinglePulseA": "0",
+            "ModSinglePulseB": "0",
+            "ModSinglePulseC": "0",
+            "ModStep": "0",
+            "Nshot": "0",
+            "NshotEnA": "0",
+            "NshotEnAa": "0",
+            "NshotEnB": "0",
+            "NshotEnBb": "0",
+            "NshotEnC": "0",
+            "NshotEnCc": "0",
+            "NshotGap": "0",
+            "NshotRetimeEn": "0",
+            "NshotRetimeToMod": "0",
+            "NshotRqstMode": "0",
+            "OutputModeA": "2",
+            "OutputModeB": "2",
+            "OutputModeC": "2",
+            "PrbsEnA": "0",
+            "PrbsEnAa": "0",
+            "PrbsEnB": "0",
+            "PrbsEnBb": "0",
+            "PrbsEnC": "0",
+            "PrbsEnCc": "0",
+            "RefSyncEn": "1",
+            "DistAutoMuteClearReg": "0",
+            "DistAutosyncClearReg": "0",
+            "DistMuteAllDriversReg": "0",
+            "DistNshotRequestReg": "0",
+            "DistResetAllDriversReg": "0",
+            "DistSyncReg": "0",
+            "ResetPdivReg": "0",
+            "Divider": [
+              {
+                "_index": "0",
+                "Divide": "123",
+                "HalfDivide": "0",
+                "MaxPhaseSlewStep": "7",
+                "Phase": "0",
+                "PhaseSlewMode": "0",
+                "PwCtrlEn": "0",
+                "DistCtrlMute": "0",
+                "DistCtrlReset": "0",
+                "DistCtrlDrvPd": "0",
+                "DistCtrlDrvReset": "0"
+              },
+              {
+                "_index": "1",
+                "Divide": "123",
+                "HalfDivide": "0",
+                "MaxPhaseSlewStep": "7",
+                "Phase": "0",
+                "PhaseSlewMode": "0",
+                "PwCtrlEn": "0",
+                "DistCtrlMute": "0",
+                "DistCtrlReset": "0"
+              },
+              {
+                "_index": "2",
+                "Divide": "123",
+                "HalfDivide": "0",
+                "MaxPhaseSlewStep": "7",
+                "Phase": "0",
+                "PhaseSlewMode": "0",
+                "PwCtrlEn": "0",
+                "DistCtrlMute": "0",
+                "DistCtrlReset": "0",
+                "DistCtrlDrvPd": "0",
+                "DistCtrlDrvReset": "0"
+              },
+              {
+                "_index": "3",
+                "Divide": "123",
+                "HalfDivide": "0",
+                "MaxPhaseSlewStep": "7",
+                "Phase": "0",
+                "PhaseSlewMode": "0",
+                "PwCtrlEn": "0",
+                "DistCtrlMute": "0",
+                "DistCtrlReset": "0"
+              },
+              {
+                "_index": "4",
+                "Divide": "1230000000",
+                "HalfDivide": "0",
+                "MaxPhaseSlewStep": "7",
+                "Phase": "0",
+                "PhaseSlewMode": "0",
+                "PwCtrlEn": "0",
+                "DistCtrlMute": "0",
+                "DistCtrlReset": "0",
+                "DistCtrlDrvPd": "0",
+                "DistCtrlDrvReset": "0"
+              },
+              {
+                "_index": "5",
+                "Divide": "1230000000",
+                "HalfDivide": "0",
+                "MaxPhaseSlewStep": "7",
+                "Phase": "0",
+                "PhaseSlewMode": "0",
+                "PwCtrlEn": "0",
+                "DistCtrlMute": "0",
+                "DistCtrlReset": "0"
+              }
+            ]
+          },
+          "Profile": [
+            {
+              "_index": "0",
+              "Bandwidth": "300",
+              "BuildoutN": "307499999",
+              "BuildoutFrac": "0",
+              "BuildoutMod": "0",
+              "EnableBf": "1",
+              "ExtZd": "0",
+              "FaqBwScale": "8",
+              "FaqLockTime": "6",
+              "FaqLockTimeout": "6",
+              "IntZdDriverPath": "2",
+              "LfBase": "0",
+              "LoopMode": "1",
+              "SelectPriority": "0",
+              "SourcePath": "3",
+              "TagMode": "0",
+              "ZeroDelayN": "0",
+              "ZeroDelayPathExternal": "4",
+              "ZeroDelayPathInternal": "4"
+            },
+            {
+              "_index": "1",
+              "Bandwidth": "1000",
+              "BuildoutN": "307499999",
+              "BuildoutFrac": "0",
+              "BuildoutMod": "0",
+              "EnableBf": "1",
+              "ExtZd": "0",
+              "FaqBwScale": "0",
+              "FaqLockTime": "0",
+              "FaqLockTimeout": "0",
+              "IntZdDriverPath": "1",
+              "LfBase": "0",
+              "LoopMode": "1",
+              "SelectPriority": "0",
+              "SourcePath": "3",
+              "TagMode": "0",
+              "ZeroDelayN": "9999999",
+              "ZeroDelayPathExternal": "2",
+              "ZeroDelayPathInternal": "2"
+            },
+            {
+              "_index": "2",
+              "Bandwidth": "50000",
+              "BuildoutN": "307499999",
+              "BuildoutFrac": "0",
+              "BuildoutMod": "0",
+              "EnableBf": "1",
+              "ExtZd": "0",
+              "FaqBwScale": "0",
+              "FaqLockTime": "0",
+              "FaqLockTimeout": "0",
+              "IntZdDriverPath": "2",
+              "LfBase": "0",
+              "LoopMode": "1",
+              "SelectPriority": "0",
+              "SourcePath": "3",
+              "TagMode": "0",
+              "ZeroDelayN": "0",
+              "ZeroDelayPathExternal": "4",
+              "ZeroDelayPathInternal": "4"
+            },
+            {
+              "_index": "3",
+              "Bandwidth": "0",
+              "BuildoutN": "4000",
+              "BuildoutFrac": "0",
+              "BuildoutMod": "0",
+              "EnableBf": "0",
+              "ExtZd": "0",
+              "FaqBwScale": "0",
+              "FaqLockTime": "0",
+              "FaqLockTimeout": "0",
+              "IntZdDriverPath": "0",
+              "LfBase": "0",
+              "LoopMode": "0",
+              "SelectPriority": "0",
+              "SourcePath": "0",
+              "TagMode": "0",
+              "ZeroDelayN": "4000",
+              "ZeroDelayPathExternal": "0",
+              "ZeroDelayPathInternal": "0"
+            },
+            {
+              "_index": "4",
+              "Bandwidth": "0",
+              "BuildoutN": "4000",
+              "BuildoutFrac": "0",
+              "BuildoutMod": "0",
+              "EnableBf": "0",
+              "ExtZd": "0",
+              "FaqBwScale": "0",
+              "FaqLockTime": "0",
+              "FaqLockTimeout": "0",
+              "IntZdDriverPath": "0",
+              "LfBase": "0",
+              "LoopMode": "0",
+              "SelectPriority": "0",
+              "SourcePath": "0",
+              "TagMode": "0",
+              "ZeroDelayN": "4000",
+              "ZeroDelayPathExternal": "0",
+              "ZeroDelayPathInternal": "0"
+            },
+            {
+              "_index": "5",
+              "Bandwidth": "0",
+              "BuildoutN": "4000",
+              "BuildoutFrac": "0",
+              "BuildoutMod": "0",
+              "EnableBf": "0",
+              "ExtZd": "0",
+              "FaqBwScale": "0",
+              "FaqLockTime": "0",
+              "FaqLockTimeout": "0",
+              "IntZdDriverPath": "0",
+              "LfBase": "0",
+              "LoopMode": "0",
+              "SelectPriority": "0",
+              "SourcePath": "0",
+              "TagMode": "0",
+              "ZeroDelayN": "4000",
+              "ZeroDelayPathExternal": "0",
+              "ZeroDelayPathInternal": "0"
+            }
+          ]
+        },
+        {
+          "_index": "1",
+          "CalibrateReg": "0",
+          "PdReg": "1",
+          "RefFaultStepDetectEn": "0",
+          "Dpll": {
+            "Ftw": "0",
+            "HtwDelayLockFreq": "1",
+            "HtwDelayLockPhase": "1",
+            "HtwDelayNotSlewing": "1",
+            "HtwHoldoff": "0",
+            "HtwPauseSlewing": "0",
+            "HtwPauseUnlockFreq": "0",
+            "HtwPauseUnlockPhase": "0",
+            "HtwPersistent": "0",
+            "HtwQuickStart": "0",
+            "HtwSingleSample": "0",
+            "HtwTimer": "10",
+            "InactiveProfileIndex": "0",
+            "NgTwFilter": "0",
+            "OffsetTcFilter": "0",
+            "OffsetTcTerm1Exp": "0",
+            "OffsetTcTerm1Sig": "0",
+            "OffsetTcTerm2Exp": "0",
+            "OffsetTcTerm2Sig": "0",
+            "OffsetTcTerm3Exp": "0",
+            "OffsetTcTerm3Sig": "0",
+            "OffsetTcTerm4Exp": "0",
+            "OffsetTcTerm4Sig": "0",
+            "OffsetTcTerm5Exp": "0",
+            "OffsetTcTerm5Sig": "0",
+            "PtcFixed": "0",
+            "PtcRate": "100663296",
+            "Twc": "16777215",
+            "DpllFaqCompleteClear": "0",
+            "DpllFaqModeFirst": "0",
+            "DpllFaqModeFreerun": "0",
+            "DpllFaqModeHoldover": "0",
+            "DpllFaqModeNooutput": "0",
+            "DpllFreerunReg": "0",
+            "DpllHoldoverReg": "0",
+            "DpllHtwClearReg": "0",
+            "DpllSelectManual": "0",
+            "DpllSelectMode": "0"
+          },
+          "Apll": {
+            "CpDcDirection": "0",
+            "CpDcEn": "1",
+            "CpDcValue": "1",
+            "CpManCurrent": "16",
+            "CpManCurrentEnable": "1",
+            "FbdivRatio": "0",
+            "LfC2": "0",
+            "LfR1": "7",
+            "LfR3": "0"
+          },
+          "Distribution": {
+            "AutoSyncMode": "0",
+            "BypassMuteRetimingA": "0",
+            "BypassMuteRetimingB": "0",
+            "Clk2EnA": "0",
+            "Clk2EnB": "0",
+            "Clk2SyncMask": "0",
+            "CoupledModeSyncEn": "0",
+            "DistAutoMuteMaskA": "0",
+            "DistAutoMuteMaskAa": "0",
+            "DistAutoMuteMaskB": "0",
+            "DistAutoMuteMaskBb": "0",
+            "DistAutoMuteMode": "0",
+            "DrvrCurrentA": "0",
+            "DrvrCurrentB": "0",
+            "FbdivSyncEdge": "1",
+            "HcslEnA": "1",
+            "HcslEnB": "1",
+            "ModCounterA": "0",
+            "ModCounterB": "0",
+            "ModEnA": "0",
+            "ModEnB": "0",
+            "ModNshotEnA": "0",
+            "ModNshotEnB": "0",
+            "ModPolA": "0",
+            "ModPolB": "0",
+            "ModSinglePulseA": "0",
+            "ModSinglePulseB": "0",
+            "ModStep": "0",
+            "Nshot": "0",
+            "NshotEnA": "0",
+            "NshotEnAa": "0",
+            "NshotEnB": "0",
+            "NshotEnBb": "0",
+            "NshotGap": "0",
+            "NshotRetimeEn": "0",
+            "NshotRetimeToMod": "0",
+            "NshotRqstMode": "0",
+            "OutputModeA": "0",
+            "OutputModeB": "0",
+            "PrbsEnA": "0",
+            "PrbsEnAa": "0",
+            "PrbsEnB": "0",
+            "PrbsEnBb": "0",
+            "RefSyncEn": "0",
+            "DistAutoMuteClearReg": "0",
+            "DistAutosyncClearReg": "0",
+            "DistMuteAllDriversReg": "0",
+            "DistNshotRequestReg": "0",
+            "DistResetAllDriversReg": "0",
+            "DistSyncReg": "0",
+            "ResetPdivReg": "0",
+            "Divider": [
+              {
+                "_index": "0",
+                "Divide": "0",
+                "HalfDivide": "0",
+                "MaxPhaseSlewStep": "7",
+                "Phase": "0",
+                "PhaseSlewMode": "0",
+                "PwCtrlEn": "0",
+                "DistCtrlMute": "0",
+                "DistCtrlReset": "0",
+                "DistCtrlDrvPd": "0",
+                "DistCtrlDrvReset": "0"
+              },
+              {
+                "_index": "1",
+                "Divide": "0",
+                "HalfDivide": "0",
+                "MaxPhaseSlewStep": "7",
+                "Phase": "0",
+                "PhaseSlewMode": "0",
+                "PwCtrlEn": "0",
+                "DistCtrlMute": "0",
+                "DistCtrlReset": "0"
+              },
+              {
+                "_index": "2",
+                "Divide": "0",
+                "HalfDivide": "0",
+                "MaxPhaseSlewStep": "7",
+                "Phase": "0",
+                "PhaseSlewMode": "0",
+                "PwCtrlEn": "0",
+                "DistCtrlMute": "0",
+                "DistCtrlReset": "0",
+                "DistCtrlDrvPd": "0",
+                "DistCtrlDrvReset": "0"
+              },
+              {
+                "_index": "3",
+                "Divide": "0",
+                "HalfDivide": "0",
+                "MaxPhaseSlewStep": "7",
+                "Phase": "0",
+                "PhaseSlewMode": "0",
+                "PwCtrlEn": "0",
+                "DistCtrlMute": "0",
+                "DistCtrlReset": "0"
+              }
+            ]
+          },
+          "Profile": [
+            {
+              "_index": "0",
+              "Bandwidth": "0",
+              "BuildoutN": "4000",
+              "BuildoutFrac": "0",
+              "BuildoutMod": "0",
+              "EnableBf": "0",
+              "ExtZd": "0",
+              "FaqBwScale": "0",
+              "FaqLockTime": "0",
+              "FaqLockTimeout": "0",
+              "IntZdDriverPath": "0",
+              "LfBase": "0",
+              "LoopMode": "0",
+              "SelectPriority": "0",
+              "SourcePath": "0",
+              "TagMode": "0",
+              "ZeroDelayN": "4000",
+              "ZeroDelayPathExternal": "0",
+              "ZeroDelayPathInternal": "0"
+            },
+            {
+              "_index": "1",
+              "Bandwidth": "0",
+              "BuildoutN": "4000",
+              "BuildoutFrac": "0",
+              "BuildoutMod": "0",
+              "EnableBf": "0",
+              "ExtZd": "0",
+              "FaqBwScale": "0",
+              "FaqLockTime": "0",
+              "FaqLockTimeout": "0",
+              "IntZdDriverPath": "0",
+              "LfBase": "0",
+              "LoopMode": "0",
+              "SelectPriority": "0",
+              "SourcePath": "0",
+              "TagMode": "0",
+              "ZeroDelayN": "4000",
+              "ZeroDelayPathExternal": "0",
+              "ZeroDelayPathInternal": "0"
+            },
+            {
+              "_index": "2",
+              "Bandwidth": "0",
+              "BuildoutN": "4000",
+              "BuildoutFrac": "0",
+              "BuildoutMod": "0",
+              "EnableBf": "0",
+              "ExtZd": "0",
+              "FaqBwScale": "0",
+              "FaqLockTime": "0",
+              "FaqLockTimeout": "0",
+              "IntZdDriverPath": "0",
+              "LfBase": "0",
+              "LoopMode": "0",
+              "SelectPriority": "0",
+              "SourcePath": "0",
+              "TagMode": "0",
+              "ZeroDelayN": "4000",
+              "ZeroDelayPathExternal": "0",
+              "ZeroDelayPathInternal": "0"
+            },
+            {
+              "_index": "3",
+              "Bandwidth": "0",
+              "BuildoutN": "4000",
+              "BuildoutFrac": "0",
+              "BuildoutMod": "0",
+              "EnableBf": "0",
+              "ExtZd": "0",
+              "FaqBwScale": "0",
+              "FaqLockTime": "0",
+              "FaqLockTimeout": "0",
+              "IntZdDriverPath": "0",
+              "LfBase": "0",
+              "LoopMode": "0",
+              "SelectPriority": "0",
+              "SourcePath": "0",
+              "TagMode": "0",
+              "ZeroDelayN": "4000",
+              "ZeroDelayPathExternal": "0",
+              "ZeroDelayPathInternal": "0"
+            },
+            {
+              "_index": "4",
+              "Bandwidth": "0",
+              "BuildoutN": "4000",
+              "BuildoutFrac": "0",
+              "BuildoutMod": "0",
+              "EnableBf": "0",
+              "ExtZd": "0",
+              "FaqBwScale": "0",
+              "FaqLockTime": "0",
+              "FaqLockTimeout": "0",
+              "IntZdDriverPath": "0",
+              "LfBase": "0",
+              "LoopMode": "0",
+              "SelectPriority": "0",
+              "SourcePath": "0",
+              "TagMode": "0",
+              "ZeroDelayN": "4000",
+              "ZeroDelayPathExternal": "0",
+              "ZeroDelayPathInternal": "0"
+            },
+            {
+              "_index": "5",
+              "Bandwidth": "0",
+              "BuildoutN": "4000",
+              "BuildoutFrac": "0",
+              "BuildoutMod": "0",
+              "EnableBf": "0",
+              "ExtZd": "0",
+              "FaqBwScale": "0",
+              "FaqLockTime": "0",
+              "FaqLockTimeout": "0",
+              "IntZdDriverPath": "0",
+              "LfBase": "0",
+              "LoopMode": "0",
+              "SelectPriority": "0",
+              "SourcePath": "0",
+              "TagMode": "0",
+              "ZeroDelayN": "4000",
+              "ZeroDelayPathExternal": "0",
+              "ZeroDelayPathInternal": "0"
+            }
+          ]
+        }
+      ],
+      "SrcProfile": [
+        {
+          "_index": "0",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "10",
+          "FreqLockThreshold": "700",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "10",
+          "PhaseLockThreshold": "700",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        },
+        {
+          "_index": "1",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "10",
+          "FreqLockThreshold": "700",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "10",
+          "PhaseLockThreshold": "700",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        },
+        {
+          "_index": "2",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "10",
+          "FreqLockThreshold": "700",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "10",
+          "PhaseLockThreshold": "700",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        },
+        {
+          "_index": "3",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "100",
+          "FreqLockThreshold": "15000",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "100",
+          "PhaseLockThreshold": "20000",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        },
+        {
+          "_index": "4",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "10",
+          "FreqLockThreshold": "700",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "10",
+          "PhaseLockThreshold": "700",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        },
+        {
+          "_index": "5",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "10",
+          "FreqLockThreshold": "700",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "10",
+          "PhaseLockThreshold": "700",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        },
+        {
+          "_index": "6",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "10",
+          "FreqLockThreshold": "700",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "10",
+          "PhaseLockThreshold": "700",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        },
+        {
+          "_index": "7",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "10",
+          "FreqLockThreshold": "700",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "10",
+          "PhaseLockThreshold": "700",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        },
+        {
+          "_index": "8",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "10",
+          "FreqLockThreshold": "700",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "10",
+          "PhaseLockThreshold": "700",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        },
+        {
+          "_index": "9",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "10",
+          "FreqLockThreshold": "700",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "10",
+          "PhaseLockThreshold": "700",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        },
+        {
+          "_index": "10",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "10",
+          "FreqLockThreshold": "700",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "10",
+          "PhaseLockThreshold": "700",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        },
+        {
+          "_index": "11",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "10",
+          "FreqLockThreshold": "700",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "10",
+          "PhaseLockThreshold": "700",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        },
+        {
+          "_index": "12",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "10",
+          "FreqLockThreshold": "700",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "10",
+          "PhaseLockThreshold": "700",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        },
+        {
+          "_index": "13",
+          "FreqLockDrainRate": "10",
+          "FreqLockFillRate": "10",
+          "FreqLockThreshold": "700",
+          "PhaseLockDrainRate": "10",
+          "PhaseLockFillRate": "10",
+          "PhaseLockThreshold": "700",
+          "PhaseRefinementSteps": "0",
+          "PhaseSkew": "0",
+          "StepLimit": "0"
+        }
+      ],
+      "Refs": [
+        {
+          "_index": "0",
+          "Receiver": {
+            "DifferentialMode": "0",
+            "Mode": "0",
+            "SingleEndedMode": "0",
+            "Pd": "0"
+          },
+          "Demod": {
+            "Bandsel": "1",
+            "EnableBf": "0",
+            "PersistenceEn": "1",
+            "ExpectedPolarity": "0",
+            "PolarityDetectModeEn": "0",
+            "Sensitivity": "0",
+            "SyncEdge": "1"
+          },
+          "Period": {
+            "R": "49",
+            "Hysteresis": "3",
+            "Nominal": "100000000000",
+            "ToleranceJitter": "0",
+            "ToleranceOffset": "100000",
+            "ValidationTimer": "10",
+            "RefmonBypassReg": "0",
+            "RefmonFaultReg": "0",
+            "RefmonTimeoutReg": "0"
+          }
+        },
+        {
+          "_index": "1",
+          "Receiver": {
+            "DifferentialMode": "0",
+            "Mode": "0",
+            "SingleEndedMode": "0",
+            "Pd": "1"
+          },
+          "Demod": {
+            "Bandsel": "1",
+            "EnableBf": "0",
+            "PersistenceEn": "1",
+            "ExpectedPolarity": "0",
+            "PolarityDetectModeEn": "0",
+            "Sensitivity": "0",
+            "SyncEdge": "1"
+          },
+          "Period": {
+            "R": "0",
+            "Hysteresis": "3",
+            "Nominal": "999999999993446400",
+            "ToleranceJitter": "0",
+            "ToleranceOffset": "100000",
+            "ValidationTimer": "10",
+            "RefmonBypassReg": "0",
+            "RefmonFaultReg": "0",
+            "RefmonTimeoutReg": "0"
+          }
+        },
+        {
+          "_index": "2",
+          "Receiver": {
+            "DifferentialMode": "0",
+            "Mode": "0",
+            "SingleEndedMode": "0",
+            "Pd": "0"
+          },
+          "Demod": {
+            "Bandsel": "1",
+            "EnableBf": "0",
+            "PersistenceEn": "1",
+            "ExpectedPolarity": "0",
+            "PolarityDetectModeEn": "0",
+            "Sensitivity": "0",
+            "SyncEdge": "1"
+          },
+          "Period": {
+            "R": "49",
+            "Hysteresis": "3",
+            "Nominal": "100000000000",
+            "ToleranceJitter": "0",
+            "ToleranceOffset": "100000",
+            "ValidationTimer": "10",
+            "RefmonBypassReg": "0",
+            "RefmonFaultReg": "0",
+            "RefmonTimeoutReg": "0"
+          }
+        },
+        {
+          "_index": "3",
+          "Receiver": {
+            "DifferentialMode": "0",
+            "Mode": "0",
+            "SingleEndedMode": "2",
+            "Pd": "0"
+          },
+          "Demod": {
+            "Bandsel": "1",
+            "EnableBf": "0",
+            "PersistenceEn": "1",
+            "ExpectedPolarity": "0",
+            "PolarityDetectModeEn": "0",
+            "Sensitivity": "0",
+            "SyncEdge": "1"
+          },
+          "Period": {
+            "R": "0",
+            "Hysteresis": "3",
+            "Nominal": "1000000000000000000",
+            "ToleranceJitter": "0",
+            "ToleranceOffset": "100000",
+            "ValidationTimer": "10",
+            "RefmonBypassReg": "0",
+            "RefmonFaultReg": "0",
+            "RefmonTimeoutReg": "0"
+          }
+        },
+        {
+          "_index": "4",
+          "Demod": {
+            "EnableBf": "0",
+            "PersistenceEn": "1",
+            "ExpectedPolarity": "0",
+            "PolarityDetectModeEn": "0",
+            "Sensitivity": "0",
+            "SyncEdge": "1"
+          },
+          "Period": {
+            "R": "0",
+            "Hysteresis": "3",
+            "Nominal": "99999940608",
+            "ToleranceJitter": "0",
+            "ToleranceOffset": "100000",
+            "ValidationTimer": "10",
+            "RefmonBypassReg": "0",
+            "RefmonFaultReg": "0",
+            "RefmonTimeoutReg": "0"
+          }
+        },
+        {
+          "_index": "5",
+          "Demod": {
+            "EnableBf": "0",
+            "PersistenceEn": "1",
+            "ExpectedPolarity": "0",
+            "PolarityDetectModeEn": "0",
+            "Sensitivity": "0",
+            "SyncEdge": "1"
+          },
+          "Period": {
+            "R": "0",
+            "Hysteresis": "3",
+            "Nominal": "7999979520",
+            "ToleranceJitter": "0",
+            "ToleranceOffset": "100000",
+            "ValidationTimer": "10",
+            "RefmonBypassReg": "0",
+            "RefmonFaultReg": "0",
+            "RefmonTimeoutReg": "0"
+          }
+        },
+        {
+          "_index": "6",
+          "Demod": {
+            "EnableBf": "0",
+            "PersistenceEn": "1",
+            "ExpectedPolarity": "0",
+            "PolarityDetectModeEn": "0",
+            "Sensitivity": "0",
+            "SyncEdge": "1"
+          },
+          "Period": {
+            "R": "0",
+            "Hysteresis": "3",
+            "Nominal": "3921568512",
+            "ToleranceJitter": "0",
+            "ToleranceOffset": "100000",
+            "ValidationTimer": "10",
+            "RefmonBypassReg": "0",
+            "RefmonFaultReg": "0",
+            "RefmonTimeoutReg": "0"
+          }
+        },
+        {
+          "_index": "7",
+          "Demod": {
+            "EnableBf": "0",
+            "PersistenceEn": "1",
+            "ExpectedPolarity": "0",
+            "PolarityDetectModeEn": "0",
+            "Sensitivity": "0",
+            "SyncEdge": "1"
+          },
+          "Period": {
+            "R": "0",
+            "Hysteresis": "3",
+            "Nominal": "7999979520",
+            "ToleranceJitter": "0",
+            "ToleranceOffset": "100000",
+            "ValidationTimer": "10",
+            "RefmonBypassReg": "0",
+            "RefmonFaultReg": "0",
+            "RefmonTimeoutReg": "0"
+          }
+        }
+      ],
+      "AuxNco": [
+        {
+          "_index": "0",
+          "CycleAbs": "0",
+          "CycleRel": "0",
+          "CycleType": "0",
+          "Delta": "0",
+          "DeltaRate": "0",
+          "Delta_t": "0",
+          "DeltaType": "0",
+          "DeltaUi": "0",
+          "FreqCenter": "1099511627776",
+          "FreqOffset": "0",
+          "PulseWidthExponent": "0",
+          "PulseWidthSignificand": "0",
+          "TagDelta": "0",
+          "TagRatio": "0"
+        },
+        {
+          "_index": "1",
+          "CycleAbs": "0",
+          "CycleRel": "0",
+          "CycleType": "0",
+          "Delta": "0",
+          "DeltaRate": "0",
+          "Delta_t": "0",
+          "DeltaType": "0",
+          "DeltaUi": "0",
+          "FreqCenter": "0",
+          "FreqOffset": "0",
+          "PulseWidthExponent": "0",
+          "PulseWidthSignificand": "0",
+          "TagDelta": "0",
+          "TagRatio": "0"
+        }
+      ],
+      "AuxTs": [
+        {
+          "_index": "0",
+          "Timebase": "0",
+          "UseTags": "0"
+        },
+        {
+          "_index": "1",
+          "Timebase": "0",
+          "UseTags": "0"
+        }
+      ],
+      "AuxTdc": [
+        {
+          "_index": "0",
+          "Divide": "0",
+          "Period": "0",
+          "Reference": "6"
+        },
+        {
+          "_index": "1",
+          "Divide": "0",
+          "Period": "0",
+          "Reference": "7"
+        }
+      ]
     },
     "read only": {
+      "SerialPort": {
+        "IdChipType": "5",
+        "IdPart": "4198933",
+        "SpiVersion": "0",
+        "Vendor": "1110"
+      },
+      "TempSensor": {
+        "Temperature": "6552",
+        "Alarm": "1"
+      },
+      "DelaySkew": {
+        "RoscPeriod": "0"
+      },
+      "Eeprom": {
+        "StatusFault": "0",
+        "StatusFaultCrc": "0",
+        "StatusLoad": "0",
+        "StatusSave": "0"
+      },
+      "Irqs": {
+        "Read": {
+          "AuxDpllFault": "0",
+          "AuxDpllLock": "0",
+          "AuxDpllUnfault": "0",
+          "AuxDpllUnlock": "0",
+          "DclkDeactivate": "0",
+          "DclkInvalid0": "0",
+          "DclkInvalid1": "0",
+          "DclkLock": "0",
+          "DclkPrimary": "0",
+          "DclkReady": "0",
+          "DclkSecondary": "0",
+          "DclkTodError": "0",
+          "DclkTodSlewEnd": "0",
+          "DclkTodSlewStart": "0",
+          "DclkUnlock": "0",
+          "DclkValid0": "0",
+          "DclkValid1": "0",
+          "DskewAvailable": "0",
+          "EepromComplete": "0",
+          "EepromFault": "0",
+          "Iuts0Invalid": "0",
+          "Iuts0Valid": "0",
+          "Iuts1Invalid": "0",
+          "Iuts1Valid": "0",
+          "Pps0Event": "0",
+          "Pps1Event": "0",
+          "RefaFault": "0",
+          "RefaPpsError": "0",
+          "RefaUnfault": "0",
+          "RefaValid": "0",
+          "RefaaFault": "0",
+          "RefaaPpsError": "0",
+          "RefaaUnfault": "0",
+          "RefaaValid": "0",
+          "Refaux0Fault": "0",
+          "Refaux0PpsError": "0",
+          "Refaux0Unfault": "0",
+          "Refaux0Valid": "0",
+          "Refaux1Fault": "0",
+          "Refaux1PpsError": "0",
+          "Refaux1Unfault": "0",
+          "Refaux1Valid": "0",
+          "Refaux2Fault": "0",
+          "Refaux2PpsError": "0",
+          "Refaux2Unfault": "0",
+          "Refaux2Valid": "0",
+          "Refaux3Fault": "0",
+          "Refaux3PpsError": "0",
+          "Refaux3Unfault": "0",
+          "Refaux3Valid": "0",
+          "RefbFault": "0",
+          "RefbPpsError": "0",
+          "RefbUnfault": "0",
+          "RefbValid": "0",
+          "RefbbFault": "0",
+          "RefbbPpsError": "0",
+          "RefbbUnfault": "0",
+          "RefbbValid": "0",
+          "SkewLimitExceeded": "0",
+          "SkewUpdate": "0",
+          "SysclkCalEnd": "0",
+          "SysclkCalStart": "0",
+          "SysclkLock": "0",
+          "SysclkStable": "0",
+          "SysclkUnlock": "0",
+          "TemperatureWarning": "0",
+          "Timestamp0Event": "0",
+          "Timestamp1Event": "0",
+          "UtsAvailable": "0",
+          "UtsError": "0",
+          "UtsUpdate": "0",
+          "Watchdog": "0",
+          "Channel": [
+            {
+              "_index": "0",
+              "ApllCalEnd": "0",
+              "ApllCalStart": "0",
+              "ApllLock": "0",
+              "ApllUnlock": "0",
+              "DistSync": "0",
+              "EnterHitless": "0",
+              "ExitHitless": "0",
+              "FaqCompleted": "0",
+              "FaqStarted": "0",
+              "Freerun": "0",
+              "FreqClamp": "0",
+              "FreqUnclamp": "0",
+              "Holdover": "0",
+              "HtwUpdate": "0",
+              "LockFreq": "0",
+              "LockPhase": "0",
+              "NDivPpsError": "0",
+              "Profile0": "0",
+              "Profile1": "0",
+              "Profile2": "0",
+              "Profile3": "0",
+              "Profile4": "0",
+              "Profile5": "0",
+              "PtcActive": "0",
+              "PtcInactive": "0",
+              "StepDetected": "0",
+              "Switching": "0",
+              "UnlockFreq": "0",
+              "UnlockPhase": "0"
+            },
+            {
+              "_index": "1",
+              "ApllCalEnd": "0",
+              "ApllCalStart": "0",
+              "ApllLock": "0",
+              "ApllUnlock": "0",
+              "DistSync": "0",
+              "EnterHitless": "0",
+              "ExitHitless": "0",
+              "FaqCompleted": "0",
+              "FaqStarted": "0",
+              "Freerun": "0",
+              "FreqClamp": "0",
+              "FreqUnclamp": "0",
+              "Holdover": "0",
+              "HtwUpdate": "0",
+              "LockFreq": "0",
+              "LockPhase": "0",
+              "NDivPpsError": "0",
+              "Profile0": "0",
+              "Profile1": "0",
+              "Profile2": "0",
+              "Profile3": "0",
+              "Profile4": "0",
+              "Profile5": "0",
+              "PtcActive": "0",
+              "PtcInactive": "0",
+              "StepDetected": "0",
+              "Switching": "0",
+              "UnlockFreq": "0",
+              "UnlockPhase": "0"
+            }
+          ]
+        }
+      },
+      "Dclk": {
+        "Domain": {
+          "TimeOfDay": {
+            "Slewing": "0",
+            "SyncError": "0"
+          },
+          "Dpll": {
+            "Active": "1",
+            "ActiveSource": "0",
+            "Locked": "1",
+            "Ready": "0",
+            "Source0Valid": "1",
+            "Source1Valid": "0"
+          }
+        },
+        "Source": {
+          "Fill": "0",
+          "Flags": "0",
+          "Nanoseconds": "0",
+          "Overfill": "0",
+          "Seconds": "0",
+          "Source": "0",
+          "Subseconds": "0",
+          "Timecode": "0"
+        },
+        "Skew": {
+          "Drift": "0",
+          "DriftFull": "0",
+          "Offset": "0",
+          "OffsetFull": "0"
+        },
+        "Iuts": [
+          {
+            "_index": "0",
+            "Ready": "0"
+          },
+          {
+            "_index": "1",
+            "Ready": "0"
+          }
+        ]
+      },
+      "Sysclk": {
+        "CalBusy": "0",
+        "Stable": "1",
+        "Locked": "1",
+        "StatusAll": "3"
+      },
+      "Status": {
+        "AuxDpllLd": "1",
+        "AuxDpllRefFault": "0"
+      },
+      "Channel": [
+        {
+          "_index": "0",
+          "Locked": "1",
+          "Dpll": {
+            "ProfilesActive": "1",
+            "Profile0Active": "1",
+            "Profile1Active": "0",
+            "Profile2Active": "0",
+            "Profile3Active": "0",
+            "Profile4Active": "0",
+            "Profile5Active": "0"
+          },
+          "Status": {
+            "ApllCalBusy": "0",
+            "ApllCalDone": "1",
+            "ApllLd": "1",
+            "DpllActive": "1",
+            "DpllFld": "1",
+            "DpllFldTub": "2047",
+            "DpllFreerun": "0",
+            "DpllHoldover": "0",
+            "DpllHtw": "36063957118521",
+            "DpllHtwStatus": "1",
+            "DpllPld": "1",
+            "DpllPldTub": "2007",
+            "DpllProfile": "0",
+            "DpllPtcStatus": "0",
+            "DpllSwitching": "0",
+            "DpllTwcStatus": "0",
+            "FaqActive": "0",
+            "FaqCompleted": "1",
+            "PhCtrlError": "0",
+            "PhSlewEn": "0",
+            "PllAllLd": "1"
+          }
+        },
+        {
+          "_index": "1",
+          "Locked": "0",
+          "Dpll": {
+            "ProfilesActive": "0",
+            "Profile0Active": "0",
+            "Profile1Active": "0",
+            "Profile2Active": "0",
+            "Profile3Active": "0",
+            "Profile4Active": "0",
+            "Profile5Active": "0"
+          },
+          "Status": {
+            "ApllCalBusy": "0",
+            "ApllCalDone": "0",
+            "ApllLd": "0",
+            "DpllActive": "0",
+            "DpllFld": "0",
+            "DpllFldTub": "0",
+            "DpllFreerun": "1",
+            "DpllHoldover": "0",
+            "DpllHtw": "0",
+            "DpllHtwStatus": "0",
+            "DpllPld": "0",
+            "DpllPldTub": "0",
+            "DpllProfile": "0",
+            "DpllPtcStatus": "0",
+            "DpllSwitching": "0",
+            "DpllTwcStatus": "1",
+            "FaqActive": "0",
+            "FaqCompleted": "0",
+            "PhCtrlError": "0",
+            "PhSlewEn": "0",
+            "PllAllLd": "0"
+          }
+        }
+      ],
+      "Refs": [
+        {
+          "_index": "0",
+          "Period": {
+            "RefmonStatusFast": "0",
+            "RefmonStatusFault": "0",
+            "RefmonStatusJitter": "0",
+            "RefmonStatusLos": "0",
+            "RefmonStatusSlow": "0",
+            "RefmonStatusValid": "1"
+          }
+        },
+        {
+          "_index": "1",
+          "Period": {
+            "RefmonStatusFast": "1",
+            "RefmonStatusFault": "1",
+            "RefmonStatusJitter": "1",
+            "RefmonStatusLos": "1",
+            "RefmonStatusSlow": "1",
+            "RefmonStatusValid": "0"
+          }
+        },
+        {
+          "_index": "2",
+          "Period": {
+            "RefmonStatusFast": "1",
+            "RefmonStatusFault": "1",
+            "RefmonStatusJitter": "1",
+            "RefmonStatusLos": "1",
+            "RefmonStatusSlow": "1",
+            "RefmonStatusValid": "0"
+          }
+        },
+        {
+          "_index": "3",
+          "Period": {
+            "RefmonStatusFast": "0",
+            "RefmonStatusFault": "0",
+            "RefmonStatusJitter": "0",
+            "RefmonStatusLos": "0",
+            "RefmonStatusSlow": "0",
+            "RefmonStatusValid": "1"
+          }
+        },
+        {
+          "_index": "4",
+          "Period": {
+            "RefmonStatusFast": "1",
+            "RefmonStatusFault": "1",
+            "RefmonStatusJitter": "1",
+            "RefmonStatusLos": "1",
+            "RefmonStatusSlow": "1",
+            "RefmonStatusValid": "0"
+          }
+        },
+        {
+          "_index": "5",
+          "Period": {
+            "RefmonStatusFast": "1",
+            "RefmonStatusFault": "1",
+            "RefmonStatusJitter": "1",
+            "RefmonStatusLos": "1",
+            "RefmonStatusSlow": "1",
+            "RefmonStatusValid": "0"
+          }
+        },
+        {
+          "_index": "6",
+          "Period": {
+            "RefmonStatusFast": "1",
+            "RefmonStatusFault": "1",
+            "RefmonStatusJitter": "1",
+            "RefmonStatusLos": "1",
+            "RefmonStatusSlow": "1",
+            "RefmonStatusValid": "0"
+          }
+        },
+        {
+          "_index": "7",
+          "Period": {
+            "RefmonStatusFast": "1",
+            "RefmonStatusFault": "1",
+            "RefmonStatusJitter": "1",
+            "RefmonStatusLos": "1",
+            "RefmonStatusSlow": "1",
+            "RefmonStatusValid": "0"
+          }
+        }
+      ],
+      "AuxNco": [
+        {
+          "_index": "0",
+          "DeltaOverflow": "0",
+          "DeltaSlewing": "0",
+          "Clock": "87444173134737978"
+        },
+        {
+          "_index": "1",
+          "DeltaOverflow": "0",
+          "DeltaSlewing": "0",
+          "Clock": "1099511627775"
+        }
+      ],
+      "AuxTs": [
+        {
+          "_index": "0",
+          "LowRes": "0",
+          "Missed": "255",
+          "Timecode": "0",
+          "TimecodeFrac": "0",
+          "TimecodeInt": "0"
+        },
+        {
+          "_index": "1",
+          "LowRes": "0",
+          "Missed": "255",
+          "Timecode": "0",
+          "TimecodeFrac": "0",
+          "TimecodeInt": "0"
+        }
+      ]
     }
   },
   "RegisterMap": {
@@ -1593,6 +3654,402 @@
   "wizard": {
     "version": "1.0.0.0",
     "inputs": {
+      "SystemClock": {
+        "SystemClock": {
+          "InputType": "0",
+          "StabilityTimer": "20",
+          "InputFrequency": {
+            "Input": "25M"
+          }
+        },
+        "AuxiliaryDPLL": {
+          "Enable": "1",
+          "Primary": {
+            "InputSource": "0",
+            "Enable": "1"
+          },
+          "Secondary": {
+            "InputSource": "31",
+            "Enable": "0"
+          },
+          "InputBandwidth": {
+            "Input": "50 Hz"
+          }
+        }
+      },
+      "Sources": {
+        "Refs": {
+          "RefA": {
+            "Enable": "1",
+            "ReceiverMode": "0",
+            "DifferentialMode": "0",
+            "InputFrequency": {
+              "Input": "10M"
+            },
+            "SetPointFrequency": {
+              "Input": "200 kHz"
+            },
+            "Demodulator": {
+              "Enable": "0",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          },
+          "RefAA": {
+            "Enable": "0",
+            "ForceDisable": "0",
+            "InputFrequency": {
+              "Input": "125 MHz"
+            },
+            "SetPointFrequency": {
+              "Input": "200 kHz"
+            },
+            "Demodulator": {
+              "Enable": "1",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          },
+          "RefB": {
+            "Enable": "1",
+            "ReceiverMode": "0",
+            "DifferentialMode": "0",
+            "InputFrequency": {
+              "Input": "10MHz"
+            },
+            "SetPointFrequency": {
+              "Input": "200 kHz"
+            },
+            "Demodulator": {
+              "Enable": "0",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          },
+          "RefBB": {
+            "Enable": "1",
+            "ForceDisable": "0",
+            "InputFrequency": {
+              "Input": "1Hz"
+            },
+            "SetPointFrequency": {
+              "Input": "200 kHz"
+            },
+            "Demodulator": {
+              "Enable": "0",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          }
+        },
+        "AuxRefs": {
+          "AuxRef0": {
+            "Enable": "0",
+            "Mpin": "4",
+            "InputFrequency": {
+              "Input": "10M"
+            },
+            "SetPointFrequency": {
+              "Input": "200 kHz"
+            },
+            "Demodulator": {
+              "Enable": "1",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          },
+          "AuxRef1": {
+            "Enable": "0",
+            "Mpin": "1",
+            "InputFrequency": {
+              "Input": "125 MHz"
+            },
+            "SetPointFrequency": {
+              "Input": "200 kHz"
+            },
+            "Demodulator": {
+              "Enable": "1",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          },
+          "AuxRef2": {
+            "Enable": "0",
+            "Mpin": "2",
+            "InputFrequency": {
+              "Input": "125 MHz"
+            },
+            "SetPointFrequency": {
+              "Input": "200 kHz"
+            },
+            "Demodulator": {
+              "Enable": "0",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          },
+          "AuxRef3": {
+            "Enable": "0",
+            "Mpin": "3",
+            "InputFrequency": {
+              "Input": "125 MHz"
+            },
+            "SetPointFrequency": {
+              "Input": "200 kHz"
+            },
+            "Demodulator": {
+              "Enable": "0",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          }
+        },
+        "DigClkSources": {
+          "Iuts0": {
+            "Enable": "0",
+            "InputFrequency": {
+              "Input": "2kHz"
+            }
+          },
+          "Iuts1": {
+            "Enable": "0",
+            "InputFrequency": {
+              "Input": "1 kHz"
+            }
+          }
+        },
+        "AuxNcos": {
+          "AuxNCO0": {
+            "Enable": "1",
+            "PulseWidth": "1 ns",
+            "InputFrequency": {
+              "Input": "1Hz"
+            },
+            "Embedded_Clock": {
+              "Enable": "0",
+              "InputFrequency": {
+                "Input": "10 MHz"
+              }
+            }
+          },
+          "AuxNCO1": {
+            "Enable": "0",
+            "PulseWidth": "0",
+            "InputFrequency": {
+              "Input": "50 kHz"
+            },
+            "Embedded_Clock": {
+              "Enable": "0",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          }
+        }
+      },
+      "Channel0": {
+        "Dist": {
+          "Out0A": {
+            "Enable": "1",
+            "Source": "0",
+            "InputFrequency": {
+              "Input": "10MHz"
+            },
+            "Modulator": {
+              "Enable": "0",
+              "DutyCycleDeviation": "0",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          },
+          "Out0B": {
+            "Enable": "1",
+            "Source": "0",
+            "InputFrequency": {
+              "Input": "10MHz"
+            },
+            "Modulator": {
+              "Enable": "0",
+              "DutyCycleDeviation": "0",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          },
+          "Out0C": {
+            "Enable": "1",
+            "Source": "0",
+            "InputFrequency": {
+              "Input": "1Hz"
+            },
+            "Modulator": {
+              "Enable": "0",
+              "DutyCycleDeviation": "0",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          }
+        },
+        "Dpll": {
+          "Profile0": {
+            "EnableInput": "1",
+            "OperatingMode": "1",
+            "TagModeInput": "0",
+            "InputSource": "3",
+            "FeedbackSource": "4",
+            "InputBandwidth": {
+              "Input": "0.3 mHz"
+            }
+          },
+          "Profile1": {
+            "EnableInput": "1",
+            "OperatingMode": "1",
+            "TagModeInput": "0",
+            "InputSource": "3",
+            "FeedbackSource": "2",
+            "InputBandwidth": {
+              "Input": "1 mHz"
+            }
+          },
+          "Profile2": {
+            "EnableInput": "1",
+            "OperatingMode": "1",
+            "TagModeInput": "0",
+            "InputSource": "3",
+            "FeedbackSource": "4",
+            "InputBandwidth": {
+              "Input": "50 mHz"
+            }
+          },
+          "Profile3": {
+            "EnableInput": "0",
+            "OperatingMode": "1",
+            "TagModeInput": "0",
+            "InputSource": "0",
+            "FeedbackSource": "0",
+            "InputBandwidth": {
+              "Input": "50 Hz"
+            }
+          },
+          "Profile4": {
+            "EnableInput": "0",
+            "OperatingMode": "1",
+            "TagModeInput": "0",
+            "InputSource": "0",
+            "FeedbackSource": "0",
+            "InputBandwidth": {
+              "Input": "50 Hz"
+            }
+          },
+          "Profile5": {
+            "EnableInput": "0",
+            "OperatingMode": "1",
+            "TagModeInput": "0",
+            "InputSource": "0",
+            "FeedbackSource": "0",
+            "InputBandwidth": {
+              "Input": "50 Hz"
+            }
+          },
+          "ProfileConfigurator": {
+            "InputBandwidth": {
+              "Input": "0.05Hz"
+            }
+          }
+        }
+      },
+      "Channel1": {
+        "Dist": {
+          "Out1A": {
+            "Enable": "0",
+            "Source": "0",
+            "InputFrequency": {
+              "Input": "1Hz"
+            },
+            "Modulator": {
+              "Enable": "0",
+              "DutyCycleDeviation": "0",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          },
+          "Out1B": {
+            "Enable": "0",
+            "Source": "0",
+            "InputFrequency": {
+              "Input": "1Hz"
+            },
+            "Modulator": {
+              "Enable": "0",
+              "DutyCycleDeviation": "0",
+              "InputFrequency": {
+                "Input": "1 Hz"
+              }
+            }
+          }
+        },
+        "Dpll": {
+          "Profile0": {
+            "EnableInput": "0",
+            "OperatingMode": "1",
+            "TagModeInput": "0",
+            "InputSource": "0",
+            "FeedbackSource": "0",
+            "InputBandwidth": {
+              "Input": "50 Hz"
+            }
+          },
+          "Profile1": {
+            "EnableInput": "0",
+            "OperatingMode": "1",
+            "TagModeInput": "0",
+            "InputSource": "0",
+            "FeedbackSource": "0",
+            "InputBandwidth": {
+              "Input": "50 Hz"
+            }
+          },
+          "Profile2": {
+            "EnableInput": "0",
+            "OperatingMode": "1",
+            "TagModeInput": "0",
+            "InputSource": "0",
+            "FeedbackSource": "0",
+            "InputBandwidth": {
+              "Input": "50 Hz"
+            }
+          },
+          "Profile3": {
+            "EnableInput": "0",
+            "OperatingMode": "1",
+            "TagModeInput": "0",
+            "InputSource": "0",
+            "FeedbackSource": "0",
+            "InputBandwidth": {
+              "Input": "50 Hz"
+            }
+          },
+          "Profile4": {
+            "EnableInput": "0",
+            "OperatingMode": "1",
+            "TagModeInput": "0",
+            "InputSource": "0",
+            "FeedbackSource": "0",
+            "InputBandwidth": {
+              "Input": "50 Hz"
+            }
+          },
           "Profile5": {
             "EnableInput": "0",
             "OperatingMode": "1",
