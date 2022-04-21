@@ -222,20 +222,3 @@ This you can do with basic clock operations:
 
 Most advanced features are not available to `clock ops`,
 you need to move to the `advanced` ops.
-
-## Advanced ops
-
-Examples of advanced usages down below.
-
-### Chipset initialization
-
-Initializes chipset for nominal operation.   
-This macro is intended to be called once per configuration (like boot time).  
-
-## Chipset status
-
-Returns status in a readable & loadable format
-
-```shell
-status.py /tmp/status.json
-```
