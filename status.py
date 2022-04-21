@@ -26,7 +26,7 @@ def read_reg (handle, dev, status, reg, addr, bitfields):
         status[reg][b[0]] = bitfield(data, b[1])
 
 def main (argv):
-    parser = argparse.ArgumentParser(description="Clock status reporting")
+    parser = argparse.ArgumentParser(description="AD9545/46 status reporting")
     parser.add_argument(
         "bus",
         help="I2C bus",
