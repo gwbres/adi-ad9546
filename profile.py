@@ -1,4 +1,10 @@
 #! /usr/bin/env python3
+#################################################################
+# Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
+#################################################################
+# profile.py
+# small script to quickly load a profile into an AD9545,46 
+#################################################################
 import sys
 import json
 import argparse

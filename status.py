@@ -1,14 +1,16 @@
 #! /usr/bin/env python3
+#################################################################
+# Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
+#################################################################
+# status.py
+# small script to quickly monitor an AD9545,46 
+#################################################################
 import sys
 import json
 import math
 import argparse
 from smbus import SMBus
 from pprint import pprint
-
-IOCTL_I2C_SLAVE = 0x0703
-REGMAP = [0x00, 0x3A3B]
-KNOWN_DEVICES = ["ad9545","ad9546"]
 
 def read_data (handle, dev, addr):
     lsb = addr & 0xFF
@@ -42,14 +44,16 @@ def main (argv):
         ("sysclk-comp", "Sys clock compensation"),
         ("pll", "Shared Pll global info"),
         ("pll0", "Pll0 core infos"),
-        ("pll1", "Pll1 core infos"),
         ("pll-ch0", "APll0 + DPll0 infos"),
+        ("pll1", "Pll1 core infos"),
         ("pll-ch1", "APll1 + DPll1 infos"),
+        ('dpll-filter', 'DPll loop filter status'),
         ("refa",  "REF-A signal info"),
         ("refaa", "REF-AA signal info"),
         ("refb",  "REF-B signal info"),
         ("refbb", "REF-BB signal info"),
         ("irq", "IRQ registers"),
+        ("watchdog", "Watchdog timer period"),
         ("iuts", None),
         ("temp", "Internal temperature sensor"),
         ("eeprom", "EEPROM controller status"),
@@ -270,6 +274,10 @@ def main (argv):
             ('dpll0-phase-step', 0x01),
         ]
         read_reg(handle, address, status, 'irq', 0x3011, bitfields)
+    if args.watchdog:
+        status['watchdog'] = {}
+        status['watchdog']['period'] = read_data(handle, address, 0x10A) & 0xFF
+        status['watchdog']['period'] |= (read_data(handle, address, 0x10B) & 0xFF)<<8
     if args.iuts:
         bitfields = [
             ('iuts1-valid', 0x02),
