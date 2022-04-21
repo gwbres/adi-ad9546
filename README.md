@@ -139,6 +139,29 @@ calib.py 0 0x4A -pll
 calib.py 0 0x4A -sysclk -pll
 ```
 
+## Power down
+
+`power-down.py` perform and recover power down operations.   
+Useful to power down non needed channels and internal cores. 
+
+The `-all` flag addresses all internal cores.  
+Otherwise, select internal units with related flag
+
+* Power down device entirely
+```shell
+power-down.py 0 0x4A -assert -all
+```
+* Recover a complete power down operation
+```shell
+power-down.py 0 0x4A -clear -all
+```
+
+* Wake `-a` references up and put `-b` reference channels to sleep:
+```shell
+power-down.py 0 0x4A -assert -refb -refbb -refaa
+power-down.py 0 0x4A -deassert -refa 
+```
+
 ## Clock ops
 
 Clock ops perform macro operations, meaning, operations
