@@ -19,7 +19,7 @@ python setup.py install
 The two chip share similar functionnalities, except that
 AD9546 is more capable than 45.   
 Therefore, both can share the following tools, but it is up to the user
-to access the proper restricted register, when using against an AD9545 chip.
+to restrict to supported operations, when operating an AD9545.
 
 ## Profiles & Register map
 
