@@ -45,20 +45,17 @@ def main (argv):
         type=lambda x: int(x,0), 
         help="I2C slave address (hex)")
     parser.add_argument(
-        "-l", 
-        "--load", 
+        "-load", 
         metavar="filepath",
         type=str, 
         help="Load given profile")
     parser.add_argument(
-        "-d", 
-        "--dump", 
+        "-dump", 
         metavar="filepath", 
         type=str, 
         help="Dump current profile")
     parser.add_argument(
-        "-c", 
-        "--chip", 
+        "-chip", 
         metavar="{}".format(str(KNOWN_DEVICES)),
         type=str,
         choices=KNOWN_DEVICES,
@@ -66,7 +63,8 @@ def main (argv):
         help="Accurately describe the chip when --dumping a profile"
     )
     parser.add_argument(
-        "-progress-bar",
+        "-quiet",
+        default=False,
         help="Disable progress bar",
     )
     args = parser.parse_args(argv)
@@ -89,7 +87,7 @@ def main (argv):
                 msb = (int(addr, 16) & 0xFF00)>>8
                 lsb = int(addr, 16) & 0x00FF
                 handle.write_i2c_block_data(address, msb, [lsb])
-                if not args.progress_bar:
+                if not args.quiet:
                     progress += 100 / N
                     if int(progress) % update_perc:
                         progress_bar(int(progress),width=50)
@@ -115,7 +113,7 @@ def main (argv):
             # 1 data byte
             data = handle.read_i2c_block_data(address, 0, 1)[0]
             struct["RegisterMap"][hex(i)] = data
-            if not args.progress_bar:
+            if not args.quiet:
                 progress += 100 / N
                 if int(progress) % update_perc:
                     progress_bar(int(progress),width=50)

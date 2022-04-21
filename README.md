@@ -31,13 +31,13 @@ AD9546 is more capable than 45.
 Therefore, both can share the following tools, but it is up to the user
 to restrict to supported operations, when operating an AD9545.
 
-## Profiles & Register map
+## Register map profiles
 
-Profiles entirely describe the register map.
-Profiles can be created with A&D official graphical interfaces (`->export`).
+Profiles describe the register map entirely.  
+It is possible to create a register map profile using the official A&D graphical tool (`export` feature).  
 
-One can load such a profile (.json file) with the `profile.py` utility.   
-`i2c` bus number (integer number) and slave address (hex) must be specified. 
+One can load such a profile (.json format) with the `profile.py` utility.   
+`i2c` bus number (integer number) and slave address (hex) must be specified:
 
 ```shell
 profile.py -h
@@ -46,15 +46,21 @@ profile.py -h
 profile.py 0 0x48 --load example.json
 
 # loading another profile (on bus #1 0x4A)
-profile.py 1 0x4A -l /tmp/map.json
+profile.py 1 0x4A -load /tmp/map.json
 ```
 
-A&D graphical interface can load a register map (`->import`).   
-One can dump the current chipset content with 
+A&D graphical interface can load a register map (`import` feature).   
+One can dump the current chipset map with 
 
 ```shell
-profile.py 0 0x55 --dump /tmp/map.json
-profile.py 0 0xAA -d /tmp/map.json
+profile.py 0 0x55 -dump map.json
+profile.py 1 0xAA -dump /tmp/map.json
+```
+
+* Disable the progress bar (quiet stdout) with the `-quiet` flag:
+```shell
+profile.py 0 0x55 -quiet -load map.json
+profile.py 1 0xAA -quiet -dump map.json
 ```
 
 ## Status script
