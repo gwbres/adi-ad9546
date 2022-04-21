@@ -4,10 +4,20 @@ Set of tools to interact & program AD9546,AD9545 integrated circuits, by Analog 
 
 These scripts are not Windows compatible.   
 
-## Install libraries
+## Install 
 
 ```shell
 python setup.py install
+```
+
+## Dependencies
+
+* python-smbus
+
+Install requirements with
+
+```shell
+pip3 install -r requirements.txt
 ```
 
 ## API
