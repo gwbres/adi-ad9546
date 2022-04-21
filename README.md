@@ -17,32 +17,68 @@ python setup.py install
 ## AD9545,46
 
 The two chip share similar functionnalities, except that
-AD9546 is more capable.
-Therefore, both can use the following API/binaries, it is up to the user
-to access the proper restricted register, when using an AD9545 chip.
+AD9546 is more capable than 45.   
+Therefore, both can share the following tools, but it is up to the user
+to access the proper restricted register, when using against an AD9545 chip.
 
 ## Profiles & Register map
 
-Profiles entirely describe a chip.   
-Profiles can be created using A&D graphical interfaces.
+Profiles entirely describe the register map.
+Profiles can be created with A&D official graphical interfaces (`->export`).
 
-`i2c` bus must be specified with `-b` (integer number).  
-Chip slave address on the `i2c` bus must be specified with `--address` or `-a` (hex).  
-
-* Load such a register map
+One can load such a profile (.json file) with the `profile.py` utility.   
+`i2c` bus number (integer number) and slave address (hex) must be specified. 
 
 ```shell
-profile.py bus 0 address 0x55 --load /tmp/map.json
-profile.py bus 1 -a 0xAA -l /tmp/map.json
+profile.py -h
+profile.py 0 0x48 --load /tmp/map.json
+profile.py 1 0x4A -l /tmp/map.json
 ```
 
-A&D graphical interface can load a register map.
-
-* Dump current settings into compatible format
+A&D graphical interface can load a register map (`->import`).   
+One can dump the current chipset content with 
 
 ```shell
 profile.py 0 0x55 --dump /tmp/map.json
 profile.py 0 0xAA -d /tmp/map.json
+```
+
+## Status script
+
+`status.py` is a read only tool, to interact with the integrated chip.  
+`i2c` bus number (integer number) and slave address (hex) must be specified.
+
+Use the `help` menu to learn how to use this script:
+```shell
+status.py -h
+```
+
+Several part of the integrated chips can be monitored at once.
+Output format is `json` and is streamed to `stdout`.
+Example of use:
+
+```shell
+# Grab general / high level info (bus=0, 0x4A):
+status.py -info -serial -pll 0 0x4A
+# General clock info + ref-a is used (bus=1, 0x48):
+status.py -pll -sysclk-pll -refa 1 0x48
+# IRQ status register
+status.py -irq 0 0x4A
+
+# dump status to a file
+status.py -info -serial -pll 0 0x4A > /tmp/status.json
+
+# call status.py from another python script;
+# evaluate json content (dict) directly from `stdout`
+import subprocess
+args = ['status.py', '-info', '0', '0x4A']
+ret = subprocess.run(args)
+if ret.exitcode == 0: # OK
+   # grab `stdout`
+   status = ret.stdout.decode('utf-8') 
+   # build structure directly
+   status = eval(status)
+   status['info']['vendor'] # eval() is way cool!
 ```
 
 ## Clock ops
