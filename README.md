@@ -43,7 +43,7 @@ One can load such a profile (.json format) with the `profile.py` utility.
 profile.py -h
 
 # loading the AD9546 example profile (on bus #0 @0x48)
-profile.py 0 0x48 --load example.json
+profile.py 0 0x48 -load example.json
 
 # loading another profile (on bus #1 0x4A)
 profile.py 1 0x4A -load /tmp/map.json
