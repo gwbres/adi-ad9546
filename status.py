@@ -41,8 +41,10 @@ def main (argv):
         ("sysclk-pll",  "Sys clock synthesis pll"),
         ("sysclk-comp", "Sys clock compensation"),
         ("pll", "Shared Pll global info"),
-        ("pll0", "Pll0 specific infos"),
-        ("pll1", "Pll1 specific infos"),
+        ("pll0", "Pll0 core infos"),
+        ("pll1", "Pll1 core infos"),
+        ("pll-ch0", "APll0 + DPll0 infos"),
+        ("pll-ch1", "APll1 + DPll1 infos"),
         ("refa",  "REF-A signal info"),
         ("refaa", "REF-AA signal info"),
         ("refb",  "REF-B signal info"),
@@ -66,7 +68,6 @@ def main (argv):
     handle = SMBus()
     handle.open(int(args.bus))
     address = int(args.address, 16)
-    print("using i2c slave address {}".format(address))
 
     status = {}
     if args.info:
@@ -269,6 +270,60 @@ def main (argv):
             ('dpll0-phase-step', 0x01),
         ]
         read_reg(handle, address, status, 'irq', 0x3011, bitfields)
+    if args.iuts:
+        bitfields = [
+            ('iuts1-valid', 0x02),
+            ('iuts2-valid', 0x01),
+        ]
+        read_reg(handle, address, status, 'iuts', 0x3023, bitfields)
+    if args.pll_ch0:
+        bitfields = [
+            ('apll0-calib-done', 0x20),
+            ('apll0-calib-busy', 0x10),
+            ('apll0-phase-locked', 0x08),
+            ('dpll0-freq-locked', 0x04),
+            ('dpll0-phase-locked', 0x02),
+            ('dpll0-locked', 0x02),
+        ]
+        read_reg(handle, address, status, 'pll-ch0', 0x3100, bitfields)
+        data = read_data(handle, address, 0x3101)
+        status['pll-ch0']['dpll0-profile'] = (data & 0x20)>>8
+        status['pll-ch0']['dpll0-active'] = (data & 0x08)>>3
+        status['pll-ch0']['dpll0-profile-switch'] = (data & 0x04)>>2
+        status['pll-ch0']['dpll0-holdover'] = (data & 0x02)>>1
+        status['pll-ch0']['dpll0-freerun'] = (data & 0x01)
+        bitfields = [
+            ('dpll0-fast-acq-complete',0x10),
+            ('dpll0-fast-acq',0x08),
+            ('dpll0-limiting-phase-slew',0x04),
+            ('dpll0-clamping-freq',0x02),
+            ('dpll0-tuning-history-avail',0x01),
+        ]
+        read_reg(handle, address, status, 'pll-ch0', 0x3102, bitfields)
+    if args.pll_ch1:
+        bitfields = [
+            ('apll1-calib-done', 0x20),
+            ('apll1-calib-busy', 0x10),
+            ('apll1-phase-locked', 0x08),
+            ('dpll1-freq-locked', 0x04),
+            ('dpll1phase-locked', 0x02),
+            ('dpll1-locked', 0x02),
+        ]
+        read_reg(handle, address, status, 'pll-ch1', 0x3200, bitfields)
+        data = read_data(handle, address, 0x3201)
+        status['pll-ch1']['dpll1-profile'] = (data & 0x20)>>8
+        status['pll-ch1']['dpll1-active'] = (data & 0x08)>>3
+        status['pll-ch1']['dpll1-profile-switch'] = (data & 0x04)>>2
+        status['pll-ch1']['dpll1-holdover'] = (data & 0x02)>>1
+        status['pll-ch1']['dpll1-freerun'] = (data & 0x01)
+        bitfields = [
+            ('dpll1-fast-acq-complete',0x10),
+            ('dpll1-fast-acq',0x08),
+            ('dpll1-limiting-phase-slew',0x04),
+            ('dpll1-clamping-freq',0x02),
+            ('dpll1-tuning-history-avail',0x01),
+        ]
+        read_reg(handle, address, status, 'pll-ch1', 0x3202, bitfields)
     if args.temp:
         temp = (read_data(handle, address, 0x3004) & 0xFF)<< 8 
         temp |= read_data(handle, address, 0x3003) & 0xFF
