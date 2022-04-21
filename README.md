@@ -170,17 +170,17 @@ Otherwise, select internal units with related flag
 
 * Power down device entirely
 ```shell
-power-down.py 0 0x4A -assert -all
+power-down.py 0 0x4A -all
 ```
 * Recover a complete power down operation
 ```shell
-power-down.py 0 0x4A -clear -all
+power-down.py 0 0x4A -all -clear
 ```
 
 * Wake `-a` references up and put `-b` reference channels to sleep:
 ```shell
-power-down.py 0 0x4A -assert -refb -refbb -refaa
-power-down.py 0 0x4A -deassert -refa 
+power-down.py 0 0x4A -refb -refbb -refaa
+power-down.py 0 0x4A -clear -refa 
 ```
 
 ## Clock ops

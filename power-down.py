@@ -33,7 +33,6 @@ def main (argv):
         help="I2C slv address",
     )
     flags = [
-        ('assert','Assert a power down op'), 
         ('clear', 'Clear (recover from a previous) power down op'), 
         ('all',   'Device power down (Sys clock pll, REFx, DPlls, APlls..)'),
         ('refb',  'TDC ref-b power down'),
@@ -56,32 +55,32 @@ def main (argv):
 
     if args.all:
         reg = read_data(handle, address, 0x2000)
-        if args.assert:
-            write_data(handle, address, 0x2000, reg | 0x01)
         if args.clear:
             write_data(handle, address, 0x2000, reg & 0xFE)
+        else:
+            write_data(handle, address, 0x2000, reg | 0x01)
     else:
         reg = read_data(handle, address, 0x20001)
         if args.refb:
-            if args.assert:
-                reg |= 0x04
             if args.clear:
                 reg &= 0xFB
+            else:
+                reg |= 0x04
         if args.refbb:
-            if args.assert:
-                reg |= 0x08
             if args.clear:
                 reg &= 0xF7 
+            else:
+                reg |= 0x08
         if args.refa:
-            if args.assert:
-                reg |= 0x01
             if args.clear:
                 reg &= 0xFE 
+            else:
+                reg |= 0x01
         if args.refaa:
-            if args.assert:
-                reg |= 0x02 
             if args.clear:
                 reg &= 0xFD
+            else:
+                reg |= 0x02 
         write_data(handle, address, 0x2000, reg)
 
 if __name__ == "__main__":
