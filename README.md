@@ -55,7 +55,18 @@ profile.py 0 0xAA -d /tmp/map.json
 Use the `help` menu to learn how to use this script:
 ```shell
 status.py -h
-usage: status.py [-h] [-info] [-serial] [-sysclk-pll] [-sysclk-comp] [-pll] [-pll0] [-pll1] [-refa] [-refaa] [-refb] [-refbb] [-irq] [-iuts] [-temp] [-eeprom] [-misc] bus address
+usage: status.py [-h] 
+    [-info] [
+    -serial]
+    [-sysclk-pll] [-sysclk-comp]
+    [-pll] [-pll0] [-pll1]
+    [-refa] [-refaa] [-refb] [-refbb] 
+    [-irq] 
+    [-iuts] 
+    [-temp] 
+    [-eeprom] 
+    [-misc] 
+    bus address
 
 Clock status reporting
 
