@@ -112,7 +112,7 @@ def main (argv):
             handle.write_i2c_block_data(address, msb, [lsb])
             # 1 data byte
             data = handle.read_i2c_block_data(address, 0, 1)[0]
-            struct["RegisterMap"][hex(i)] = data
+            struct["RegisterMap"][hex(i)] = "0x{:02x}".format(data)
             if not args.quiet:
                 progress += 100 / N
                 if int(progress) % update_perc:
