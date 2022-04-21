@@ -31,7 +31,11 @@ One can load such a profile (.json file) with the `profile.py` utility.
 
 ```shell
 profile.py -h
-profile.py 0 0x48 --load /tmp/map.json
+
+# loading the AD9546 example profile (on bus #0 @0x48)
+profile.py 0 0x48 --load example.json
+
+# loading another profile (on bus #1 0x4A)
 profile.py 1 0x4A -l /tmp/map.json
 ```
 
