@@ -56,16 +56,14 @@ def main (argv):
     if args.pll:
         reg |= 0x08
     write_data(handle, address, 0x2000, reg)
-    # assert I/O
-    write_data(handle, address, 0x, reg)
-    # clear bits
+    write_data(handle, address, 0x0F, 0x01) # [2] I/O update
+    # [3] clear bits
     if args.sysclk:
         reg &= 0xFB
     if args.pll:
         reg &= 0xF7
     write_data(handle, address, 0x2000, reg)
-    # assert I/O
-    write_data(handle, address, 0x, reg)
+    write_data(handle, address, 0x0F, 0x01) # [4] I/O update
 
 if __name__ == "__main__":
     main(sys.argv[1:])
