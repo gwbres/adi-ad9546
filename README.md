@@ -113,6 +113,32 @@ if ret.exitcode == 0: # OK
    status['info']['vendor'] # eval() is way cool!
 ```
 
+## Calibration script
+
+`calib.py` allows easy & quick chipset (re)calibration.   
+
+It is required to perform a calibration at boot time.  
+It is required to perform an analog Pll (re)calibration anytime
+we are recovering from a sys clock power down.
+
+* Perform a sys clock recalibration
+
+```shell
+calib.py 0 0x4A -sysclk
+```
+
+* Recalibrate Analog Plls
+
+```shell
+calib.py 0 0x4A -pll
+```
+
+* Perform full recalibration
+
+```shell
+calib.py 0 0x4A -sysclk -pll
+```
+
 ## Clock ops
 
 Clock ops perform macro operations, meaning, operations
@@ -155,11 +181,6 @@ Examples of advanced usages down below.
 
 Initializes chipset for nominal operation.   
 This macro is intended to be called once per configuration (like boot time).  
-
-### Chipset calibration
-
-Calibrates chipset for nominal operation.   
-This macro is intended to be called once per session. 
 
 ## Chipset status
 
