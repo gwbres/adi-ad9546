@@ -35,10 +35,10 @@ def main (argv):
     flags = [
         ('clear', 'Clear (recover from a previous) power down op'), 
         ('all',   'Device power down (Sys clock pll, REFx, DPlls, APlls..)'),
-        ('refb',  'TDC ref-b power down'),
-        ('refbb', 'TDC ref-bb power down'),
-        ('refa',  'TDC ref-a power down'),
-        ('refaa', 'TDC ref-aa power down'),
+        ('refb',  'TDC ref-b'),
+        ('refbb', 'TDC ref-bb'),
+        ('refa',  'TDC ref-a'),
+        ('refaa', 'TDC ref-aa'),
     ]
     for (flag, helper) in flags:
         parser.add_argument(
