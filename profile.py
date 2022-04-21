@@ -1,83 +1,82 @@
 #! /usr/bin/env python3
 import sys
 import json
-import fcntl
 import argparse
+from smbus import SMBus
 
-IOCTL_I2C_SLAVE = 0x0703
 REGMAP = [0x00, 0x3A3B]
+KNOWN_DEVICES = ["ad9545","ad9546"]
 
 def main (argv):
-    parser = argparse.ArgumentParser(description="Load / dump a profile into AD9545,AD9546 chipsets")
+    parser = argparse.ArgumentParser(description="Load / dump a profile into AD9545,AD9546 chip")
     parser.add_argument(
-        "-b", 
-        "--bus", 
+        "bus", 
         metavar="bus", 
         type=int, 
         default=0, 
         help="I2C bus #")
     parser.add_argument(
-        "-a", 
-        "--address", 
+        "address", 
         metavar="address", 
         type=lambda x: int(x,0), 
         help="I2C slave address (hex)")
     parser.add_argument(
         "-l", 
         "--load", 
-        metavar="load", 
+        metavar="filepath",
         type=str, 
         help="Load given profile")
     parser.add_argument(
         "-d", 
         "--dump", 
-        metavar="dump", 
+        metavar="filepath", 
         type=str, 
         help="Dump current profile")
     parser.add_argument(
         "-c", 
         "--chip", 
-        metavar="chipset", 
-        type=str, 
-        choices=["ad9545","ad9546"], 
-        default="ad9546",
+        metavar="{}".format(str(KNOWN_DEVICES)),
+        type=str,
+        choices=KNOWN_DEVICES,
+        default=KNOWN_DEVICES[0],
         help="Accurately describe the chip when --dumping a profile"
     )
     args = parser.parse_args(argv)
 
-    i2c_handle = open("/dev/i2c-{}".format(args.bus), "wb", buffering=0)
-    fnctl.ioctl(i2c_handle, IOCTL_I2C_SLAVE, args.address)
+    handle = SMBus()
+    handle.open(int(args.bus))
+    address = int(args.address, 16)
     
     if args.load:
         with open(args.load, encoding="utf-8-sig") as f:
             data = json.load(f)
             regmap = data["RegisterMap"]
             for addr in regmap:
-                _addr = int(addr, 16) # hex() 
                 value = int(regmap[addr], 16) # hex()
                 # 2 address bytes
-                (msb, lsb) = ((_addr & 0xFF00)>>8, _addr & 0x00FF)
-                i2c_handle.write(bytearray[msb, lsb, value])
+                msb = int(addr, 16) & 0xFF00)>>8
+                lsb = int(addr, 16) & 0x00FF)
+                handle.write_i2c_block_data(address, msb, [lsb])
 
     if args.dump:
         # create a json struct
         struct = {}
-        struct[args.chipset] = {}
-        struct[args.chipset]["_gui_version"] = "1.0.0.0"
-        struct[args.chipset]["_die_version"] = "4198933" # ??
-        struct[args.chipset]["notes"] = {}
-        struct[args.chipset]["bitfields"] = {}
-        struct[args.chipset]["read only"] = {}
-        struct[args.chipset]["wizard"] = {}
+        struct[args.chip] = {}
+        struct[args.chip]["_gui_version"] = "1.0.0.0"
+        struct[args.chip]["_die_version"] = "4198933" # ??
+        struct[args.chip]["notes"] = {}
+        struct[args.chip]["bitfields"] = {}
+        struct[args.chip]["read only"] = {}
+        struct[args.chip]["wizard"] = {}
         struct["wizard"] = {} 
         struct["wizard"]["version"] = "1.0.0.0"
         struct["RegisterMap"] = {}
         for i in range (REGMAP[0],REGMAP[1]+1):
             # 2 address bytes
             (msb, lsb) = ((i & 0xFF00)>>8, i & 0x00FF)
-            i2c_handle.write(bytearray[msb, lsb])
+            handle.write_i2c_block_data(address, msb, [lsb])
             # 1 data byte
-            data = i2c_handle.read(1)
+            data = handle.read_i2c_block_data(dev, 0, 1)[0]
             struct["RegisterMap"][hex(i)] = data
         json.dumps(struct, sort_keys=True, indent=4)
 
