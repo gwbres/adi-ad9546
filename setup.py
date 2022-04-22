@@ -14,5 +14,6 @@ setup(name="distutils",
         "reset.py",
         "power-down.py",
         "irq.py",
+        "misc.py",
     ],
 )

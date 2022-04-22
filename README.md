@@ -213,6 +213,19 @@ Clear them with `irq.py`:
 * `--sysclk`: clear all sysclock related events 
 * `-h`: for other known flags
 
+## Misc
+
+`status.py --temp` returns the internal temperature sensor reading.  
+`misc.py` allows programming a temperature alarm threshold:
+
+```shell
+misc.py --temp-thres-low=-10 # [°C]
+misc.py --temp-thres-high=80 # [°C]
+status.py --temp 0 0x48 # current reading [°C] 
+```
+
+Warning events are retrieved with the `irq.py` utility, refer to related section.
+
 ## Clock ops
 
 Clock ops perform macro operations, meaning, operations
