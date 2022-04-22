@@ -11,6 +11,7 @@ setup(name="distutils",
         "profile.py",
         "status.py",
         "calib.py",
+        "reset.py",
         "power-down.py",
     ],
 )

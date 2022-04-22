@@ -146,7 +146,7 @@ if ret.exitcode == 0: # OK
 
 It is required to perform a calibration at boot time.  
 It is required to perform an analog Pll (re)calibration anytime
-we are recovering from a sys clock power down.
+we recover from a sys clock power down.
 
 * Perform a sys clock recalibration
 
@@ -166,7 +166,15 @@ calib.py 0 0x4A -pll
 calib.py 0 0x4A -sysclk -pll
 ```
 
-## Power down
+## Reset script
+
+To quickly reset the device
+
+* `-soft` : performs a soft reset
+* `-sans` : same thing but maintains current registers value 
+* `-h` for more infos
+
+## Power down script
 
 `power-down.py` perform and recover power down operations.   
 Useful to power down non needed channels and internal cores. 
