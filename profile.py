@@ -83,15 +83,17 @@ def main (argv):
             regmap = data["RegisterMap"]
             N = len(regmap)
             for addr in regmap:
-                value = int(regmap[addr], 16) # hex()
+                value = int(regmap[addr], 16) & 0xFF # 1 byte from hex()
                 # 2 address bytes
-                msb = (int(addr, 16) & 0xFF00)>>8
-                lsb = int(addr, 16) & 0x00FF
-                handle.write_i2c_block_data(address, msb, [lsb])
+                _addr = int(addr, 16)
+                msb = (_addr & 0xFF00)>>8
+                lsb = _addr & 0xFF
+                handle.write_i2c_block_data(address, msb, [lsb, value])
                 if not args.quiet:
                     progress += 100 / N
                     if int(progress) % update_perc:
                         progress_bar(int(progress),width=50)
+            handle.write_i2c_block_data(address, 0x00, [0x0F, 0x01]) # I/O update
 
     if args.dump:
         # create a json struct
@@ -109,11 +111,11 @@ def main (argv):
         N = REGMAP[1]+1
         for i in range (REGMAP[0],N):
             # 2 address bytes
-            (msb, lsb) = ((i & 0xFF00)>>8, i & 0x00FF)
+            (msb, lsb) = ((i & 0xFF00)>>8, i & 0xFF)
             handle.write_i2c_block_data(address, msb, [lsb])
             # 1 data byte
-            data = handle.read_i2c_block_data(address, 0, 1)[0]
-            struct["RegisterMap"]["0x{:04x}".format(i)] = "0x{:02x}".format(data)
+            data = handle.read_byte(address)
+            struct["RegisterMap"]["0x{:04X}".format(i)] = "0x{:02X}".format(data)
             if not args.quiet:
                 progress += 100 / N
                 if int(progress) % update_perc:

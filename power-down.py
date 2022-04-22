@@ -13,11 +13,11 @@ from smbus import SMBus
 
 def write_data (handle, dev, addr, data):
     lsb = addr & 0xFF
-    msb = addr & (0xFF00)>>8
-    handle.write_i2c_block_data(dev, msb, [lsb])
+    msb = (addr & 0xFF00)>>8
+    handle.write_i2c_block_data(dev, msb, [lsb, data])
 def read_data (handle, dev, addr):
     lsb = addr & 0xFF
-    msb = addr & (0xFF00)>>8
+    msb = (addr & 0xFF00)>>8
     handle.write_i2c_block_data(dev, msb, [lsb])
     data = handle.read_i2c_block_data(dev, 0, 1)[0]
     return data
@@ -57,8 +57,10 @@ def main (argv):
         reg = read_data(handle, address, 0x2000)
         if args.clear:
             write_data(handle, address, 0x2000, reg & 0xFE)
+            write_data(handle, address, 0x000F, 0x01) # I/O update
         else:
             write_data(handle, address, 0x2000, reg | 0x01)
+            write_data(handle, address, 0x000F, 0x01) # I/O update
     else:
         reg = read_data(handle, address, 0x20001)
         if args.refb:
@@ -82,6 +84,7 @@ def main (argv):
             else:
                 reg |= 0x02 
         write_data(handle, address, 0x2000, reg)
+        write_data(handle, address, 0x000F, 0x01) # I/O update
 
 if __name__ == "__main__":
     main(sys.argv[1:])

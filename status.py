@@ -12,10 +12,10 @@ from smbus import SMBus
 from pprint import pprint
 
 def read_data (handle, dev, addr):
+    msb = (addr & 0xFF00)>>8
     lsb = addr & 0xFF
-    msb = addr & (0xFF00)>>8
     handle.write_i2c_block_data(dev, msb, [lsb])
-    data = handle.read_i2c_block_data(dev, 0, 1)[0]
+    data = handle.read_byte(dev)
     return data
 def bitfield (data, mask):
     return int((data & mask) >> int(math.log2(mask))) 
@@ -42,9 +42,7 @@ def main (argv):
         ("sysclk-pll",  "Sys clock synthesis pll"),
         ("sysclk-comp", "Sys clock compensation"),
         ("pll", "Shared Pll global info"),
-        ("pll0", "Pll0 core infos"),
         ("pll-ch0", "APll0 + DPll0 infos"),
-        ("pll1", "Pll1 core infos"),
         ("pll-ch1", "APll1 + DPll1 infos"),
         ('dpll-filter', 'DPll loop filter status'),
         ("refa",  "REF-A signal info"),
@@ -75,7 +73,7 @@ def main (argv):
     status = {}
     if args.info:
         status['info'] = {}
-        status['info']['chip-type'] = hex(read_data(handle, address, 0x0003) & 0x0F)
+        status['info']['chip-type'] = hex(read_data(handle, address, 0x0003))
         
         data = read_data(handle, address, 0x0004) & 0xFF
         data |= (read_data(handle, address, 0x0005) & 0xFF)<<8
@@ -102,18 +100,18 @@ def main (argv):
         status['sysclk-pll'] = {}
         data = read_data(handle, address, 0x200) 
         status['sysclk-pll']['fb-div-ratio'] = data
-        data = read_data(handle, address, 0x201) 
+        data = read_data(handle, address, 0x201)
         status['sysclk-pll']['input-path-sel'] = int((data & 0x04) >>3)
         status['sysclk-pll']['input-div-ratio'] = int((data & 0x06)>>1)
         status['sysclk-pll']['freq-doubler'] = int(data & 0x01)
         ref_freq = read_data(handle, address, 0x202)
-        ref_freq += read_data(handle, address, 0x203)
-        ref_freq += read_data(handle, address, 0x204)
-        ref_freq += read_data(handle, address, 0x205)
-        ref_freq += read_data(handle, address, 0x206)
-        status['sysclk-pll']['ref-freq'] = ref_freq
-        per  = (read_data(handle, address, 0x208) & 0x0F) << 8
-        per += read_data(handle, address, 0x207) & 0x0F
+        ref_freq += read_data(handle, address, 0x203) << 8
+        ref_freq += read_data(handle, address, 0x204) << 16
+        ref_freq += read_data(handle, address, 0x205) << 24
+        ref_freq += read_data(handle, address, 0x206) << 32
+        status['sysclk-pll']['ref-freq'] = ref_freq * 1E3
+        per = read_data(handle, address, 0x207) & 0x0F
+        per += (read_data(handle, address, 0x208) & 0x0F) << 8
         status['sysclk-pll']['stability-period'] = read_data(handle, address, 0x207) & 0x0F
     if args.sysclk_comp:
         bitfields = [

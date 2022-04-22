@@ -11,11 +11,11 @@ from smbus import SMBus
 
 def write_data (handle, dev, addr, data):
     lsb = addr & 0xFF
-    msb = addr & (0xFF00)>>8
-    handle.write_i2c_block_data(dev, msb, [lsb])
+    msb = (addr & 0xFF00)>>8
+    handle.write_i2c_block_data(dev, msb, [lsb, data])
 def read_data (handle, dev, addr):
     lsb = addr & 0xFF
-    msb = addr & (0xFF00)>>8
+    msb = (addr & 0xFF00)>>8
     handle.write_i2c_block_data(dev, msb, [lsb])
     data = handle.read_i2c_block_data(dev, 0, 1)[0]
     return data
