@@ -6,10 +6,6 @@ except ImportError:
     from distutils.core import setup
 
 setup(name="distutils",
-    version="1.0",
-    description="Analog Devices (AD9545,46) management tools",
-    author="Guillaume W. Bres",
-    author_email="guillaume.bressaix@gmail.com",
     scripts=[
         "calib.py",
         "distrib.py",
