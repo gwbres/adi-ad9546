@@ -53,7 +53,7 @@ def main (argv):
         ("irq", "IRQ registers"),
         ("watchdog", "Watchdog timer period"),
         ("iuts", None),
-        ("temp", "Internal temperature sensor"),
+        ("temp", "Reads temperature sensor [°C]"),
         ("eeprom", "EEPROM controller status"),
         ("misc", "Auxilary NCOs, DPll and Temp info"),
     ]
