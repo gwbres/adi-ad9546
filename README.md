@@ -23,7 +23,10 @@ pip3 install -r requirements.txt
 ## API
 
 * Each application comes with an `-h` help menu.  
-Refer to help menu for specific information
+Refer to help menu for specific information. 
+* Flags order does not matter
+* `flag` is mandatory
+* `--flag` describe an optionnal flag, action will not be performed if not passed
 
 ## AD9545,46
 
@@ -31,6 +34,19 @@ The two chip share similar functionnalities, except that
 AD9546 is more capable than 45.   
 Therefore, both can share the following tools, but it is up to the user
 to restrict to supported operations, when operating an AD9545.
+
+## Utilities
+
+* `calib.py`: is critical, calibrates clock and internal synthesizers. 
+Action required depending on previous user actions and current settings. 
+* `distrib.py`: is critical, controls clock distribution and output signals
+* `misc.py`: miscellaneous / optionnal stuff
+* `power-down.py` : power saving and management utility
+* `profile.py`: very useful, loads / dumps a register map preset,
+as desribed in application note
+* `reset.py`: to quickly reset the device
+* `status.py` : general status monitoring, including on board temperature,
+sensors and IRQ flags
 
 ## Register map profiles
 
@@ -149,22 +165,48 @@ It is required to perform a calibration at boot time.
 It is required to perform an analog Pll (re)calibration anytime
 we recover from a sys clock power down.
 
-* Perform a sys clock recalibration
+* Perform complete (re)calibration
 
 ```shell
-calib.py 0 0x4A --sysclk
+calib.py --all 0 0x4A
 ```
 
-* Recalibrate Analog Plls
+* Perform only a sys clock (re)calibration
+(1st step in application note)
 
 ```shell
-calib.py 0 0x4A --pll
+calib.py --sysclk 0 0x4A
 ```
 
-* Perform full recalibration
+## Clock distribution
+
+`distrib.py` is also an important utility. 
+It helps configure the clock path, control output signals
+and their behavior.
+
+Control flags:
+* `--core`: (optionnal) describes which core we are targetting.
+This script only suppports a single `--core` assignment.
+One must call `distrib.py` several times to perform multiple clock distribution.
+
+* `--channel`: (optionnal) describes which channel we are targetting for a given core.
+This script only suppports a single `--channel` assignment.
+One must call `distrib.py` several times to perform multiple channel distribution.
+Default to `all`, meaning if `--channel` is not specified, both channel (CH0/CH1)
+are assigned the same value.
+
+Action flags: the script supports as many `action` flags as desired.
+
+* `sync-all`: sends a SYNC order to all distribution dividers.
+This action is special, in the sense `--core` and `--channel` are discarded.
+It is required to run a `sync-all` in case the current output behavior
+is not set to `immediate`.
 
 ```shell
-calib.py 0 0x4A --sysclk --pll
+# assign a SYNC all, might be required depending on
+# current configuration or previously loaded profile
+# This one is special, because --core + --channel are discarded
+distrib.py --sync-all 0 0x48
 ```
 
 ## Reset script
@@ -219,43 +261,10 @@ Clear them with `irq.py`:
 `misc.py` allows programming a temperature alarm threshold:
 
 ```shell
-misc.py --temp-thres-low=-10 # [°C]
-misc.py --temp-thres-high=80 # [°C]
+misc.py --temp-thres-low -10 # [°C]
+misc.py --temp-thres-high 80 # [°C]
+misc.py --temp-thres-low -30 --temp-thres-high 90
 status.py --temp 0 0x48 # current reading [°C] 
 ```
 
 Warning events are retrieved with the `irq.py` utility, refer to related section.
-
-## Clock ops
-
-Clock ops perform macro operations, meaning, operations
-that are unlocked by A&D kernel drivers official support.    
-Therefore, it is expected to use `clock-ops.py` along `ad9545` official driver loaded & deployed
-properly.
-
-Determine which operations are available for which clock:
-
-```shell
-clock_ops.py --list
-```
-
-Most operation require a channel to be specified, specify them with `--channel`
-or `-n`:
-```shell
-clock_ops.py --clock=sysclk --channel
-```
-
-For each clock, specify a channel with a --channel n integer number
-
-* Enable sys clock
-* Enable refclock
-
-This you can do with basic clock operations:
-* set up (control, status) the sys clock 
-* set up each internal clock, including synthesis process control:
- * clock tree control (parent)
- * instantenous phase control
- * frequency control
-
-Most advanced features are not available to `clock ops`,
-you need to move to the `advanced` ops.
