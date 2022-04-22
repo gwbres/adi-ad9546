@@ -197,7 +197,7 @@ are assigned the same value.
 
 Action flags: the script supports as many `action` flags as desired.
 
-* `sync-all`: sends a SYNC order to all distribution dividers.
+* `--sync-all`: sends a SYNC order to all distribution dividers.
 This action is special, in the sense `--core` and `--channel` are discarded.
 It is required to run a `sync-all` in case the current output behavior
 is not set to `immediate`.
@@ -207,6 +207,33 @@ is not set to `immediate`.
 # current configuration or previously loaded profile
 # This one is special, because --core + --channel are discarded
 distrib.py --sync-all 0 0x48
+```
+
+* `--autosync` : control given channel so called "autosync" behavior.
+`--core` is not needed for such operation.
+```shell
+# set both Pll CH0 & CH1 to "immediate" behavior
+distrib.py --autosync immediate 0 0x48
+# set both Pll CH0 to "immediate" behavior
+distrib.py --autosync immediate --channel 0 0 0x48
+#  and Pll CH1 to "manual" behavior
+distrib.py --autosync manual --channel 1 0 0x48
+```
+
+In the previous example, CH1 is set to manual behavior.  
+One must either perform a `sync-all` operation,
+a `q-sync` operation on channel 1,
+or an Mx-pin operation with dedicated script, to enable this output signal.
+
+* `--q-sync` : initializes a Q Divider synchronization sequence manually. 
+This is useful when enabling a channel manually, but without dedicated Mx-pin
+control.
+`--core` is not needed for such operation.
+```shell
+# manual Q Sync on both channels
+distrib.py --q-sync 0 0x48
+# manual Q Sync on channel 1
+distrib.py --q-sync --channel 1 0 0x48
 ```
 
 ## Reset script
