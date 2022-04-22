@@ -14,8 +14,8 @@ def write_data (handle, dev, addr, data):
     lsb = addr & 0xFF
     handle.write_i2c_block_data(dev, msb, [lsb, data])
 def read_data (handle, dev, addr):
-    lsb = addr & 0xFF
     msb = (addr & 0xFF00)>>8
+    lsb = addr & 0xFF
     handle.write_i2c_block_data(dev, msb, [lsb])
     data = handle.read_byte(dev)
     return data
@@ -43,9 +43,9 @@ def main (argv):
     args = parser.parse_args(argv)
 
     # open device
-    #handle = SMBus()
-    #handle.open(int(args.bus))
-    #address = int(args.address, 16)
+    handle = SMBus()
+    handle.open(int(args.bus))
+    address = int(args.address, 16)
 
     if args.temp_thres_high:
         value = int(args.temp_thres_high * pow(2,7))
