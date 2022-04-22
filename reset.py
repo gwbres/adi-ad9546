@@ -33,7 +33,8 @@ def main (argv):
     flags = [
         ('soft', """Performs a soft reset. 
         If Mx pins are configured for automated EEPROM download, download gets initiated."""), 
-        ('sans', """Performs a soft reset but maintains current registers value."""
+        ('sans', 'Performs a soft reset but maintains current registers value.'),
+        ('watchdog', 'Resets watchdog timer'),
     ]
     for (flag, helper) in flags:
         parser.add_argument(
@@ -58,6 +59,9 @@ def main (argv):
         reg &= 0xFB # clear bit
         write_data(handle, address, 0x0001, reg | 0x04)
         write_data(handle, address, 0x0001, reg)
+    if args.watchdog:
+        reg = read_data(handle, address, 0x2005)
+        write_data(handle, address, 0x0001, reg | 0x80)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
