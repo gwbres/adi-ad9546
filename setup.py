@@ -1,6 +1,9 @@
 #! /usr/bin/env python3
 
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 setup(name="distutils",
     version="1.0",
