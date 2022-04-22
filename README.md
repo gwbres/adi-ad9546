@@ -202,7 +202,8 @@ power-down.py 0 0x4A --clear --refa
 ## IRQ events
 
 `status.py --irq` allows reading the current asserted IRQ flags.  
-Clear them with `irq.py`
+
+Clear them with `irq.py`:
 
 * `--all`: clear all flags
 * `--pll`: clear all PLL (PLL0 + PLL1 + digital + analog) related events 
