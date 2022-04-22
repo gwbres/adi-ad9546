@@ -285,7 +285,8 @@ Clear them with `irq.py`:
 ## Misc
 
 `status.py --temp` returns the internal temperature sensor reading.  
-`misc.py` allows programming a temperature alarm threshold:
+
+* Program a temperature range :
 
 ```shell
 misc.py --temp-thres-low -10 # [°C]
@@ -294,4 +295,4 @@ misc.py --temp-thres-low -30 --temp-thres-high 90
 status.py --temp 0 0x48 # current reading [°C] 
 ```
 
-Warning events are retrieved with the `irq.py` utility, refer to related section.
+Related warning events are then retrieved with the `irq.py` utility, refer to related section.
