@@ -13,5 +13,6 @@ setup(name="distutils",
         "calib.py",
         "reset.py",
         "power-down.py",
+        "irq.py",
     ],
 )

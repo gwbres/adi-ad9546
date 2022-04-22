@@ -173,6 +173,7 @@ To quickly reset the device
 
 * `--soft` : performs a soft reset
 * `--sans` : same thing but maintains current registers value 
+* `--watchdog` : resets internal watchdog timer
 * `-h` for more infos
 
 ## Power down script
@@ -197,6 +198,19 @@ power-down.py 0 0x4A --all --clear
 power-down.py 0 0x4A --refb --refbb --refaa
 power-down.py 0 0x4A --clear --refa 
 ```
+
+## IRQ events
+
+`status.py --irq` allows reading the current asserted IRQ flags.  
+Clear them with `irq.py`
+
+* `--all`: clear all flags
+* `--pll`: clear all PLL (PLL0 + PLL1 + digital + analog) related events 
+* `--pll0`: clear PLL0 (digital + analog) related events 
+* `--pll1`: clear PLL1 (digital + analog) related events 
+* `--other`: clear events that are not related to the pll subgroup
+* `--sysclk`: clear all sysclock related events 
+* `-h`: for other known flags
 
 ## Clock ops
 
