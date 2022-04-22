@@ -22,7 +22,8 @@ pip3 install -r requirements.txt
 
 ## API
 
-* Each application comes with an `-h` help menu
+* Each application comes with an `-h` help menu.  
+Refer to help menu for specific information
 
 ## AD9545,46
 
@@ -43,24 +44,24 @@ One can load such a profile (.json format) with the `profile.py` utility.
 profile.py -h
 
 # loading the AD9546 example profile (on bus #0 @0x48)
-profile.py 0 0x48 -load example.json
+profile.py 0 0x48 --load example.json
 
 # loading another profile (on bus #1 0x4A)
-profile.py 1 0x4A -load /tmp/map.json
+profile.py 1 0x4A --load /tmp/map.json
 ```
 
 A&D graphical interface can load a register map (`import` feature).   
 One can dump the current chipset map with 
 
 ```shell
-profile.py 0 0x55 -dump map.json
-profile.py 1 0xAA -dump /tmp/map.json
+profile.py 0 0x55 --dump map.json
+profile.py 1 0xAA --dump /tmp/map.json
 ```
 
-* Disable the progress bar (quiet stdout) with the `-quiet` flag:
+* Disable the progress bar (quiet stdout) with the `--quiet` flag:
 ```shell
-profile.py 0 0x55 -quiet -load map.json
-profile.py 1 0xAA -quiet -dump map.json
+profile.py 0 0x55 --quiet --load map.json
+profile.py 1 0xAA --quiet --dump map.json
 ```
 
 ## Status script
@@ -72,16 +73,16 @@ Use the `help` menu to learn how to use this script:
 ```shell
 status.py -h
 usage: status.py [-h] 
-    [-info] [
-    -serial]
-    [-sysclk-pll] [-sysclk-comp]
-    [-pll] [-pll0] [-pll1]
-    [-refa] [-refaa] [-refb] [-refbb] 
-    [-irq] 
-    [-iuts] 
-    [-temp] 
-    [-eeprom] 
-    [-misc] 
+    [--info]
+    [--serial]
+    [--sysclk-pll] [--sysclk-comp]
+    [--pll] [-pll0] [--pll1]
+    [--refa] [-refaa] [--refb] [--refbb] 
+    [--irq] 
+    [--iuts] 
+    [--temp] 
+    [--eeprom] 
+    [--misc] 
     bus address
 
 Clock status reporting
@@ -92,22 +93,22 @@ positional arguments:
 
 optional arguments:
   -h, --help    show this help message and exit
-  -info         Device general infos (SN#, ..)
-  -serial       Serial port status (I2C/SPI)
-  -sysclk-pll   Sys clock synthesis pll
-  -sysclk-comp  Sys clock compensation
-  -pll          Shared Pll global info
-  -pll0         Pll0 specific infos
-  -pll1         Pll1 specific infos
-  -refa         REF-A signal info
-  -refaa        REF-AA signal info
-  -refb         REF-B signal info
-  -refbb        REF-BB signal info
-  -irq          IRQ registers
-  -iuts         Report IUTS Status
-  -temp         Internal temperature sensor
-  -eeprom       EEPROM controller status
-  -misc         Auxilary NCOs, DPll and Temp info
+  --info         Device general infos (SN#, ..)
+  --serial       Serial port status (I2C/SPI)
+  --sysclk-pll   Sys clock synthesis pll
+  --sysclk-comp  Sys clock compensation
+  --pll          Shared Pll global info
+  --pll0         Pll0 specific infos
+  --pll1         Pll1 specific infos
+  --refa         REF-A signal info
+  --refaa        REF-AA signal info
+  --refb         REF-B signal info
+  --refbb        REF-BB signal info
+  --irq          IRQ registers
+  --iuts         Report IUTS Status
+  --temp         Internal temperature sensor
+  --eeprom       EEPROM controller status
+  --misc         Auxilary NCOs, DPll and Temp info
 ```
 
 Several part of the integrated chips can be monitored at once.
@@ -116,21 +117,21 @@ Example of use:
 
 ```shell
 # Grab general / high level info (bus=0, 0x4A):
-status.py -info -serial -pll 0 0x4A
+status.py --info --serial --pll 0 0x4A
 
 # General clock infos + ref-a status (bus=1, 0x48):
-status.py -pll -sysclk-pll -refa 1 0x48
+status.py --pll --sysclk-pll --refa 1 0x48
 
 # IRQ status register
-status.py -irq 0 0x4A
+status.py --irq 0 0x4A
 
 # dump status to a file
-status.py -info -serial -pll 0 0x4A > /tmp/status.json
+status.py --info --serial --pll 0 0x4A > /tmp/status.json
 
 # call status.py from another python script;
 # evaluate json content (dict) directly from `stdout`
 import subprocess
-args = ['status.py', '-info', '0', '0x4A']
+args = ['status.py', '--info', '0', '0x4A']
 ret = subprocess.run(args)
 if ret.exitcode == 0: # OK
    # grab `stdout`
@@ -151,27 +152,27 @@ we recover from a sys clock power down.
 * Perform a sys clock recalibration
 
 ```shell
-calib.py 0 0x4A -sysclk
+calib.py 0 0x4A --sysclk
 ```
 
 * Recalibrate Analog Plls
 
 ```shell
-calib.py 0 0x4A -pll
+calib.py 0 0x4A --pll
 ```
 
 * Perform full recalibration
 
 ```shell
-calib.py 0 0x4A -sysclk -pll
+calib.py 0 0x4A --sysclk --pll
 ```
 
 ## Reset script
 
 To quickly reset the device
 
-* `-soft` : performs a soft reset
-* `-sans` : same thing but maintains current registers value 
+* `--soft` : performs a soft reset
+* `--sans` : same thing but maintains current registers value 
 * `-h` for more infos
 
 ## Power down script
@@ -179,22 +180,22 @@ To quickly reset the device
 `power-down.py` perform and recover power down operations.   
 Useful to power down non needed channels and internal cores. 
 
-The `-all` flag addresses all internal cores.  
+The `--all` flag addresses all internal cores.  
 Otherwise, select internal units with related flag
 
 * Power down device entirely
 ```shell
-power-down.py 0 0x4A -all
+power-down.py 0 0x4A --all
 ```
 * Recover a complete power down operation
 ```shell
-power-down.py 0 0x4A -all -clear
+power-down.py 0 0x4A --all --clear
 ```
 
 * Wake `-a` references up and put `-b` reference channels to sleep:
 ```shell
-power-down.py 0 0x4A -refb -refbb -refaa
-power-down.py 0 0x4A -clear -refa 
+power-down.py 0 0x4A --refb --refbb --refaa
+power-down.py 0 0x4A --clear --refa 
 ```
 
 ## Clock ops

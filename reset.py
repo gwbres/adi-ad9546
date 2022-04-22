@@ -37,7 +37,7 @@ def main (argv):
     ]
     for (flag, helper) in flags:
         parser.add_argument(
-            "-{}".format(flag), 
+            "--{}".format(flag), 
             action="store_true",
             help=helper,
         )

@@ -45,17 +45,17 @@ def main (argv):
         type=lambda x: int(x,0), 
         help="I2C slave address (hex)")
     parser.add_argument(
-        "-load", 
+        "--load", 
         metavar="filepath",
         type=str, 
         help="Load given profile")
     parser.add_argument(
-        "-dump", 
+        "--dump", 
         metavar="filepath", 
         type=str, 
         help="Dump current profile")
     parser.add_argument(
-        "-chip", 
+        "--chip", 
         metavar="{}".format(str(KNOWN_DEVICES)),
         type=str,
         choices=KNOWN_DEVICES,
@@ -63,7 +63,7 @@ def main (argv):
         help="Accurately describe the chip when --dumping a profile"
     )
     parser.add_argument(
-        "-quiet",
+        "--quiet",
         default=False,
         action="store_true",
         help="Disable progress bar",
