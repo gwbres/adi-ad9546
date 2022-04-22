@@ -41,10 +41,11 @@ def main (argv):
         ("serial",  "Serial port status (I2C/SPI)"),
         ("sysclk-pll",  "Sys clock synthesis pll"),
         ("sysclk-comp", "Sys clock compensation"),
-        ("pll", "Shared Pll global info"),
-        ("pll-ch0", "APll0 + DPll0 infos"),
-        ("pll-ch1", "APll1 + DPll1 infos"),
-        ('dpll-filter', 'DPll loop filter status'),
+        ("pll", "Pll (APll+DPll+CH0/CH1) info"),
+        ("pll-ch0", "APll + DPll CH0 infos"),
+        ("q-ch0", "Qxx CH0 infos"),
+        ("pll-ch1", "APll + DPll CH1 infos"),
+        ("q-ch1", "Qxx CH1 infos"),
         ("refa",  "REF-A signal info"),
         ("refaa", "REF-AA signal info"),
         ("refb",  "REF-B signal info"),
@@ -329,6 +330,40 @@ def main (argv):
             ('dpll1-tuning-history-avail',0x01),
         ]
         read_reg(handle, address, status, 'pll-ch1', 0x3202, bitfields)
+    if args.q_ch0:
+        bitfields = [
+            ('q0cc-phase-slew', 0x20),
+            ('q0c-phase-slew', 0x10),
+            ('q0bb-phase-slew', 0x08),
+            ('q0b-phase-slew', 0x04),
+            ('q0aa-phase-slew', 0x02),
+            ('q0a-phase-slew', 0x01),
+        ]
+        read_reg(handle, address, status, 'q-ch0', 0x310D, bitfields)
+        bitfields = [
+            ('q0cc-phase-ctrl-err', 0x20),
+            ('q0c-phase-ctrl-err', 0x10),
+            ('q0bb-phase-ctrl-err', 0x08),
+            ('q0b-phase-ctrl-err', 0x04),
+            ('q0aa-phase-ctrl-err', 0x02),
+            ('q0a-phase-ctrl-err', 0x01),
+        ]
+        read_reg(handle, address, status, 'q-ch0', 0x310E, bitfields)
+    if args.q_ch1:
+        bitfields = [
+            ('q1bb-phase-slew', 0x08),
+            ('q1b-phase-slew', 0x04),
+            ('q1aa-phase-slew', 0x02),
+            ('q1a-phase-slew', 0x01),
+        ]
+        read_reg(handle, address, status, 'q-ch1', 0x320D, bitfields)
+        bitfields = [
+            ('q1bb-phase-ctrl-err', 0x08),
+            ('q1b-phase-ctrl-err', 0x04),
+            ('q1aa-phase-ctrl-err', 0x02),
+            ('q1a-phase-ctrl-err', 0x01),
+        ]
+        read_reg(handle, address, status, 'q-ch1', 0x320E, bitfields)
     if args.temp:
         temp = (read_data(handle, address, 0x3004) & 0xFF)<< 8 
         temp |= read_data(handle, address, 0x3003) & 0xFF
