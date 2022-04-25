@@ -2,8 +2,8 @@
 #################################################################
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
-# profile.py
-# small script to quickly load a profile into an AD9545,46 
+# regmap.py
+# small script to quickly load an exported regmap into chipset 
 #################################################################
 import sys
 import json
@@ -32,7 +32,7 @@ def progress_bar (progress, width=100):
     sys.stdout.flush()
 
 def main (argv):
-    parser = argparse.ArgumentParser(description="Load /dump a profile into/from AD9545,46 chipset")
+    parser = argparse.ArgumentParser(description="Load /dump a regmap into AD95xx chipsets")
     parser.add_argument(
         "bus", 
         metavar="bus", 
@@ -48,19 +48,19 @@ def main (argv):
         "--load", 
         metavar="filepath",
         type=str, 
-        help="Load given profile")
+        help="Load given regmap")
     parser.add_argument(
         "--dump", 
         metavar="filepath", 
         type=str, 
-        help="Dump current profile")
+        help="Dump current regmap")
     parser.add_argument(
         "--chip", 
         metavar="{}".format(str(KNOWN_DEVICES)),
         type=str,
         choices=KNOWN_DEVICES,
         default=KNOWN_DEVICES[0],
-        help="Accurately describe the chip when --dumping a profile"
+        help="Accurately describe the chip when --dumping a regmap"
     )
     parser.add_argument(
         "--quiet",

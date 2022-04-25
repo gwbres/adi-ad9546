@@ -42,43 +42,31 @@ Action required depending on previous user actions and current settings.
 * `distrib.py`: is critical, controls clock distribution and output signals
 * `misc.py`: miscellaneous / optionnal stuff
 * `power-down.py` : power saving and management utility
-* `profile.py`: very useful, loads / dumps a register map preset,
-as desribed in application note
+* `regmap.py`: load / dump a register map preset
 * `reset.py`: to quickly reset the device
 * `status.py` : general status monitoring, including on board temperature,
 sensors and IRQ flags
 
-## Register map profiles
+## Register map
 
-Profiles describe the register map entirely.  
-It is possible to create a register map profile using the official A&D graphical tool (`export` feature).  
-
-One can load such a profile (.json format) with the `profile.py` utility.   
-`i2c` bus number (integer number) and slave address (hex) must be specified:
-
-```shell
-profile.py -h
-
-# loading the AD9546 example profile (on bus #0 @0x48)
-profile.py 0 0x48 --load example.json
-
-# loading another profile (on bus #1 0x4A)
-profile.py 1 0x4A --load /tmp/map.json
-```
-
-A&D graphical interface can load a register map (`import` feature).   
-One can dump the current chipset map with 
+`regmap.py` allows the user to quickly load an exported
+register map from the official A&D graphical tool.
+* Support format is `json`.
+* `i2c` bus must be specified
+* `i2c slave address` must be specified
 
 ```shell
-profile.py 0 0x55 --dump map.json
-profile.py 1 0xAA --dump /tmp/map.json
+regmap.py -h
+# load a register map (on bus #0 @0x48)
+regmap.py 0 0x48 --load test.json
 ```
 
-* Disable the progress bar (quiet stdout) with the `--quiet` flag:
+Export current register map to open it in A&D graphical tools:
 ```shell
-profile.py 0 0x55 --quiet --load map.json
-profile.py 1 0xAA --quiet --dump map.json
+regmap.py --dump /tmp/output.json 0 0x48
 ```
+
+* Use `--quiet` in both cases to disable the progress bar
 
 ## Status script
 
