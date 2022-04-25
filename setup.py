@@ -5,7 +5,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-setup(name="distutils",
+setup(name="adi-ad9546",
     scripts=[
         "calib.py",
         "distrib.py",
