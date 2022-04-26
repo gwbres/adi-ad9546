@@ -2,9 +2,10 @@
 
 [![Python application](https://github.com/gwbres/adi-ad9546/actions/workflows/python-app.yml/badge.svg)](https://github.com/gwbres/adi-ad9546/actions/workflows/python-app.yml)
 
-Set of tools to interact & program AD9546,AD9545 integrated circuits, by Analog Devices.
+Set of tools to interact & program AD9546/45 integrated circuits, by Analog Devices.
 
-Use these tools to interact with older chipsets [AD9548/47](https://github.com/gwbres/adi-ad9548)
+Use [these tools](https://github.com/gwbres/adi-ad9548)
+to interact with AD9548/47 older chipsets.
 
 These scripts are not Windows compatible.   
 
