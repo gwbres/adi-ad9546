@@ -172,14 +172,16 @@ calib.py --sysclk 0 0x4A
 
 ## Clock distribution
 
-`distrib.py` is also an important utility. 
+`distrib.py` is an important utility.   
 It helps configure the clock path, control output signals
-and their behavior.
+and their behavior.  
+To determine the chipset current configuration related to clock distribution,
+one should use the status script with `--distrib` option.
 
 Control flags:
 
-* `--channel`: (optionnal) describes which channel we are targetting for a given core.
-Defaults to `all`, meaning if `--channel` is not specified, both channel (CH0/CH1)
+* `--channel`: (optionnal) describes which channel we are targetting.
+Defaults to `all`, meaning if `--channel` is not specified, both channels (CH0/CH1)
 are assigned the same value.
 This script only suppports a single `--channel` assignment.
 
@@ -214,7 +216,6 @@ distrib.py --current 7.5 --channel 1 --pin a
 ```
 
 * `--sync-all`: sends a SYNC order to all distribution dividers.
-This action is special, in the sense `--core` and `--channel` are discarded.
 It is required to run a `sync-all` in case the current output behavior
 is not set to `immediate`.
 
@@ -309,6 +310,13 @@ To quickly reset the device
 * `--watchdog` : resets internal watchdog timer
 * `-h` for more infos
 
+## Ref input script
+
+`ref_input.py` to control the reference input signal,
+signal quality constraints, switching mechanisms 
+and the general clock state.
+
+
 ## Power down script
 
 `power-down.py` perform and recover power down operations.   
@@ -326,9 +334,9 @@ power-down.py 0 0x4A --all
 power-down.py 0 0x4A --all --clear
 ```
 
-* Wake `-a` references up and put `-b` reference channels to sleep:
+* Wake `A` reference up and put `AA,B,BB` references to sleep:
 ```shell
-power-down.py 0 0x4A --refb --refbb --refaa
+power-down.py 0 0x4A --refb --refbb --refaa 
 power-down.py 0 0x4A --clear --refa 
 ```
 

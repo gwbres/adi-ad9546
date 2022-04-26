@@ -57,15 +57,13 @@ def main (argv):
         ('current', float, [7.5,12.5,15], 'Set driver output current [mA] for OUTx, where x = channel'),
         ('mode', str, ['diff','se','sedd'], """Select between Differential, Single Ended or
         Single Ended Dual Divider for OUTx pin, where x = channel"""),
-        ('auto-sync', str, ['manual', 'immediate','phase','freq'], 'Set PLLx drivers output mode, where x = channel. Refer to README & datasheet.'),
+        ('autosync', str, ['manual', 'immediate','phase','freq'], 'Set PLLx drivers output mode, where x = channel. Refer to README & datasheet.'),
         ('unmute', str, ['immediate', 'hitless', 'phase', 'freq'], 'Set PLLx distribution unmuting opmode, where x = channel. Refer to README & datasheet.'),
         ('divider', int, [], 'Control Qxy division ratio, where x = channel, y = pin. Refer to README & datasheet.'),
         ('phase-offset', int, [], 'Apply inst. phase offset to Qxy output pin'),
-        ('half-div-enable', None, [], 'Enable Qxy Half integer divider'),
-        ('half-div-disable', None, [], 'Disable Qxy Half integer divider'),
+        ('half-divider', str, ['enable','disable'], 'Control Qxy Half integer divider'),
         ('q-sync', None, [], 'Initialize a sync sequence on Q div. stage manually. Refer to README & datasheet.'),
-        ('pwm-enable', None, [],  'Enable OUTxy PWM modulator, where x = channel, y = output pin'),
-        ('pwm-disable', None, [], 'Disable OUTxy PWM modulator, where x = channel, y = output pin'),
+        ('pwm', str, ['enable','disable'],  'Control OUTxy PWM modulator, where x = channel, y = output pin'),
     ]
     
     for (v_label, v_type, v_choices, v_helper) in flags:
@@ -99,7 +97,7 @@ def main (argv):
         write_data(handle, address, 0x000F, 0x01) # IO update
         return 0 # force stop, avoids possible corruption when mishandling this script
 
-    if args.auto_sync:
+    if args.autosync:
         value = 0x00
         if args.auto_sync == 'immediate':
             value = 0x01
@@ -403,105 +401,87 @@ def main (argv):
             write_data(handle, address, 0x14DC, reg | value)
             write_data(handle, address, 0x000F, 0x01) # IO update
 
-    if args.pwm_enable:
+    if args.pwm:
+        regs = []
         if args.channel == 'all':
             if args.pin == 'all':
-                for reg in [0x10CF, 0x10D0, 0x14CF, 0x14D0]:
-                    v = read_data(handle, address, reg)
-                    write_data(handle, address, reg, v | 0x01)
-                write_data(handle, address, 0x000F, 0x01) # IO update
+                regs = [0x10CF, 0x10D0]
             elif args.pin == 'a':
-                reg = read_data(handle, address, 0x10CF)
-                write_data(handle, address, 0x10CF, reg|0x01)
-                reg = read_data(handle, address, 0x14CF)
-                write_data(handle, address, 0x14CF, reg|0x01)
-                write_data(handle, address, 0x000F, 0x01) # IO update
+                regs = [0x10CF]
             elif args.pin == 'b':
-                reg = read_data(handle, address, 0x10D0)
-                write_data(handle, address, 0x10D0, reg|0x01)
-                reg = read_data(handle, address, 0x14D0)
-                write_data(handle, address, 0x14D0, reg|0x01)
-                write_data(handle, address, 0x000F, 0x01) # IO update
-                    
-        else:
-            if args.channel == '0':
-                if args.pin == 'all':
-                    for reg in [0x10CF, 0x10D0]:
-                        v = read_data(handle, address, reg)
-                        write_data(handle, address, reg, v | 0x01)
-                    write_data(handle, address, 0x000F, 0x01) # IO update
-                elif args.pin == 'a':
-                    v = read_data(handle, address, 0x10CF)
-                    write_data(handle, address, reg, v | 0x01)
-                    write_data(handle, address, 0x000F, 0x01) # IO update
-                elif args.pin == 'b':
-                    v = read_data(handle, address, 0x10D0)
-                    write_data(handle, address, reg, v | 0x01)
-                    write_data(handle, address, 0x000F, 0x01) # IO update
-            elif args.channel == '1':
-                if args.pin == 'all':
-                    for reg in [0x14CF, 0x14D0]:
-                        v = read_data(handle, address, reg)
-                        write_data(handle, address, reg, v | 0x01)
-                    write_data(handle, address, 0x000F, 0x01) # IO update
-                elif args.pin == 'a':
-                    v = read_data(handle, address, 0x14CF)
-                    write_data(handle, address, reg, v | 0x01)
-                    write_data(handle, address, 0x000F, 0x01) # IO update
-                elif args.pin == 'b':
-                    v = read_data(handle, address, 0x14D0)
-                    write_data(handle, address, reg, v | 0x01)
-                    write_data(handle, address, 0x000F, 0x01) # IO update
-
-    if args.pwm_disable:
-        if args.channel == 'all':
+                regs = [0x10D0]
+        elif args.channel == '0':
             if args.pin == 'all':
-                for reg in [0x10CF, 0x10D0, 0x14CF, 0x14D0]:
-                    v = read_data(handle, address, reg)
-                    write_data(handle, address, reg, v & 0xFE)
-                write_data(handle, address, 0x000F, 0x01) # IO update
+                regs = [0x10CF, 0x10D0]
             elif args.pin == 'a':
-                reg = read_data(handle, address, 0x10CF)
-                write_data(handle, address, reg, reg & 0xFE)
-                reg = read_data(handle, address, 0x14CF)
-                write_data(handle, address, reg, reg & 0xFE)
-                write_data(handle, address, 0x000F, 0x01) # IO update
+                regs = [0x10CF]
             elif args.pin == 'b':
-                reg = read_data(handle, address, 0x10D0)
-                write_data(handle, address, reg, reg & 0xFE)
-                reg = read_data(handle, address, 0x14D0)
-                write_data(handle, address, reg, reg & 0xFE)
-                write_data(handle, address, 0x000F, 0x01) # IO update
-                    
-        else:
-            if args.channel == '0':
-                if args.pin == 'all':
-                    for reg in [0x10CF, 0x10D0]:
-                        v = read_data(handle, address, reg)
-                        write_data(handle, address, reg, reg & 0xFE)
-                    write_data(handle, address, 0x000F, 0x01) # IO update
-                elif args.pin == 'a':
-                    v = read_data(handle, address, 0x10CF)
-                    write_data(handle, address, reg, reg & 0xFE)
-                    write_data(handle, address, 0x000F, 0x01) # IO update
-                elif args.pin == 'b':
-                    v = read_data(handle, address, 0x10D0)
-                    write_data(handle, address, reg, reg & 0xFE)
-                    write_data(handle, address, 0x000F, 0x01) # IO update
+                regs = [0x10D0]
+        elif args.channel == '1':
+            if args.pin == 'all':
+                regs = [0x14CF, 0x14D0]
+            elif args.pin == 'a':
+                regs = [0x14CF]
+            elif args.pin == 'b':
+                regs = [0x14D0]
+        for reg in regs:
+            r = read_data(handle, address, reg)
+            if args.pwm == 'enable':
+                write_data(handle, address, r|0x01)
             else:
-                if args.pin == 'all':
-                    for reg in [0x14CF, 0x14D0]:
-                        v = read_data(handle, address, reg)
-                        write_data(handle, address, reg, reg & 0xFE)
-                    write_data(handle, address, 0x000F, 0x01) # IO update
-                elif args.pin == 'a':
-                    v = read_data(handle, address, 0x14CF)
-                    write_data(handle, address, reg, reg & 0xFE)
-                    write_data(handle, address, 0x000F, 0x01) # IO update
-                elif args.pin == 'b':
-                    v = read_data(handle, address, 0x14D0)
-                    write_data(handle, address, reg, reg & 0xFE)
-                    write_data(handle, address, 0x000F, 0x01) # IO update
+                write_data(handle, address, r&0xFE)
+        write_data(handle, address, 0x000F, 0x01) # IO update
+    
+    if args.half_divider:
+        regs = []
+        if args.channel == 'all':
+            if args.pin == 'all':
+                regs = [0x1108, 0x111A, 0x1111, 0x111A, 0x1123, 0x112C, 0x1135] 
+            elif args.pin == 'a':
+                regs = [0x1108] 
+            elif args.pin == 'aa':
+                regs = [0x1111] 
+            elif args.pin == 'b':
+                regs = [0x111A] 
+            elif args.pin == 'bb':
+                regs = [0x1123] 
+            elif args.pin == 'c':
+                regs = [0x112C] 
+            elif args.pin == 'cc':
+                regs = [0x1135] 
+        elif args.channel == '0':
+            if args.pin == 'all':
+                regs = [0x1108, 0x111A, 0x1111, 0x111A, 0x1123, 0x112C, 0x1135]
+            elif args.pin == 'a':
+                regs = [0x1108] 
+            elif args.pin == 'aa':
+                regs = [0x1111] 
+            elif args.pin == 'b':
+                regs = [0x111A] 
+            elif args.pin == 'bb':
+                regs = [0x1123] 
+            elif args.pin == 'c':
+                regs = [0x112C] 
+            elif args.pin == 'cc':
+                regs = [0x1135] 
+        elif args.channel == '1':
+            if args.pin == 'all':
+                regs = [0x1508, 0x1511, 0x151A, 0x1523] 
+            elif args.pin == 'a':
+                regs = [0x1508]
+            elif args.pin == 'aa':
+                regs = [0x1511]
+            elif args.pin == 'b':
+                regs = [0x151A]
+            elif args.pin == 'bb':
+                regs = [0x1523]
+
+        for reg in regs:
+            r = read_data(handle, address, reg)
+            if args.half_divider == 'enable':
+                write_data(handle, address, reg, r|0x10)
+            else:
+                write_data(handle, address, reg, r&0xEF)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
