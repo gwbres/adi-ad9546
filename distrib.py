@@ -51,6 +51,12 @@ def main (argv):
         ("sync-all", None, [], """Synchronize all distribution dividers.
         If output behavior is not set to `immediate`, one must run a `sync-all` to
         output a synthesis."""),
+        ('format', str, ['cml','hcsl'], u"""Select driver format for OUTx where x = chnnal.
+        CML: Current Sink. External 50\u03A9 pull up needed.
+        HCSL: External 50\u03A9 pull down needed."""),
+        ('current', float, [7.5,12.5,15], 'Set driver output current [mA] for OUTx, where x = channel'),
+        ('mode', str, ['diff','se','sedd'], """Select between Differential, Single Ended or
+        Single Ended Dual Divider for OUTx pin, where x = channel"""),
         ('auto-sync', str, ['manual', 'immediate','phase','freq'], 'Set PLLx drivers output mode, where x = channel. Refer to README & datasheet.'),
         ('unmute', str, ['immediate', 'hitless', 'phase', 'freq'], 'Set PLLx distribution unmuting opmode, where x = channel. Refer to README & datasheet.'),
         ('divider', int, [], 'Control Qxy division ratio, where x = channel, y = pin. Refer to README & datasheet.'),
@@ -77,6 +83,9 @@ def main (argv):
                 help=v_helper,
             )
     args = parser.parse_args(argv)
+    
+    core = args.core
+    channel = args.channel
 
     # open device
     handle = SMBus()
@@ -90,8 +99,6 @@ def main (argv):
         write_data(handle, address, 0x000F, 0x01) # IO update
         return 0 # force stop, avoids possible corruption when mishandling this script
 
-    core = args.core
-    channel = args.channel
     if args.auto_sync:
         value = 0x00
         if args.auto_sync == 'immediate':
@@ -116,6 +123,123 @@ def main (argv):
             write_data(handle, address, 0x000F, 0x01) # IO update
         return 0 # force stop, to avoid corruption on misusage
 
+    if args.format:
+        regs = []
+        value = 0x00 if args.format == 'cml' else 0x01 # hcsl
+        if args.channel == 'all':
+            if args.pin == 'all':
+                regs = [0x10D7, 0x10D8, 0x10D9, 0x14D7, 0x14D8]
+            elif args.pin == 'a':
+                regs = [0x10D7]
+            elif args.pin == 'b':
+                regs = [0x10D8]
+            elif args.pin == 'c':
+                regs = [0x10D9]
+        elif args.channel == '0':
+            if args.pin == 'all':
+                regs = [0x10D7, 0x10D8, 0x10D9]
+            elif args.pin == 'a':
+                regs = [0x10D7]
+            elif args.pin == 'b':
+                regs = [0x10D8]
+            elif args.pin == 'c':
+                regs = [0x10D9]
+        elif args.channel == '1':
+            if args.pin == 'all':
+                regs = [0x14D7, 0x14D8]
+            elif args.pin == 'a':
+                regs = [0x14D7]
+            elif args.pin == 'b':
+                regs = [0x14D8]
+        for reg in regs:
+            r = read_data(handle, address, reg)
+            r &= 0xFE # mask out
+            r |= value # assign
+            write_data(handle, address, reg, r) 
+        write_data(handle, address, 0x000F, 0x01) # IO update
+        return 0 # force stop, to avoid corruption on misusage
+            
+    if args.current:
+        regs = []
+        if args.current == 12.5:
+            value = 0x01
+        elif args.current == 15:
+            value = 0x02
+        else:
+            value = 0x00
+        if args.channel == 'all':
+            if args.pin == 'all':
+                regs = [0x10D7, 0x10D8, 0x10D9, 0x14D7, 0x14D8]
+            elif args.pin == 'a':
+                regs = [0x10D7]
+            elif args.pin == 'b':
+                regs = [0x10D8]
+            elif args.pin == 'c':
+                regs = [0x10D9]
+        elif args.channel == '0':
+            if args.pin == 'all':
+                regs = [0x10D7, 0x10D8, 0x10D9]
+            elif args.pin == 'a':
+                regs = [0x10D7]
+            elif args.pin == 'b':
+                regs = [0x10D8]
+            elif args.pin == 'c':
+                regs = [0x10D9]
+        elif args.channel == '1':
+            if args.pin == 'all':
+                regs = [0x14D7, 0x14D8]
+            elif args.pin == 'a':
+                regs = [0x14D7]
+            elif args.pin == 'b':
+                regs = [0x14D8]
+        for reg in regs:
+            r = read_data(handle, address, reg)
+            r &= 0xF9 # mask out
+            r |= (value <<1) # assign
+            write_data(handle, address, reg, r)
+        write_data(handle, address, 0x000F, 0x01) # IO update
+        return 0 # force stop, to avoid corruption on misusage
+    
+    if args.mode:
+        regs = []
+        if args.mode == 'se':
+            value = 0x01
+        elif args.mode == 'sedd':
+            value = 0x02
+        else: # diff
+            value = 0x00
+        if args.channel == 'all':
+            if args.pin == 'all':
+                regs = [0x10D7, 0x10D8, 0x10D9, 0x14D7, 0x14D8]
+            elif args.pin == 'a':
+                regs = [0x10D7]
+            elif args.pin == 'b':
+                regs = [0x10D8]
+            elif args.pin == 'c':
+                regs = [0x10D9]
+        elif args.channel == '0':
+            if args.pin == 'all':
+                regs = [0x10D7, 0x10D8, 0x10D9]
+            elif args.pin == 'a':
+                regs = [0x10D7]
+            elif args.pin == 'b':
+                regs = [0x10D8]
+            elif args.pin == 'c':
+                regs = [0x10D9]
+        elif args.channel == '1':
+            if args.pin == 'all':
+                regs = [0x14D7, 0x14D8]
+            elif args.pin == 'a':
+                regs = [0x14D7]
+            elif args.pin == 'b':
+                regs = [0x14D8]
+        for reg in regs:
+            r = read_data(handle, address, reg)
+            r &= 0xF9 # mask out
+            r |= (value <<1) # assign
+            write_data(handle, address, reg, r)
+        write_data(handle, address, 0x000F, 0x01) # IO update
+        return 0 # force stop, to avoid corruption on misusage
     if args.phase_offset:
         regs = []
         r0 = args.phase_offset & 0xFF
@@ -255,8 +379,6 @@ def main (argv):
             write_data(handle, address, 0x2201, reg|0xF7) # clear
             write_data(handle, address, 0x000F, 0x01) # IO update
     
-    #if args.auto_unmute:
-
     if args.unmute:
         value = 0x00
         if args.unmute == 'hitless':
@@ -280,7 +402,7 @@ def main (argv):
             reg = read_data(handle, address, 0x14DC) & 0xFC
             write_data(handle, address, 0x14DC, reg | value)
             write_data(handle, address, 0x000F, 0x01) # IO update
-            
+
     if args.pwm_enable:
         if args.channel == 'all':
             if args.pin == 'all':
