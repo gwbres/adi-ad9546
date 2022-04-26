@@ -4,6 +4,8 @@
 
 Set of tools to interact & program AD9546,AD9545 integrated circuits, by Analog Devices.
 
+Use these tools to interact with older chipsets [AD9548/47](https://github.com/gwbres/adi-ad9548)
+
 These scripts are not Windows compatible.   
 
 ## Install 
