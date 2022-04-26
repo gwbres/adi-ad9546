@@ -194,11 +194,11 @@ Action flags: the script supports as many `action` flags as desired, see the lis
 * `--format` sets OUTxy current sink/source format
 * `--current` sets OUTxy pin output current [mA], where x = channel
 ```shell
-# set channel 1 as HCSL default format
-distrib.py --format hcsl
-# set channel 2 as CML format
-distrib.py --format hcsl
-# set channel 1+2 as HCSL default format
+# set channel 0 as HCSL default format
+distrib.py --format hcsl --channel 0
+# set channel 1 as CML format
+distrib.py --format hcsl --channel 1
+# set channel 0+1 as HCSL default format
 distrib.py --format hcsl
 
 # set Q0A, Q0B as differntial output
