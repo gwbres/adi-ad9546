@@ -329,11 +329,8 @@ signal quality constraints, switching mechanisms
 and the general clock state.
 
 * `--freq` set REFxy input frequency [Hz]
-
 * `--coupling` control REFx input coupling
-
 * `--free-run` force clock to move to free-run state
-
 * `--holdover` force clock to move to holdover state,
 `lock` must be previously acquired.
 
