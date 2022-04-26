@@ -35,10 +35,12 @@ def main (argv):
     flags = [
         ('clear', 'Clear (recover from a previous) power down op'), 
         ('all',   'Device power down (Sys clock pll, REFx, DPlls, APlls..)'),
-        ('refb',  'TDC ref-b'),
-        ('refbb', 'TDC ref-bb'),
-        ('refa',  'TDC ref-a'),
-        ('refaa', 'TDC ref-aa'),
+        ('pll0',  'PLL0 core power down'),
+        ('pll1',  'PLL1 core power down'),
+        ('refb',  'TDC + ref-b power down'),
+        ('refbb', 'TDC + ref-bb power down'),
+        ('refa',  'TDC + ref-a power down'),
+        ('refaa', 'TDC + ref-aa power down'),
     ]
     for (flag, helper) in flags:
         parser.add_argument(
@@ -57,12 +59,10 @@ def main (argv):
         reg = read_data(handle, address, 0x2000)
         if args.clear:
             write_data(handle, address, 0x2000, reg & 0xFE)
-            write_data(handle, address, 0x000F, 0x01) # I/O update
         else:
             write_data(handle, address, 0x2000, reg | 0x01)
-            write_data(handle, address, 0x000F, 0x01) # I/O update
     else:
-        reg = read_data(handle, address, 0x20001)
+        reg = read_data(handle, address, 0x2001)
         if args.refb:
             if args.clear:
                 reg &= 0xFB
@@ -84,7 +84,21 @@ def main (argv):
             else:
                 reg |= 0x02 
         write_data(handle, address, 0x2000, reg)
-        write_data(handle, address, 0x000F, 0x01) # I/O update
+        if args.pll0:
+            reg = read_data(handle, address, 0x2100)
+            if args.clear:
+                reg &= 0xFE
+            else:
+                reg |= 0x01
+            write_data(handle, address, 0x2100, reg)
+        if args.pll1:
+            reg = read_data(handle, address, 0x2200)
+            if args.clear:
+                reg &= 0xFE
+            else:
+                reg |= 0x01
+            write_data(handle, address, 0x2200, reg)
+    write_data(handle, address, 0x000F, 0x01) # I/O update
 
 if __name__ == "__main__":
     main(sys.argv[1:])
