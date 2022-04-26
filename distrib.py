@@ -93,7 +93,7 @@ def main (argv):
     # Special Flags
     if args.sync_all:
         r = read_data(handle, address, 0x2000)
-        write_data(handle, address, 0x2000, reg | 0x08)
+        write_data(handle, address, 0x2000, r|0x08)
         write_data(handle, address, 0x000F, 0x01) # IO update
         return 0 # force stop, avoids possible corruption when mishandling this script
 
