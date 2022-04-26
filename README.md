@@ -149,6 +149,18 @@ if ret.exitcode == 0: # OK
    status['info']['vendor'] # eval() is way cool!
 ```
 
+## Sysclock script
+
+`Sys` clock compensation is a new feature introduced in AD9546.
+`sysclock.py` allows quick and easy access to these features.
+
+To determine current `sysclock` related settings, use status.py with `--sysclock` option.
+
+* `--freq`: to program input frequency [Hz]
+* `--sel` : to select the input path (internal crystal or external XOA/B pins)
+* `--div`: set integer division ratio on input frequency
+* `--doubler`: enables input doubler
+
 ## Calibration script
 
 `calib.py` allows easy & quick chipset (re)calibration.   
@@ -316,6 +328,22 @@ To quickly reset the device
 signal quality constraints, switching mechanisms 
 and the general clock state.
 
+* `--freq` set REFxy input frequency [Hz]
+
+* `--coupling` control REFx input coupling
+
+* `--free-run` force clock to move to free-run state
+
+* `--holdover` force clock to move to holdover state,
+`lock` must be previously acquired.
+
+It is easier to always request a `free-run`, in the sense this
+request cannot fail
+
+* `freq-lock-thresh` : frequency locking mechanism constraint.
+* `phase-lock-thresh` : phase locking mechanism constraint.
+* `phase-step-thresh` : inst. phase step threshold 
+* `phase-skew`: phase skew
 
 ## Power down script
 
