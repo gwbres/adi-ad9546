@@ -1,5 +1,7 @@
 # ADI-AD9546 
 
+[![Python package](https://github.com/gwbres/adi-ad9546/actions/workflows/python-package.yml/badge.svg)](https://github.com/gwbres/adi-ad9546/actions/workflows/python-package.yml)
+
 Set of tools to interact & program AD9546,AD9545 integrated circuits, by Analog Devices.
 
 These scripts are not Windows compatible.   
