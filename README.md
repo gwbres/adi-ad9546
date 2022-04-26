@@ -177,17 +177,41 @@ It helps configure the clock path, control output signals
 and their behavior.
 
 Control flags:
-* `--core`: (optionnal) describes which core we are targetting.
-This script only suppports a single `--core` assignment.
-One must call `distrib.py` several times to perform multiple clock distribution.
 
 * `--channel`: (optionnal) describes which channel we are targetting for a given core.
-This script only suppports a single `--channel` assignment.
-One must call `distrib.py` several times to perform multiple channel distribution.
-Default to `all`, meaning if `--channel` is not specified, both channel (CH0/CH1)
+Defaults to `all`, meaning if `--channel` is not specified, both channel (CH0/CH1)
 are assigned the same value.
+This script only suppports a single `--channel` assignment.
 
-Action flags: the script supports as many `action` flags as desired.
+* `--pin`: (optionnal) describes which pin (A/B) is targetted.
+Defaults to `all` meaning, both A, B, (and AA,BB,C,CC when feasible) are assigned the same value.
+This script only suppports a single `--pin` assignment. Therefore, one must call
+this script several times to control several pins.
+
+Action flags: the script supports as many `action` flags as desired, see the list down below.
+
+* `--mode` set OUTxy output pin as single ended or differential
+* `--format` sets OUTxy current sink/source format
+* `--current` sets OUTxy pin output current [mA], where x = channel
+```shell
+# set channel 1 as HCSL default format
+distrib.py --format hcsl
+# set channel 2 as CML format
+distrib.py --format hcsl
+# set channel 1+2 as HCSL default format
+distrib.py --format hcsl
+
+# set Q0A, Q0B as differntial output
+distrib.py --mode diff --channel 0
+
+# set Q1A, as single ended pin
+distrib.py --mode se --channel 1 --pin a
+
+# set Q0A Q0B to output 12.5 mA, default output current
+distrib.py --current 12.5 --channel 0
+# set Q1A to output 7.5 mA, minimal current
+distrib.py --current 7.5 --channel 1 --pin a
+```
 
 * `--sync-all`: sends a SYNC order to all distribution dividers.
 This action is special, in the sense `--core` and `--channel` are discarded.
@@ -195,19 +219,20 @@ It is required to run a `sync-all` in case the current output behavior
 is not set to `immediate`.
 
 ```shell
-# assign a SYNC all, might be required depending on
-# current configuration or previously loaded profile
-# This one is special, because --core + --channel are discarded
+# send a SYNC all
+# SYNC all is required depending on previous actions and current configuration
 distrib.py --sync-all 0 0x48
 ```
 
 * `--autosync` : control given channel so called "autosync" behavior.
-`--core` is not needed for such operation.
+
 ```shell
 # set both Pll CH0 & CH1 to "immediate" behavior
 distrib.py --autosync immediate 0 0x48
+
 # set both Pll CH0 to "immediate" behavior
 distrib.py --autosync immediate --channel 0 0 0x48
+
 #  and Pll CH1 to "manual" behavior
 distrib.py --autosync manual --channel 1 0 0x48
 ```
@@ -217,15 +242,62 @@ One must either perform a `sync-all` operation,
 a `q-sync` operation on channel 1,
 or an Mx-pin operation with dedicated script, to enable this output signal.
 
-* `--q-sync` : initializes a Q Divider synchronization sequence manually. 
-This is useful when enabling a channel manually, but without dedicated Mx-pin
-control.
-`--core` is not needed for such operation.
+* `--q-sync` : initializes a Qxy Divider synchronization sequence manually. 
+When x is the `channel` and `y` is the desired pin.
 ```shell
-# manual Q Sync on both channels
+# triggers Q0A Q0B Q1A Q1B SYNC 
 distrib.py --q-sync 0 0x48
-# manual Q Sync on channel 1
-distrib.py --q-sync --channel 1 0 0x48
+
+# triggers Q0A Q0B SYNC 
+distrib.py --q-sync --channel 0 0 0x48
+
+# triggers Q0B Q1B SYNC 
+distrib.py --q-sync --pin b 0 0x48
+```
+
+* `--unmute` : controls QXY unmuting opmode,
+where x is the `channel` and `y` the desired pin.
+```shell
+# Q0A Q0B + Q1A Q1B `immediate` unmuting 
+distrib.py --unmute immediate 0 0x48
+
+# Q0A Q1A `phase locked` unmuting 
+distrib.py --unmute phase --pin a 0 0x48
+
+# Q0B Q1B `freq locked` unmuting 
+distrib.py --unmute freq --pin b 0 0x48
+
+# Q0A + Q1B `immediate` unmuting 
+distrib.py --unmute immediate --pin a 0 0x48
+distrib.py --unmute immediate --pin b 0 0x48
+```
+
+* `--pwm-enable` and `--pwm-disable`: constrols PWM modulator
+for OUTxy where x is the `channel` and `y` the desired pin.
+
+* `--divider` : control integer division ratio at
+QXY pin, where 
+
+```shell
+# Q0A,AA,B,BB,C,CC + Q1A,AA,B,BB R=48 division ratio
+distrib.py --divider 48 0 0x48
+
+# Q1A,AA,B,BB R=64 division ratio
+distrib.py --divider 64 --channel 1 0 0x48
+
+# Q0A & Q0B R=23 division ratio
+distrib.py --divider 23 --channel 0 --pin a 0 0x48
+distrib.py --divider 23 --channel 0 --pin b 0 0x48
+```
+
+* `--phase-offset` applies an instantaneous phase offset
+to selected channel + pin.
+Maximal value is 2\*D-1 where D is previous `--divider` ratio
+for given channel + pin.
+
+```shell
+# Apply Q0A,AA,B,BB,C,CC + Q1A,AA,B,BB 
+
 ```
 
 ## Reset script
