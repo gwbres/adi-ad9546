@@ -52,6 +52,7 @@ def main (argv):
         ("refbb", "REF-BB signal info"),
         ("irq", "IRQ registers"),
         ("watchdog", "Watchdog timer period"),
+        ('distrib', 'Clock distribution related infos'),
         ("iuts", None),
         ("temp", "Reads temperature sensor [°C]"),
         ("eeprom", "EEPROM controller status"),
@@ -369,6 +370,80 @@ def main (argv):
         temp |= read_data(handle, address, 0x3003) & 0xFF
         status['temp'] = {}
         status['temp']['reading'] = temp * pow(2,-7)
+
+    if args.distrib:
+        status['distrib'] = {}
+        for ch in ['ch0','ch1']:
+            status['distrib'][ch] = {}
+            pins = ['a','aa','b','bb']
+            if ch == 'ch0':
+                pins.append('c')
+                pins.append('cc')
+            for pin in pins:
+                status['distrib'][ch][pin] = {}
+        
+        r = read_data(handle, address, 0x10D7)
+        fmt = r & 0x01
+        fmt = 'hcsl' if fmt == 1 else 'cml'
+        current = (r & 0x03)>>1
+        if current == 0: 
+            current = '7.5mA'
+        elif current == 1:
+            current = '12.5mA'
+        else:
+            current = '15mA'
+        mode = (r & 0x04)>>3
+        if mode == 0:
+            mode = 'diff'
+        elif mode == 1:
+            mode = 'se'
+        else:
+            mode = 'sedd'
+        status['distrib']['ch0']['a']['format'] = fmt
+        status['distrib']['ch0']['a']['current'] = current
+        status['distrib']['ch0']['a']['mode'] = current
+        
+        r = read_data(handle, address, 0x10D8)
+        fmt = r & 0x01
+        fmt = 'hcsl' if fmt == 1 else 'cml'
+        current = (r & 0x03)>>1
+        if current == 0: 
+            current = '7.5mA'
+        elif current == 1:
+            current = '12.5mA'
+        else:
+            current = '15mA'
+        mode = (r & 0x04)>>3
+        if mode == 0:
+            mode = 'diff'
+        elif mode == 1:
+            mode = 'se'
+        else:
+            mode = 'sedd'
+        status['distrib']['ch0']['b']['format'] = fmt
+        status['distrib']['ch0']['b']['current'] = current
+        status['distrib']['ch0']['b']['mode'] = current
+
+        r = read_data(handle, address, 0x10D9)
+        fmt = r & 0x01
+        fmt = 'hcsl' if fmt == 1 else 'cml'
+        current = (r & 0x03)>>1
+        if current == 0: 
+            current = '7.5mA'
+        elif current == 1:
+            current = '12.5mA'
+        else:
+            current = '15mA'
+        mode = (r & 0x04)>>3
+        if mode == 0:
+            mode = 'diff'
+        elif mode == 1:
+            mode = 'se'
+        else:
+            mode = 'sedd'
+        status['distrib']['ch0']['c']['format'] = fmt
+        status['distrib']['ch0']['c']['current'] = current
+        status['distrib']['ch0']['c']['mode'] = current
 
     pprint(status)
     
