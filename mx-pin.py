@@ -3,7 +3,7 @@
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
 # Mx-pin.py
-# Utility to control and assign Mx special I/O 
+# Programmable I/Os
 #################################################################
 import sys
 import argparse
@@ -21,7 +21,7 @@ def read_data (handle, dev, addr):
     return data
 
 def main (argv):
-    parser = argparse.ArgumentParser(description="AD9545/46 Mx-pin tool")
+    parser = argparse.ArgumentParser(description="AD9545/46 Mx-pin programmable I/O")
     parser.add_argument(
         "bus",
         help="I2C bus",
@@ -34,7 +34,7 @@ def main (argv):
         "pin",
         metavar="pin",
         choices=["M1","M2","M3","M4","M5","M6"],
-        help="Select with pin to assign", 
+        help="Select with pin to assign",
         type=str,
     )
     parser.add_argument(

@@ -3,7 +3,7 @@
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
 # irq.py
-# IRQ clearing tool 
+# IRQ clearing tool
 #################################################################
 import sys
 import argparse
@@ -55,7 +55,7 @@ def main (argv):
     ]
     for (flag, helper) in flags:
         parser.add_argument(
-            "--{}".format(flag), 
+            "--{}".format(flag),
             action="store_true",
             help=helper,
         )
@@ -92,7 +92,7 @@ def main (argv):
         write_data(handle, address, 0x2006, 0x08)
     if args.eeprom:
         write_data(handle, address, 0x2006, 0x01|0x02)
-    if args.skew_limit: 
+    if args.skew_limit:
         write_data(handle, address, 0x2007, 0x20)
     if args.skew_meas:
         write_data(handle, address, 0x200A, 0x10)
@@ -106,7 +106,7 @@ def main (argv):
         write_data(handle, address, 0x2009, 0xF0)
     if args.tsu:
         write_data(handle, address, 0x200A, 0x08|0x04)
-    if args.temp: 
+    if args.temp:
         write_data(handle, address, 0x2007, 0x10)
 
 if __name__ == "__main__":

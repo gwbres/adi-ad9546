@@ -3,7 +3,7 @@
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
 # reset.py
-# small script to quickly reset the device 
+# small script to quickly reset the device
 #################################################################
 import sys
 import argparse
@@ -31,14 +31,14 @@ def main (argv):
         help="I2C slv address",
     )
     flags = [
-        ('soft', """Performs a soft reset. 
-        If Mx pins are configured for automated EEPROM download, download gets initiated."""), 
+        ('soft', """Performs a soft reset.
+        If Mx pins are configured for automated EEPROM download, download gets initiated."""),
         ('sans', 'Performs a soft reset but maintains current registers value.'),
         ('watchdog', 'Resets watchdog timer'),
     ]
     for (flag, helper) in flags:
         parser.add_argument(
-            "--{}".format(flag), 
+            "--{}".format(flag),
             action="store_true",
             help=helper,
         )

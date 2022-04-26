@@ -3,7 +3,7 @@
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
 # regmap.py
-# small script to quickly load an exported regmap into chipset 
+# small script to quickly load an exported regmap into chipset
 #################################################################
 import sys
 import json
@@ -34,28 +34,28 @@ def progress_bar (progress, width=100):
 def main (argv):
     parser = argparse.ArgumentParser(description="Load /dump a regmap into AD95xx chipsets")
     parser.add_argument(
-        "bus", 
-        metavar="bus", 
-        type=int, 
-        default=0, 
+        "bus",
+        metavar="bus",
+        type=int,
+        default=0,
         help="I2C bus #")
     parser.add_argument(
-        "address", 
-        metavar="address", 
-        type=lambda x: int(x,0), 
+        "address",
+        metavar="address",
+        type=lambda x: int(x,0),
         help="I2C slave address (hex)")
     parser.add_argument(
-        "--load", 
+        "--load",
         metavar="filepath",
-        type=str, 
+        type=str,
         help="Load given regmap")
     parser.add_argument(
-        "--dump", 
-        metavar="filepath", 
-        type=str, 
+        "--dump",
+        metavar="filepath",
+        type=str,
         help="Dump current regmap")
     parser.add_argument(
-        "--chip", 
+        "--chip",
         metavar="{}".format(str(KNOWN_DEVICES)),
         type=str,
         choices=KNOWN_DEVICES,
@@ -105,7 +105,7 @@ def main (argv):
         struct[args.chip]["bitfields"] = {}
         struct[args.chip]["read only"] = {}
         struct[args.chip]["wizard"] = {}
-        struct["wizard"] = {} 
+        struct["wizard"] = {}
         struct["wizard"]["version"] = "1.0.0.0"
         struct["RegisterMap"] = {}
         N = REGMAP[1]+1
