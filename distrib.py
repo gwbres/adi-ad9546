@@ -412,15 +412,15 @@ def main (argv):
                 write_data(handle, address, 0x000F, 0x01) # IO update
             elif args.pin == 'a':
                 reg = read_data(handle, address, 0x10CF)
-                write_data(handle, addres, 0x10CF, reg|0x01)
+                write_data(handle, address, 0x10CF, reg|0x01)
                 reg = read_data(handle, address, 0x14CF)
-                write_data(handle, addres, 0x14CF, reg|0x01)
+                write_data(handle, address, 0x14CF, reg|0x01)
                 write_data(handle, address, 0x000F, 0x01) # IO update
             elif args.pin == 'b':
                 reg = read_data(handle, address, 0x10D0)
-                write_data(handle, addres, 0x10D0, reg|0x01)
+                write_data(handle, address, 0x10D0, reg|0x01)
                 reg = read_data(handle, address, 0x14D0)
-                write_data(handle, addres, 0x14D0, reg|0x01)
+                write_data(handle, address, 0x14D0, reg|0x01)
                 write_data(handle, address, 0x000F, 0x01) # IO update
                     
         else:
