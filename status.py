@@ -124,7 +124,7 @@ def main (argv):
             ('method2-tdcs', 0x02),
             ('method1-tdcs', 0x01),
         ]
-        read_reg(handle, address, status, status['sysclk']['comp'], 0x0280, bitfields)
+        read_reg(handle, address, status['sysclk'], 'comp', 0x0280, bitfields)
         bitfields = [
             ('method3-aux-nco1', 0x40),
             ('method2-aux-nco1', 0x20),
@@ -133,7 +133,7 @@ def main (argv):
             ('method2-aux-nco0', 0x02),
             ('method1-aux-nco0', 0x01),
         ]
-        read_reg(handle, address, status, status['sysclk']['comp'], 0x0281, bitfields)
+        read_reg(handle, address, status['sysclk'], 'comp', 0x0281, bitfields)
         bitfields = [
             ('method3-dpll1', 0x40),
             ('method2-dpll1', 0x20),
@@ -142,7 +142,7 @@ def main (argv):
             ('method2-dpll0', 0x02),
             ('method2-dpll0', 0x01),
         ]
-        read_reg(handle, address, status, status['sysclk']['comp'], 0x0282, bitfields)
+        read_reg(handle, address, status['sysclk'], 'comp', 0x0282, bitfields)
         r = read_data(handle, address, 0x0283) & 0x07
         values = {
             0: '0',
@@ -174,7 +174,7 @@ def main (argv):
             0: 'dpll0',
             1: 'dpll1',
         }
-        status['sysclk']['comp']['dpll-sel'] = sel[read_data(handle, addres, 0x0287)&0x01]
+        status['sysclk']['comp']['dpll-sel'] = sel[read_data(handle, address, 0x0287)&0x01]
         cutoff = {
             0: '156 Hz',
             1: '78 Hz',
@@ -228,7 +228,7 @@ def main (argv):
             ('temperature-alarm', 0x01),
         ]
         read_reg(handle, address, status, 'misc', 0x3002, bitfields)
-    if ref_input:
+    if args.ref_input:
         status['ref-input'] = {}
         for ref in ['a','aa','b','bb']:
             status['ref-input'][ref] = {}
