@@ -47,10 +47,7 @@ def main (argv):
         ("q-ch0", "Qxx CH0 infos"),
         ("pll-ch1", "APll + DPll CH1 infos"),
         ("q-ch1", "Qxx CH1 infos"),
-        ("refa",  "REF-A signal info"),
-        ("refaa", "REF-AA signal info"),
-        ("refb",  "REF-B signal info"),
-        ("refbb", "REF-BB signal info"),
+        ("ref-input",  "REFx signal info"),
         ("irq", "IRQ registers"),
         ("watchdog", "Watchdog timer period"),
         ('distrib', 'Clock distribution related infos'),
@@ -59,12 +56,12 @@ def main (argv):
         ("eeprom", "EEPROM controller status"),
         ("misc", "Auxilary NCOs, DPll and Temp info"),
     ]
-    for (flag, helper) in flags:
-        _helper = helper if helper is not None else "Report {} Status".format(flag.upper())
+    for (v_flag, v_helper) in flags:
+        #_helper = helper if helper is not None else "Report {} Status".format(flag.upper())
         parser.add_argument(
-            "--{}".format(flag), 
+            "--{}".format(v_flag), 
             action="store_true",
-            help=_helper,
+            help=v_helper,
         )
     args = parser.parse_args(argv)
 
@@ -201,6 +198,7 @@ def main (argv):
             cx_s += read_data(handle, address, base+1) << 8
             cx_e  = read_data(handle, address, base+2)
             base += 3
+            #TODO conclure
 
     if args.eeprom:
         bitfields = [
@@ -230,46 +228,142 @@ def main (argv):
             ('temperature-alarm', 0x01),
         ]
         read_reg(handle, address, status, 'misc', 0x3002, bitfields)
-    if args.refa:
-        bitfields = [
-            ('loss-of-signal', 0x20),
-            ('valid', 0x10),
-            ('fault', 0x08),
-            ('jitter-excess', 0x04),
-            ('fast', 0x02),
-            ('slow', 0x01),
-        ]
-        read_reg(handle, address, status, 'refa', 0x3005, bitfields)
-    if args.refaa:
-        bitfields = [
-            ('loss-of-signal', 0x20),
-            ('valid', 0x10),
-            ('fault', 0x08),
-            ('jitter-excess', 0x04),
-            ('fast', 0x02),
-            ('slow', 0x01),
-        ]
-        read_reg(handle, address, status, 'refaa', 0x3006, bitfields)
-    if args.refb:
-        bitfields = [
-            ('loss-of-signal', 0x20),
-            ('valid', 0x10),
-            ('fault', 0x08),
-            ('jitter-excess', 0x04),
-            ('fast', 0x02),
-            ('slow', 0x01),
-        ]
-        read_reg(handle, address, status, 'refb', 0x3007, bitfields)
-    if args.refbb:
-        bitfields = [
-            ('loss-of-signal', 0x20),
-            ('valid', 0x10),
-            ('fault', 0x08),
-            ('jitter-excess', 0x04),
-            ('fast', 0x02),
-            ('slow', 0x01),
-        ]
-        read_reg(handle, address, status, 'refbb', 0x3008, bitfields)
+    if ref_input:
+        status['ref-input'] = {}
+        for ref in ['a','aa','b','bb']:
+            status['ref-input'][ref] = {}
+        for ref in ['ref0-aux', 'ref1-aux', 'ref2-aux', 'ref3-aux']:
+            status['ref-input'][ref] = {}
+        coupling = {
+            0: 'AC 1.2V',
+            1: 'DC 1.2V CMOS',
+            2: 'DC 1.8V CMOS',
+            3:u'DC 1.2V CMOS + 46k\u03A9pull-up',
+        }
+        ref_mode = {
+            0: 'single ended',
+            1: 'differential',
+        }
+        bw = {
+            0: 'narrow',
+            1: 'wide',
+        }
+        demod_polarity = {
+            0: 'manual',
+            1: 'automatic',
+        }
+        event_pol = {
+            0: 'narrow/wide',
+            1: 'wide/narrow',
+        }
+        mon_hysteresis = {
+            0: 'No hysteresis',
+            1: '3.125%',
+            2: '6.25%',
+            3: '12.5%',
+            4: '25%',
+            5: '50%',
+            6: '75%',
+            7: '87.5%',
+        }
+        r = read_data(handle, address, 0x0300)
+        status['ref-input']['aa']['input-termination'] = coupling[(r & 0xC0)>>6]
+        status['ref-input']['a']['input-termination'] = coupling[(r & 0x30)>>4]
+        status['ref-input']['a']['differential'] = coupling[(r & 0x0C)>>2]
+        status['ref-input']['a-aa-input-mode'] = ref_mode[r & 0x01]
+        status['ref-input']['a-aa-demod-bw'] = bw[read_data(handle, address, 0x0301) & 0x01]
+        base = 0x0302
+        for ref in ['a','aa']:
+            r = read_data(handle, address, base)
+            status['ref-input'][ref]['demod-polarity'] = demod_polarity[(r & 0x80)>>7]
+            status['ref-input'][ref]['demod-persist-enabled'] = bool((r & 0x40)>>6)
+            status['ref-input'][ref]['demod-sync-edge'] = (r & 0x30)>>4
+            status['ref-input'][ref]['demod-enabled'] = bool((r & 0x80)>>3)
+            status['ref-input'][ref]['demod-event-pol'] = event_pol[(r & 0x04)>>2]
+            status['ref-input'][ref]['demod-sensitivity'] = r & 0x03
+            base += 1
+        r = read_data(handle, address, 0x0304)
+        status['ref-input']['bb']['input-termination'] = coupling[(r & 0xC0)>>6]
+        status['ref-input']['b']['input-termination'] = coupling[(r & 0x30)>>4]
+        status['ref-input']['b']['differential'] = coupling[(r & 0x0C)>>2]
+        status['ref-input']['b-bb-input-mode'] = ref_mode[r & 0x01]
+        status['ref-input']['b-bb-demod-bw'] = bw[read_data(handle, address, 0x0305) & 0x01]
+        base = 0x0306
+        for ref in ['b','bb']:
+            r = read_data(handle, address, base)
+            status['ref-input'][ref]['demod-polarity'] = demod_polarity[(r & 0x80)>>7]
+            status['ref-input'][ref]['demod-persist-enabled'] = bool((r & 0x40)>>6)
+            status['ref-input'][ref]['demod-sync-edge'] = (r & 0x30)>>4
+            status['ref-input'][ref]['demod-enabled'] = bool((r & 0x80)>>3)
+            status['ref-input'][ref]['demod-event-pol'] = event_pol[(r & 0x04)>>2]
+            status['ref-input'][ref]['demod-sensitivity'] = r & 0x03
+            base += 1
+
+        base = 0x030A
+        for ref in ['ref0-aux','ref1-aux']:
+            r = read_data(handle, address, base)
+            status['ref-input'][ref]['demod-polarity'] = demod_polarity[(r & 0x80)>>7]
+            status['ref-input'][ref]['demod-persist-enabled'] = bool((r & 0x40)>>6)
+            status['ref-input'][ref]['demod-sync-edge'] = (r & 0x30)>>4
+            status['ref-input'][ref]['demod-enabled'] = bool((r & 0x80)>>3)
+            status['ref-input'][ref]['demod-event-pol'] = event_pol[(r & 0x04)>>2]
+            status['ref-input'][ref]['demod-sensitivity'] = r & 0x03
+            base += 1
+        
+        base = 0x030E
+        for ref in ['ref2-aux','ref3-aux']:
+            r = read_data(handle, address, base)
+            status['ref-input'][ref]['demod-polarity'] = demod_polarity[(r & 0x80)>>7]
+            status['ref-input'][ref]['demod-persist-enabled'] = bool((r & 0x40)>>6)
+            status['ref-input'][ref]['demod-sync-edge'] = (r & 0x30)>>4
+            status['ref-input'][ref]['demod-enabled'] = bool((r & 0x80)>>3)
+            status['ref-input'][ref]['demod-event-pol'] = event_pol[(r & 0x04)>>2]
+            status['ref-input'][ref]['demod-sensitivity'] = r & 0x03
+            base += 1
+
+        base = 0x0400
+        for ref in ['a','aa','b','bb']:
+            rdiv =  read_data(handle, address, base+0)
+            rdiv += read_data(handle, address, base+1) << 8
+            rdiv += read_data(handle, address, base+2) << 16
+            rdiv += (read_data(handle, address, base+3) & 0x1F) << 24
+            status['ref-input'][ref]['r-div'] = rdiv+1 
+            per =  read_data(handle, address, base+4)
+            per += read_data(handle, address, base+5) << 8
+            per += read_data(handle, address, base+6) << 16
+            per += read_data(handle, address, base+7) << 24
+            per += read_data(handle, address, base+8) << 32
+            per += read_data(handle, address, base+9) << 40
+            per += read_data(handle, address, base+10) << 48
+            per += (read_data(handle, address, base+11) & 0x0F) << 56
+            status['ref-input'][ref]['freq'] = pow(10,18)/per 
+            t = read_data(handle, address, base+12)
+            t += read_data(handle, address, base+13) << 8
+            t += read_data(handle, address, base+14) << 16
+            status['ref-input'][ref]['max-freq-deviation'] = t /10E9 /(1-t/10E9)
+            status['ref-input'][ref]['mon-hysteresis'] = mon_hysteresis[read_data(handle, address, base+15) & 0x07]
+            t = read_data(handle, address, base+16)
+            t += read_data(handle, address, base+17)<<8
+            t += (read_data(handle, address, base+18)&0x0F)<<16
+            status['ref-input'][ref]['validation-time'] = '{:.3e} sec'.format(t /1000)
+            j = read_data(handle, address, base+19)
+            j += read_data(handle, address, base+20)
+            status['ref-input'][ref]['jitter-tolerance'] = '{:.3e} sec rms'.format(j /10E9)
+            base += 0x0020
+
+        base = 0x3005
+        for ref in ['a','aa','b','bb']:
+            bitfields = [
+                ('loss-of-signal', 0x20),
+                ('valid', 0x10),
+                ('fault', 0x08),
+                ('jitter-excess', 0x04),
+                ('fast', 0x02),
+                ('slow', 0x01),
+            ]
+            read_reg(handle, address, status['ref-input'], ref, base, bitfields)
+            base += 1
+    
     if args.irq:
         bitfields = [
             ('sysclk-unlock', 0x80),
