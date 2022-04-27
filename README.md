@@ -81,43 +81,6 @@ regmap.py --dump /tmp/output.json 0 0x48
 Use the `help` menu to learn how to use this script:
 ```shell
 status.py -h
-usage: status.py [-h] 
-    [--info]
-    [--serial]
-    [--sysclk-pll] [--sysclk-comp]
-    [--pll] [-pll0] [--pll1]
-    [--refa] [-refaa] [--refb] [--refbb] 
-    [--irq] 
-    [--iuts] 
-    [--temp] 
-    [--eeprom] 
-    [--misc] 
-    bus address
-
-Clock status reporting
-
-positional arguments:
-  bus           I2C bus
-  address       I2C slv address
-
-optional arguments:
-  -h, --help    show this help message and exit
-  --info         Device general infos (SN#, ..)
-  --serial       Serial port status (I2C/SPI)
-  --sysclk-pll   Sys clock synthesis pll
-  --sysclk-comp  Sys clock compensation
-  --pll          Shared Pll global info
-  --pll0         Pll0 specific infos
-  --pll1         Pll1 specific infos
-  --refa         REF-A signal info
-  --refaa        REF-AA signal info
-  --refb         REF-B signal info
-  --refbb        REF-BB signal info
-  --irq          IRQ registers
-  --iuts         Report IUTS Status
-  --temp         Internal temperature sensor
-  --eeprom       EEPROM controller status
-  --misc         Auxilary NCOs, DPll and Temp info
 ```
 
 Several part of the integrated chips can be monitored at once.
@@ -128,8 +91,8 @@ Example of use:
 # Grab general / high level info (bus=0, 0x4A):
 status.py --info --serial --pll 0 0x4A
 
-# General clock infos + ref-a status (bus=1, 0x48):
-status.py --pll --sysclk-pll --refa 1 0x48
+# General clock infos + ref-input status (bus=1, 0x48):
+status.py --info --pll --sysclk --ref-input 1 0x48
 
 # IRQ status register
 status.py --irq 0 0x4A
