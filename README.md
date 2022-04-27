@@ -150,7 +150,7 @@ if ret.exitcode == 0: # OK
    status['info']['vendor'] # eval() is way cool!
 ```
 
-## Sysclock script
+## Sys clock
 
 `Sys` clock compensation is a new feature introduced in AD9546.
 `sysclock.py` allows quick and easy access to these features.

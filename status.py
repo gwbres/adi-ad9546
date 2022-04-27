@@ -39,8 +39,9 @@ def main (argv):
     flags = [
         ("info",    "Device general infos (SN#, ..)"),
         ("serial",  "Serial port status (I2C/SPI)"),
-        ("sysclk-pll",  "Sys clock synthesis pll"),
-        ("sysclk-comp", "Sys clock compensation"),
+        ("sysclk",  "Sys clock (all) infos"),
+        ("sysclk-pll",  "Sys clock pll core focus"),
+        ("sysclk-comp", "Sys clock compensation core infos"),
         ("pll", "Pll (APll+DPll+CH0/CH1) info"),
         ("pll-ch0", "APll + DPll CH0 infos"),
         ("q-ch0", "Qxx CH0 infos"),
@@ -76,7 +77,6 @@ def main (argv):
     if args.info:
         status['info'] = {}
         status['info']['chip-type'] = hex(read_data(handle, address, 0x0003))
-        
         data = read_data(handle, address, 0x0004) & 0xFF
         data |= (read_data(handle, address, 0x0005) & 0xFF)<<8
         data |= (read_data(handle, address, 0x0006) & 0xFF)<<16
@@ -98,24 +98,28 @@ def main (argv):
             ('buffered-read', 0x40),
         ]
         read_reg(handle, address, status, 'serial', 0x0001, bitfields)
-    if args.sysclk_pll:
-        status['sysclk-pll'] = {}
-        data = read_data(handle, address, 0x200) 
-        status['sysclk-pll']['fb-div-ratio'] = data
+    if args.sysclk or args.sysclk_pll:
+        status['sysclk'] = {}
+        status['sysclk']['pll'] = {}
+        status['sysclk']['pll']['fb-div-ratio'] = read_data(handle, address, 0x200) 
         data = read_data(handle, address, 0x201)
-        status['sysclk-pll']['input-path-sel'] = int((data & 0x04) >>3)
-        status['sysclk-pll']['input-div-ratio'] = int((data & 0x06)>>1)
-        status['sysclk-pll']['freq-doubler'] = int(data & 0x01)
+        status['sysclk']['pll']['input-sel'] = (data & 0x08)>>3
+        status['sysclk']['pll']['input-div'] = (data & 0x06)>>1
+        status['sysclk']['pll']['freq-doubler'] = bool(data & 0x01)
         ref_freq = read_data(handle, address, 0x202)
         ref_freq += read_data(handle, address, 0x203) << 8
         ref_freq += read_data(handle, address, 0x204) << 16
         ref_freq += read_data(handle, address, 0x205) << 24
         ref_freq += read_data(handle, address, 0x206) << 32
-        status['sysclk-pll']['ref-freq'] = ref_freq * 1E3
-        per = read_data(handle, address, 0x207) & 0x0F
-        per += (read_data(handle, address, 0x208) & 0x0F) << 8
-        status['sysclk-pll']['stability-period'] = read_data(handle, address, 0x207) & 0x0F
-    if args.sysclk_comp:
+        status['sysclk']['pll']['ref-freq'] = ref_freq * 1E3
+        per = read_data(handle, address, 0x207)
+        per += read_data(handle, address, 0x208) << 8
+        per += (read_data(handle, address, 0x209) & 0x0F) << 16
+        status['sysclk']['pll']['stab-period'] = per * 10E-3 
+    if args.sysclk or args.sysclk_comp:
+        if not 'sysclk' in status:
+            status['sysclk'] = {}
+        status['sysclk']['comp'] = {}
         bitfields = [
             ('method2-aux-dpll', 0x20),
             ('method1-aux-dpll', 0x10),
@@ -123,7 +127,7 @@ def main (argv):
             ('method2-tdcs', 0x02),
             ('method1-tdcs', 0x01),
         ]
-        read_reg(handle, address, status, 'sysclk-comp', 0x0280, bitfields)
+        read_reg(handle, address, status, status['sysclk']['comp'], 0x0280, bitfields)
         bitfields = [
             ('method3-aux-nco1', 0x40),
             ('method2-aux-nco1', 0x20),
@@ -132,7 +136,72 @@ def main (argv):
             ('method2-aux-nco0', 0x02),
             ('method1-aux-nco0', 0x01),
         ]
-        read_reg(handle, address, status, 'sysclk-comp', 0x0281, bitfields)
+        read_reg(handle, address, status, status['sysclk']['comp'], 0x0281, bitfields)
+        bitfields = [
+            ('method3-dpll1', 0x40),
+            ('method2-dpll1', 0x20),
+            ('method2-dpll1', 0x10),
+            ('method3-dpll0', 0x04),
+            ('method2-dpll0', 0x02),
+            ('method2-dpll0', 0x01),
+        ]
+        read_reg(handle, address, status, status['sysclk']['comp'], 0x0282, bitfields)
+        r = read_data(handle, address, 0x0283) & 0x07
+        values = {
+            0: '0',
+            1: "0.715 ppm/s",
+            2: "1.430 ppm/s",
+            3: "2.860 ppm/s",
+            4: "5.720 ppm/s",
+            5: "11.44 ppm/s",
+            6: "22.88 ppm/s",
+            7: "45.76 ppm/s",
+        }
+        status['sysclk']['comp']['slew-rate-lim'] = values[r]
+        sources = {
+            0: 'REFA',
+            1: 'REFAA',
+            2: 'REFB',
+            3: 'REFBB',
+            6: 'aux-REF0',
+            7: 'aux-REF1',
+            11: 'aux-REF2',
+            12: 'aux-REF3',
+        }
+        r = read_data(handle, address, 0x0284) & 0x0F
+        status['sysclk']['comp']['source']  = sources[r]
+        r = read_data(handle, address, 0x0285)
+        r += read_data(handle, address, 0x0286) << 8
+        status['sysclk']['comp']['dpll-bw'] = r /10
+        sel = {
+            0: 'dpll0',
+            1: 'dpll1',
+        }
+        status['sysclk']['comp']['dpll-sel'] = sel[read_data(handle, addres, 0x0287)&0x01]
+        cutoff = {
+            0: '156 Hz',
+            1: '78 Hz',
+            2: '39 Hz',
+            3: '20 Hz',
+            4: '10 Hz',
+            5: '5 Hz',
+            6: '2 Hz',
+            7: '1 Hz',
+        }
+        status['sysclk']['comp']['method1-cutoff'] = cutoff[read_data(handle, address, 0x0288)&0x07]
+        c0 = read_data(handle, address, 0x0289)
+        c0 += read_data(handle, address, 0x028A) << 8
+        c0 += read_data(handle, address, 0x028B) << 16
+        c0 += read_data(handle, address, 0x028C) << 24
+        c0 += read_data(handle, address, 0x028D) << 32
+        status['sysclk']['comp']['method1-c0'] = c0 / pow(2,45)  
+        base = 0x028E
+        for cx in range (1, 6):
+            cx_s  = read_data(handle, address, base+0)
+            cx_s += read_data(handle, address, base+1) << 8
+            cx_e  = read_data(handle, address, base+2)
+            base += 3
+
     if args.eeprom:
         bitfields = [
             ('crc-fault', 0x08),
@@ -382,69 +451,33 @@ def main (argv):
             for pin in pins:
                 status['distrib'][ch][pin] = {}
         
-        r = read_data(handle, address, 0x10D7)
-        fmt = r & 0x01
-        fmt = 'hcsl' if fmt == 1 else 'cml'
-        current = (r & 0x03)>>1
-        if current == 0: 
-            current = '7.5mA'
-        elif current == 1:
-            current = '12.5mA'
-        else:
-            current = '15mA'
-        mode = (r & 0x04)>>3
-        if mode == 0:
-            mode = 'diff'
-        elif mode == 1:
-            mode = 'se'
-        else:
-            mode = 'sedd'
-        status['distrib']['ch0']['a']['format'] = fmt
-        status['distrib']['ch0']['a']['current'] = current
-        status['distrib']['ch0']['a']['mode'] = current
+        fmts = {
+           0: 'cml',
+           1: 'hcsl',
+        }
+        currents = {
+            0: '7.6 mA',
+            1: '12.5 mA',
+            2: '15 mA',
+        }
+        modes = {
+            0: 'diff',
+            1: 'se',
+            2: 'sedd',
+        }
         
+        r = read_data(handle, address, 0x10D7)
+        status['distrib']['ch0']['a']['format'] = fmts[r & 0x01]
+        status['distrib']['ch0']['a']['current'] = currents[(r & 0x03)>>1]
+        status['distrib']['ch0']['a']['mode'] = modes[(r & 0x04)>>3]
         r = read_data(handle, address, 0x10D8)
-        fmt = r & 0x01
-        fmt = 'hcsl' if fmt == 1 else 'cml'
-        current = (r & 0x03)>>1
-        if current == 0: 
-            current = '7.5mA'
-        elif current == 1:
-            current = '12.5mA'
-        else:
-            current = '15mA'
-        mode = (r & 0x04)>>3
-        if mode == 0:
-            mode = 'diff'
-        elif mode == 1:
-            mode = 'se'
-        else:
-            mode = 'sedd'
-        status['distrib']['ch0']['b']['format'] = fmt
-        status['distrib']['ch0']['b']['current'] = current
-        status['distrib']['ch0']['b']['mode'] = current
-
+        status['distrib']['ch0']['b']['format'] = fmts[r & 0x01]
+        status['distrib']['ch0']['b']['current'] = currents[(r & 0x03)>>1]
+        status['distrib']['ch0']['b']['mode'] = modes[(r & 0x04)>>3]
         r = read_data(handle, address, 0x10D9)
-        fmt = r & 0x01
-        fmt = 'hcsl' if fmt == 1 else 'cml'
-        current = (r & 0x03)>>1
-        if current == 0: 
-            current = '7.5mA'
-        elif current == 1:
-            current = '12.5mA'
-        else:
-            current = '15mA'
-        mode = (r & 0x04)>>3
-        if mode == 0:
-            mode = 'diff'
-        elif mode == 1:
-            mode = 'se'
-        else:
-            mode = 'sedd'
-        status['distrib']['ch0']['c']['format'] = fmt
-        status['distrib']['ch0']['c']['current'] = current
-        status['distrib']['ch0']['c']['mode'] = current
-
+        status['distrib']['ch0']['c']['format'] = fmts[r & 0x01]
+        status['distrib']['ch0']['c']['current'] = currents[(r & 0x03)>>1]
+        status['distrib']['ch0']['c']['mode'] = modes[(r & 0x04)>>3]
     pprint(status)
     
 if __name__ == "__main__":
