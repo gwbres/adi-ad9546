@@ -7,9 +7,9 @@
 #################################################################
 import sys
 import math
+import json
 import argparse
 from smbus import SMBus
-from pprint import pprint
 
 def read_data (handle, dev, addr):
     msb = (addr & 0xFF00)>>8
@@ -494,40 +494,6 @@ def main (argv):
             ('dpll1-tuning-history-avail',0x01),
         ]
         read_reg(handle, address, status, 'pll-ch1', 0x3202, bitfields)
-    if args.q_ch0:
-        bitfields = [
-            ('q0cc-phase-slew', 0x20),
-            ('q0c-phase-slew', 0x10),
-            ('q0bb-phase-slew', 0x08),
-            ('q0b-phase-slew', 0x04),
-            ('q0aa-phase-slew', 0x02),
-            ('q0a-phase-slew', 0x01),
-        ]
-        read_reg(handle, address, status, 'q-ch0', 0x310D, bitfields)
-        bitfields = [
-            ('q0cc-phase-ctrl-err', 0x20),
-            ('q0c-phase-ctrl-err', 0x10),
-            ('q0bb-phase-ctrl-err', 0x08),
-            ('q0b-phase-ctrl-err', 0x04),
-            ('q0aa-phase-ctrl-err', 0x02),
-            ('q0a-phase-ctrl-err', 0x01),
-        ]
-        read_reg(handle, address, status, 'q-ch0', 0x310E, bitfields)
-    if args.q_ch1:
-        bitfields = [
-            ('q1bb-phase-slew', 0x08),
-            ('q1b-phase-slew', 0x04),
-            ('q1aa-phase-slew', 0x02),
-            ('q1a-phase-slew', 0x01),
-        ]
-        read_reg(handle, address, status, 'q-ch1', 0x320D, bitfields)
-        bitfields = [
-            ('q1bb-phase-ctrl-err', 0x08),
-            ('q1b-phase-ctrl-err', 0x04),
-            ('q1aa-phase-ctrl-err', 0x02),
-            ('q1a-phase-ctrl-err', 0x01),
-        ]
-        read_reg(handle, address, status, 'q-ch1', 0x320E, bitfields)
     if args.temp:
         temp = (read_data(handle, address, 0x3004) & 0xFF)<< 8 
         temp |= read_data(handle, address, 0x3003) & 0xFF
@@ -538,7 +504,7 @@ def main (argv):
         status['distrib'] = {}
         for ch in ['ch0','ch1']:
             status['distrib'][ch] = {}
-            pins = ['a','aa','b','bb']
+            pins = ['pll','a','aa','b','bb']
             if ch == 'ch0':
                 pins.append('c')
                 pins.append('cc')
@@ -559,20 +525,249 @@ def main (argv):
             1: 'se',
             2: 'sedd',
         }
+        shot_mod = {
+            0: 'immediate',
+            1: 'triggered',
+        }
+        single_pulse_mod = {
+            0: 'balanced',
+            1: 'unbalanced',
+        }
+        mod_polarity = {
+            0: 'narrow/wide',
+            1: 'wide/narrow',
+        }
+        enabled = {
+            0: 'bypassed',
+            1: 'enabled',
+        }
+        n_shot_mod = {
+            0: 'burst',
+            1: 'periodic',
+        }
+        boolean = {
+            0: 'disabled',
+            1: 'enabled',
+        }
+        retime_to_mod = {
+            0: 'carrier-retiming',
+            1: 'trigger-retiming',
+        }
+        retiming = {
+            0: 'direct',
+            1: 'retimed',
+        }
+        slew_mode = {
+            0: 'lag',
+            1: 'minimum-steps',
+        }
+        max_phase_slew = {
+            0: 'Q180°',
+            1: 'Q90°',
+            2: '1/32Q',
+            3: '1/16Q',
+            4: '1/8Q',
+            5: '1/4Q',
+            6: '1/2Q',
+            7: '1Q',
+        }
+        #################
+        #CH0        
+        #################
+        base = 0x1100
+        for pin in ['a','aa','b','bb','c','cc']:
+            div = read_data(handle, address,  base+0 )
+            div += read_data(handle, address, base+1 ) << 8
+            div += read_data(handle, address, base+2 ) << 16
+            div += read_data(handle, address, base+3 ) << 24
+            status['distrib']['ch0'][pin]['q-div'] = div
+            offset = read_data(handle, address, base +4 )
+            offset += read_data(handle, address, base+5 ) <<8
+            offset += read_data(handle, address, base+6 ) <<16
+            offset += read_data(handle, address, base+7 ) <<24
+            r = read_data(handle, address, base+8)
+            offset += ((r & 0x40)>>6) << 32
+            status['distrib']['ch0'][pin]['phase-offset'] = offset
+            status['distrib']['ch0'][pin]['half-div'] = boolean[(r & 0x20)>>5]
+            status['distrib']['ch0'][pin]['pwm/phase'] = boolean[(r & 0x10)>>4]
+            status['distrib']['ch0'][pin]['slew-mode'] = slew_mode[(r & 0x08)>>3]
+            status['distrib']['ch0'][pin]['max-phase-slew'] = max_phase_slew[(r & 0x07)]
+            base += 9
+
+        mod = read_data(handle, address, 0x10C0+0)
+        mod += read_data(handle, address, 0x10C1+1) << 8
+        for pin in ['a','b','c']:
+            q_div = status['distrib']['ch0'][pin]['q-div']
+            try:
+                status['distrib']['ch0'][pin]['mod-step'] = mod /2 /q_div
+            except ZeroDivisionError:
+                status['distrib']['ch0'][pin]['mod-step'] = 0
         
-        r = read_data(handle, address, 0x10D7)
-        status['distrib']['ch0']['a']['format'] = fmts[r & 0x01]
-        status['distrib']['ch0']['a']['current'] = currents[(r & 0x03)>>1]
-        status['distrib']['ch0']['a']['mode'] = modes[(r & 0x04)>>3]
-        r = read_data(handle, address, 0x10D8)
-        status['distrib']['ch0']['b']['format'] = fmts[r & 0x01]
-        status['distrib']['ch0']['b']['current'] = currents[(r & 0x03)>>1]
-        status['distrib']['ch0']['b']['mode'] = modes[(r & 0x04)>>3]
-        r = read_data(handle, address, 0x10D9)
-        status['distrib']['ch0']['c']['format'] = fmts[r & 0x01]
-        status['distrib']['ch0']['c']['current'] = currents[(r & 0x03)>>1]
-        status['distrib']['ch0']['c']['mode'] = modes[(r & 0x04)>>3]
-    pprint(status)
+        base = 0x10C2
+        for pin in ['a','b','c']:
+            mod = read_data(handle, address, base+0)
+            mod += read_data(handle, address, base+1) << 8
+            mod += read_data(handle, address, base+2) << 16
+            mod += (read_data(handle, address, base+3) &0x0F) << 24
+            status['distrib']['ch0'][pin]['mod-counter'] = mod
+            base += 6
+
+        r = read_data(handle, address, 0x10CE) & 0x03
+        status['distrib']['ch0']['pll']['fb-div-sync-edge'] = r 
+
+        base = 0x10CF
+        for pin in ['a','b','c']:
+            r = read_data(handle, address, base) & 0x0F
+            status['distrib']['ch0'][pin]['n-shot-mod'] = shot_mod[(r & 0x08)>>3]
+            status['distrib']['ch0'][pin]['single-pulse-modulation'] = single_pulse_mod[(r & 0x04)>>2]
+            status['distrib']['ch0'][pin]['modulation-polarity'] = mod_polarity[(r & 0x02)>>1]
+            status['distrib']['ch0'][pin]['modulation'] = enabled[r & 0x01]
+            base += 1
+
+        r = read_data(handle, address, 0x10D2)
+        status['distrib']['ch0']['pll']['n-shot-gap'] = r
+        r = read_data(handle, address, 0x10D3)
+        status['distrib']['ch0']['pll']['n-shot-request-mode'] = n_shot_mod[(r & 0x40)>>6]
+        status['distrib']['ch0']['pll']['n-shots'] = r & 0x3F
+
+        r = read_data(handle, address, 0x10D4)
+        status['distrib']['ch0']['bb']['prbs'] = boolean[(r&0x80)>>7] 
+        status['distrib']['ch0']['bb']['n-shot'] = boolean[(r&0x40)>>6]
+        status['distrib']['ch0']['b']['prbs'] = boolean[(r&0x20)>>5]
+        status['distrib']['ch0']['b']['n-shot'] = boolean[(r&0x10)>>4]
+        status['distrib']['ch0']['aa']['prbs'] = boolean[(r&0x08)>>3] 
+        status['distrib']['ch0']['aa']['n-shot'] = boolean[(r&0x04)>>2]
+        status['distrib']['ch0']['a']['prbs'] = boolean[(r&0x02)>>1]
+        status['distrib']['ch0']['a']['n-shot'] = boolean[r&0x01]
+        r = read_data(handle, address, 0x10D5)
+        status['distrib']['ch0']['cc']['prbs'] = boolean[(r&0x08)>>3]
+        status['distrib']['ch0']['cc']['n-shot'] = boolean[(r&0x04)>>2]
+        status['distrib']['ch0']['c']['prbs'] = boolean[(r&0x02)>>1]
+        status['distrib']['ch0']['c']['n-shot'] = boolean[r&0x01]
+        r = read_data(handle, address, 0x10D6)
+        status['distrib']['ch0']['pll']['nshot-2-mod-retime'] = retime_to_mod[(r & 0x10)>>4]
+        status['distrib']['ch0']['pll']['nshot-retiming'] = retiming[r & 0x01]
+
+        base = 0x10D7
+        for pin in ['a','b','c']:
+            r = read_data(handle, address, base)
+            status['distrib']['ch0'][pin]['mute-retiming'] = boolean[(r & 0x20)>>5]
+            status['distrib']['ch0'][pin]['mode'] = modes[(r & 0x18)>>3]
+            status['distrib']['ch0'][pin]['current'] = currents[(r & 0x03)>>1]
+            status['distrib']['ch0'][pin]['format'] = fmts[r & 0x01]
+            base += 1
+        
+        r = read_data(handle, address, 0x310D)
+        status['distrib']['ch0']['cc']['phase-slewing'] = boolean[(r & 0x20)>>5]
+        status['distrib']['ch0']['c']['phase-slewing'] = boolean[(r & 0x10)>>4]
+        status['distrib']['ch0']['bb']['phase-slewing'] = boolean[(r & 0x08)>>3]
+        status['distrib']['ch0']['b']['phase-slewing'] = boolean[(r & 0x04)>>2]
+        status['distrib']['ch0']['aa']['phase-slewing'] = boolean[(r & 0x02)>>1]
+        status['distrib']['ch0']['a']['phase-slewing'] = boolean[r & 0x01]
+        
+        r = read_data(handle, address, 0x310E)
+        status['distrib']['ch0']['cc']['phase-ctrl-error'] = bool((r & 0x20)>>5)
+        status['distrib']['ch0']['c']['phase-ctrl-error'] = bool((r & 0x10)>>4)
+        status['distrib']['ch0']['bb']['phase-ctrl-error'] = bool((r & 0x08)>>3)
+        status['distrib']['ch0']['b']['phase-ctrl-error'] = bool((r & 0x04)>>2)
+        status['distrib']['ch0']['aa']['phase-ctrl-error'] = bool((r & 0x02)>>1)
+        status['distrib']['ch0']['a']['phase-ctrl-error'] = bool((r & 0x01)>>0)
+        
+        #################
+        #CH1        
+        #################
+        base = 0x1500
+        for pin in ['a','aa','b','bb']:
+            div = read_data(handle, address,  base+0 )
+            div += read_data(handle, address, base+1 ) << 8
+            div += read_data(handle, address, base+2 ) << 16
+            div += read_data(handle, address, base+3 ) << 24
+            status['distrib']['ch1'][pin]['q-div'] = div
+            offset = read_data(handle, address, base +4 )
+            offset += read_data(handle, address, base+5 ) <<8
+            offset += read_data(handle, address, base+6 ) <<16
+            offset += read_data(handle, address, base+7 ) <<24
+            r = read_data(handle, address, base+8)
+            offset += ((r & 0x40)>>6) << 32
+            status['distrib']['ch1'][pin]['phase-offset'] = offset
+            status['distrib']['ch1'][pin]['half-div'] = boolean[(r & 0x20)>>5]
+            status['distrib']['ch1'][pin]['pwm/phase'] = boolean[(r & 0x10)>>4]
+            status['distrib']['ch1'][pin]['slew-mode'] = slew_mode[(r & 0x08)>>3]
+            status['distrib']['ch1'][pin]['max-phase-slew'] = max_phase_slew[(r & 0x07)]
+            base += 9
+
+        mod = read_data(handle, address, 0x14C0+0)
+        mod += read_data(handle, address, 0x14C1+1) << 8
+        for pin in ['a','b']:
+            q_div = status['distrib']['ch1'][pin]['q-div']
+            try:
+                status['distrib']['ch1'][pin]['mod-step'] = mod /2 /q_div
+            except ZeroDivisionError:
+                status['distrib']['ch1'][pin]['mod-step'] = 0
+        
+        base = 0x14C2
+        for pin in ['a','b']:
+            mod = read_data(handle, address, base+0)
+            mod += read_data(handle, address, base+1) << 8
+            mod += read_data(handle, address, base+2) << 16
+            mod += (read_data(handle, address, base+3) &0x0F) << 24
+            status['distrib']['ch1'][pin]['mod-counter'] = mod
+            base += 6
+
+        r = read_data(handle, address, 0x14CE) & 0x03
+        status['distrib']['ch1']['pll']['fb-div-sync-edge'] = r 
+
+        base = 0x14CF
+        for pin in ['a','b']:
+            r = read_data(handle, address, base) & 0x0F
+            status['distrib']['ch1'][pin]['n-shot-mod'] = shot_mod[(r & 0x08)>>3]
+            status['distrib']['ch1'][pin]['single-pulse-modulation'] = single_pulse_mod[(r & 0x04)>>2]
+            status['distrib']['ch1'][pin]['modulation-polarity'] = mod_polarity[(r & 0x02)>>1]
+            status['distrib']['ch1'][pin]['modulation'] = enabled[r & 0x01]
+            base += 1
+
+        r = read_data(handle, address, 0x14D2)
+        status['distrib']['ch1']['pll']['n-shot-gap'] = r
+        r = read_data(handle, address, 0x14D3)
+        status['distrib']['ch1']['pll']['n-shot-request-mode'] = n_shot_mod[(r & 0x40)>>6]
+        status['distrib']['ch1']['pll']['n-shots'] = r & 0x3F
+
+        r = read_data(handle, address, 0x14D4)
+        status['distrib']['ch1']['bb']['prbs'] = boolean[(r&0x80)>>7] 
+        status['distrib']['ch1']['bb']['n-shot'] = boolean[(r&0x40)>>6]
+        status['distrib']['ch1']['b']['prbs'] = boolean[(r&0x20)>>5]
+        status['distrib']['ch1']['b']['n-shot'] = boolean[(r&0x10)>>4]
+        status['distrib']['ch1']['aa']['prbs'] = boolean[(r&0x08)>>3] 
+        status['distrib']['ch1']['aa']['n-shot'] = boolean[(r&0x04)>>2]
+        status['distrib']['ch1']['a']['prbs'] = boolean[(r&0x02)>>1]
+        status['distrib']['ch1']['a']['n-shot'] = boolean[r&0x01]
+        r = read_data(handle, address, 0x14D6)
+        status['distrib']['ch1']['pll']['nshot-2-mod-retime'] = retime_to_mod[(r & 0x10)>>4]
+        status['distrib']['ch1']['pll']['nshot-retiming'] = retiming[r & 0x01]
+
+        base = 0x14D7
+        for pin in ['a','b']:
+            r = read_data(handle, address, base)
+            status['distrib']['ch1'][pin]['mute-retiming'] = boolean[(r & 0x20)>>5]
+            status['distrib']['ch1'][pin]['mode'] = modes[(r & 0x18)>>3]
+            status['distrib']['ch1'][pin]['current'] = currents[(r & 0x03)>>1]
+            status['distrib']['ch1'][pin]['format'] = fmts[r & 0x01]
+            base += 1
+        
+        r = read_data(handle, address, 0x320D)
+        status['distrib']['ch1']['bb']['phase-slewing'] = boolean[(r & 0x08)>>3]
+        status['distrib']['ch1']['b']['phase-slewing'] = boolean[(r & 0x04)>>2]
+        status['distrib']['ch1']['aa']['phase-slewing'] = boolean[(r & 0x02)>>1]
+        status['distrib']['ch1']['a']['phase-slewing'] = boolean[r & 0x01]
+        
+        r = read_data(handle, address, 0x320E)
+        status['distrib']['ch1']['bb']['phase-ctrl-error'] = bool((r & 0x08)>>3)
+        status['distrib']['ch1']['b']['phase-ctrl-error'] = bool((r & 0x04)>>2)
+        status['distrib']['ch1']['aa']['phase-ctrl-error'] = bool((r & 0x02)>>1)
+        status['distrib']['ch1']['a']['phase-ctrl-error'] = bool((r & 0x01)>>0)
+        
+    # pretty print
+    print(json.dumps(status, sort_keys=True, indent=4))
     
 if __name__ == "__main__":
     main(sys.argv[1:])
