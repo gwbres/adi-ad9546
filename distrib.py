@@ -300,12 +300,12 @@ def main (argv):
                 regs = [0x1516]
             elif args.path == 'bb':
                 regs = [0x151F]
-            
+ 
         for reg in regs:
-            write_data(handle, address, reg, r0) 
-            write_data(handle, address, reg+1, r1) 
-            write_data(handle, address, reg+2, r2) 
-            write_data(handle, address, reg+3, r3) 
+            write_data(handle, address, reg+0, r0)
+            write_data(handle, address, reg+1, r1)
+            write_data(handle, address, reg+2, r2)
+            write_data(handle, address, reg+3, r3)
             r = read_data(handle, address, reg+4)
             write_data(handle, address, reg+4, r | ((r4 & 0x01)<<6))
         write_data(handle, address, 0x000F, 0x01) # IO update
