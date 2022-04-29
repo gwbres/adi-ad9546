@@ -357,6 +357,8 @@ distrib.py --divider 23 --channel 0 --pin a 0 0x48
 distrib.py --divider 23 --channel 0 --pin b 0 0x48
 ```
 
+* `--half-divider` : enables "half divider" feature @ QXY path
+
 * `--phase-offset` applies instantaneous phase offset to desired
 output path. Maximal value is 2\*D-1 where D is previous `--divider` ratio
 for given channel + pin.
@@ -365,6 +367,12 @@ for given channel + pin.
 # Apply Q0A,AA,B,BB,C,CC + Q1A,AA,B,BB 
 # TODO
 ```
+
+* `--unmuting` : controls "unmuting" behavior, meaning,
+output signal can be exposed automatically depending on clock state.
+
+* `--mute` and `--unmute` to manually enable/disable an output pin
+
 
 ## Reset script
 
