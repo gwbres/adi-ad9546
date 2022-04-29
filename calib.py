@@ -52,7 +52,6 @@ def main (argv):
     # [1] perform request
     write_data(handle, address, 0x2000, 0x00)
     write_data(handle, address, 0x000F, 0x01) # I/O update
-    #reg = read_data(handle, address, 0x2000)
     reg = 0
     if args.sysclk:
         reg |= 0x04
