@@ -2,8 +2,7 @@
 #################################################################
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
-# status.py
-# small script to quickly monitor an AD9545,46 
+# status.py: AD9546,45 status monitor (read only)
 #################################################################
 import sys
 import math
@@ -26,20 +25,43 @@ def read_reg (handle, dev, status, reg, addr, bitfields):
     for b in bitfields:
         status[reg][b[0]] = bitfield(data, b[1])
 
-def has_child (tree):
-    return len(tree.keys()) > 0
-
-def filter_by_key (tree, k):
-    ret = tree.copy()
-    for key in tree.keys():
-        if type(tree[key]) is dict:
-            subtrees = []
-            for sub in tree[key].keys():
-                subtrees.append(filter_by_key(tree[key], k))
-            print("SUBTREES : {}".format(str(subtrees)))
+def contains_key (tree, key):
+    """ 
+    Returns true if at least 1 branch from this tree contains given `key`
+    """
+    print(str(tree)+"\n")
+    at_least_one = False
+    for child in tree.keys():
+        if type(tree[child]) is dict: # child
+            if contains_key(tree[child], key):
+                print("===> Innter tree matched", child)
+                at_least_one |= True
         else:
-            if key != k:
-                del ret[key]
+            if child == key:
+                print("===> Child matched by name", child)
+                at_least_one |= True
+    return at_least_one
+
+def filter_by_key (tree, key):
+    ret = {}
+    for k in tree.keys():
+        if type(tree[k]) is dict:
+            if k == key: # total match
+                print("Total match @ ", k)
+                ret[k] = tree[k] 
+            else:
+                # retain childs that contain key
+                at_least_one = False
+                for child in tree[k].keys(): 
+                    if type(tree[k][child]) is dict:
+                        at_least_one |= contains_key(tree[k][child], key)
+                    else:
+                        at_least_one |= (child == key)
+                if at_least_one:
+                    print("At least one !")
+        else:
+            if k == key:
+                ret[k] = tree[k]
     return ret
 
 def main (argv):
@@ -857,15 +879,33 @@ def main (argv):
                 status['distrib'][ch]['outc']['+']['muted'] = bool((r & 0x04)>>2)
             base += 0x100
             
+    print("======== TOTAL ===============")
+    print(json.dumps(status, sort_keys=True, indent=2))
+    print("==============================")
  
-    filtered = status.copy()
     if args.filter_by_key:
-        keys = args.filter_by_key.split(",")
+        filtered = {}
+        filters = args.filter_by_key.split(",")
+        for category in status.keys(): # filter all categories
+            filtered[category] = {}
+            filtered_out = []
+            for f in filters:
+                filtered_out.append(filter_by_key(status[category], f))
+                #print("xxxxxxxxxx filtered with {} xxxxxxxxx\n{}".format(f, str(filtered_out[-1])))
+            # merge filtered out categories
+            print("xxxxxxxxxxxxxxx MERGED xxxxxxxxxxxxxxxxxxx")
+            all_empty = True
+            for f in filtered_out:
+                for k in f.keys():
+                    all_empty = False
+                    filtered[category][k] = f[k] 
+            if all_empty: # not a single match accros entire category => maintain
+                filtered[category] = status[category].copy()
+                
+    else:
+        filtered = status.copy()
     
-    if args.filter_by_value:
-        values = args.filter_by_value.split(",")
-    
-    print(json.dumps(filtered, sort_keys=True, indent=3))
+    print(json.dumps(filtered, sort_keys=True, indent=2))
     
 if __name__ == "__main__":
     main(sys.argv[1:])
