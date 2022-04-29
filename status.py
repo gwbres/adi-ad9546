@@ -346,9 +346,7 @@ def main (argv):
         read_reg(handle, address, status, 'misc', 0x3002, bitfields)
     if args.ref_input:
         status['ref-input'] = {}
-        for ref in ['a','aa','b','bb']:
-            status['ref-input'][ref] = {}
-        for ref in ['ref0-aux', 'ref1-aux', 'ref2-aux', 'ref3-aux']:
+        for ref in ['a','aa','b','bb']: #TODO '0','1','2'..aux
             status['ref-input'][ref] = {}
         coupling = {
             0: 'AC 1.2V',
@@ -415,30 +413,30 @@ def main (argv):
             status['ref-input'][ref]['demod-sensitivity'] = r & 0x03
             base += 1
 
-        base = 0x030A
-        for ref in ['ref0-aux','ref1-aux']:
-            r = read_data(handle, address, base)
-            status['ref-input'][ref]['demod-polarity'] = demod_polarity[(r & 0x80)>>7]
-            status['ref-input'][ref]['demod-persist-enabled'] = bool((r & 0x40)>>6)
-            status['ref-input'][ref]['demod-sync-edge'] = (r & 0x30)>>4
-            status['ref-input'][ref]['demod-enabled'] = bool((r & 0x80)>>3)
-            status['ref-input'][ref]['demod-event-pol'] = event_pol[(r & 0x04)>>2]
-            status['ref-input'][ref]['demod-sensitivity'] = r & 0x03
-            base += 1
-        
-        base = 0x030E
-        for ref in ['ref2-aux','ref3-aux']:
-            r = read_data(handle, address, base)
-            status['ref-input'][ref]['demod-polarity'] = demod_polarity[(r & 0x80)>>7]
-            status['ref-input'][ref]['demod-persist-enabled'] = bool((r & 0x40)>>6)
-            status['ref-input'][ref]['demod-sync-edge'] = (r & 0x30)>>4
-            status['ref-input'][ref]['demod-enabled'] = bool((r & 0x80)>>3)
-            status['ref-input'][ref]['demod-event-pol'] = event_pol[(r & 0x04)>>2]
-            status['ref-input'][ref]['demod-sensitivity'] = r & 0x03
-            base += 1
+        #base = 0x030A
+        #for ref in ['0','1']:
+        #    r = read_data(handle, address, base)
+        #    status['ref-input'][ref]['aux-demod-polarity'] = demod_polarity[(r & 0x80)>>7]
+        #    status['ref-input'][ref]['aux-demod-persist-enabled'] = bool((r & 0x40)>>6)
+        #    status['ref-input'][ref]['aux-demod-sync-edge'] = (r & 0x30)>>4
+        #    status['ref-input'][ref]['aux-demod-enabled'] = bool((r & 0x80)>>3)
+        #    status['ref-input'][ref]['aux-demod-event-pol'] = event_pol[(r & 0x04)>>2]
+        #    status['ref-input'][ref]['aux-demod-sensitivity'] = r & 0x03
+        #    base += 1
+        #
+        #base = 0x030E
+        #for ref in ['ref2-aux','ref3-aux']:
+        #    r = read_data(handle, address, base)
+        #    status['ref-input'][ref]['demod-polarity'] = demod_polarity[(r & 0x80)>>7]
+        #    status['ref-input'][ref]['demod-persist-enabled'] = bool((r & 0x40)>>6)
+        #    status['ref-input'][ref]['demod-sync-edge'] = (r & 0x30)>>4
+        #    status['ref-input'][ref]['demod-enabled'] = bool((r & 0x80)>>3)
+        #    status['ref-input'][ref]['demod-event-pol'] = event_pol[(r & 0x04)>>2]
+        #    status['ref-input'][ref]['demod-sensitivity'] = r & 0x03
+        #    base += 1
 
         base = 0x0400
-        for ref in ['a','aa','b','bb']:
+        for ref in ['a','aa','b','bb']: # '0','1'
             rdiv =  read_data(handle, address, base+0)
             rdiv += read_data(handle, address, base+1) << 8
             rdiv += read_data(handle, address, base+2) << 16
@@ -477,7 +475,13 @@ def main (argv):
                 ('fast', 0x02),
                 ('slow', 0x01),
             ]
-            read_reg(handle, address, status['ref-input'], ref, base, bitfields)
+            r = read_data(handle, address, base)
+            status['ref-input'][ref]['loss-of-signal'] = bool((r&0x20)>>5)
+            status['ref-input'][ref]['valid'] = bool((r&0x10)>>4)
+            status['ref-input'][ref]['fault'] = bool((r&0x08)>>3)
+            status['ref-input'][ref]['jitter-excess'] = bool((r&0x04)>>2)
+            status['ref-input'][ref]['fast'] = bool((r&0x02)>>1)
+            status['ref-input'][ref]['slow'] = bool((r&0x01)>>0)
             base += 1
     
     if args.irq:
