@@ -868,9 +868,9 @@ def main (argv):
                 status['distrib'][ch]['outc']['+']['muted'] = bool((r & 0x04)>>2)
             base += 0x100
             
-    print("======== TOTAL ===============")
-    print(json.dumps(status, sort_keys=True, indent=2))
-    print("==============================")
+    #print("======== TOTAL ===============")
+    #print(json.dumps(status, sort_keys=True, indent=2))
+    #print("==============================")
  
     if args.filter_by_key:
         filtered = {}
@@ -896,8 +896,9 @@ def main (argv):
             to_diff = []
             for f in filters:
                 to_diff = filter_by_value(filtered[category], f)
-                print("========= diff ==============")
-                print(json.dumps(to_diff, sort_keys=True, indent=2))
+                #TODO conclude diff op
+                #print("========= diff ==============")
+                #print(json.dumps(to_diff, sort_keys=True, indent=2))
     
     print(json.dumps(filtered, sort_keys=True, indent=2))
     
