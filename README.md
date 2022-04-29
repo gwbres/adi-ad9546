@@ -42,15 +42,15 @@ to restrict to supported operations, when operating an AD9545.
 
 ## Utilities
 
-* `calib.py`: is critical, calibrates clock and internal synthesizers. 
-Action required depending on previous user actions and current settings. 
-* `distrib.py`: is critical, controls clock distribution and output signals
+* `calib.py`: calibrates core portions of the clock. Typically required
+when booting or a new setup has just been loaded.
+* `distrib.py`: controls clock distribution and output signals
 * `misc.py`: miscellaneous / optionnal stuff
-* `power-down.py` : power saving and management utility
-* `regmap.py`: load / dump a register map preset
-* `reset.py`: to quickly reset the device
-* `status.py` : general status monitoring, including on board temperature,
-sensors and IRQ flags
+* `power-down.py` : power saving and management utility, turns core sections on and off.
+* `ref-input.py`: controls clock input signals 
+* `regmap.py`: load or dump a register map preset
+* `reset.py`: reset the device
+* `status.py` : status monitoring, includes IRQ flag reports and onboard temperature reading
 
 ## Register map
 
