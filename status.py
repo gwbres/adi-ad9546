@@ -25,43 +25,30 @@ def read_reg (handle, dev, status, reg, addr, bitfields):
     for b in bitfields:
         status[reg][b[0]] = bitfield(data, b[1])
 
-def contains_key (tree, key):
-    """ 
-    Returns true if at least 1 branch from this tree contains given `key`
-    """
-    print(str(tree)+"\n")
-    at_least_one = False
-    for child in tree.keys():
-        if type(tree[child]) is dict: # child
-            if contains_key(tree[child], key):
-                print("===> Innter tree matched", child)
-                at_least_one |= True
-        else:
-            if child == key:
-                print("===> Child matched by name", child)
-                at_least_one |= True
-    return at_least_one
-
 def filter_by_key (tree, key):
-    ret = {}
+    ret = tree.copy()
     for k in tree.keys():
         if type(tree[k]) is dict:
-            if k == key: # total match
-                print("Total match @ ", k)
-                ret[k] = tree[k] 
-            else:
-                # retain childs that contain key
-                at_least_one = False
-                for child in tree[k].keys(): 
-                    if type(tree[k][child]) is dict:
-                        at_least_one |= contains_key(tree[k][child], key)
+            if k != key: # not a top branch of interest
+                # ==> inner match?
+                has_child = len(tree[k].keys()) > 0
+                print(has_child, k)
+                if has_child:
+                    # ==> retain child only have a subbranch of interest
+                    retained = filter_by_key(tree[k], key)
+                    got_something = len(retained.keys()) > 0
+                    if got_something:
+                        print("Got something", k, retained)
                     else:
-                        at_least_one |= (child == key)
-                if at_least_one:
-                    print("At least one !")
+                        print("Found nothing" , k, key)
+                        del ret[k]
+                else:
+                    print("leaf: ", k)
+                    del ret[k]
+                    continue
         else:
-            if k == key:
-                ret[k] = tree[k]
+            if k != key:
+                del ret[k]
     return ret
 
 def main (argv):
