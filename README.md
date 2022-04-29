@@ -52,11 +52,13 @@ when booting or a new setup has just been loaded.
 * `reset.py`: reset the device
 * `status.py` : status monitoring, includes IRQ flag reports and onboard temperature reading
 
+See at the bottom of this page for typical configuration flows.
+
 ## Register map
 
 `regmap.py` allows the user to quickly load an exported
 register map from the official A&D graphical tool.
-* Support format is `json`.
+* Supported format is `json`
 * `i2c` bus must be specified
 * `i2c slave address` must be specified
 
@@ -202,7 +204,7 @@ To determine current `sysclock` related settings, use status.py with `--sysclock
 
 ## Calibration script
 
-`calib.py` allows easy & quick chipset (re)calibration.   
+`calib.py` allows chipset (re)calibration.   
 
 It is required to perform a calibration at boot time.  
 It is required to perform an analog Pll (re)calibration anytime
@@ -226,31 +228,39 @@ calib.py --sysclk 0 0x4A
 `distrib.py` is an important utility.   
 It helps configure the clock path, control output signals
 and their behavior.  
+
 To determine the chipset current configuration related to clock distribution,
 one should use the status script with `--distrib` option.
 
 Control flags:
 
-* `--channel`: (optionnal) describes which channel we are targetting.
+* `--channel` (optionnal) describes which targetted channel.
 Defaults to `all`, meaning if `--channel` is not specified, both channels (CH0/CH1)
 are assigned the same value.
 This script only suppports a single `--channel` assignment.
 
-* `--pin`: (optionnal) describes which pin (A/B) is targetted.
-Defaults to `all` meaning, both A, B, (and AA,BB,C,CC when feasible) are assigned the same value.
-This script only suppports a single `--pin` assignment. Therefore, one must call
-this script several times to control several pins.
+* `--path` (optionnal) describes desired signal path. 
+Defaults to `all` meaning, all paths are assigned the same value (if feasible).  
+This script only suppports a single `--path` assignment at a time.  
+Refer to help menu for list of accepted values.
+
+* `--pin` (optionnal) describes desired pin, when controlling an output pin.
+Defaults to `all` meaning, all pins (+ and -) are assigned the same value when feasible.  
+Refer to help menu for list of accepted values.
 
 Action flags: the script supports as many `action` flags as desired, see the list down below.
 
 * `--mode` set OUTxy output pin as single ended or differential
 * `--format` sets OUTxy current sink/source format
 * `--current` sets OUTxy pin output current [mA], where x = channel
+
 ```shell
 # set channel 0 as HCSL default format
 distrib.py --format hcsl --channel 0
+
 # set channel 1 as CML format
 distrib.py --format hcsl --channel 1
+
 # set channel 0+1 as HCSL default format
 distrib.py --format hcsl
 
@@ -262,6 +272,7 @@ distrib.py --mode se --channel 1 --pin a
 
 # set Q0A Q0B to output 12.5 mA, default output current
 distrib.py --current 12.5 --channel 0
+
 # set Q1A to output 7.5 mA, minimal current
 distrib.py --current 7.5 --channel 1 --pin a
 ```
