@@ -1,6 +1,7 @@
 # ADI-AD9546 
 
 [![Python application](https://github.com/gwbres/adi-ad9546/actions/workflows/python-app.yml/badge.svg)](https://github.com/gwbres/adi-ad9546/actions/workflows/python-app.yml)
+[![PyPI version](https://badge.fury.io/py/adi-ad9546.svg)](http://badge.fury.io/py/adi-ad9546)
 
 Set of tools to interact & program AD9546/45 integrated circuits, by Analog Devices.
 
