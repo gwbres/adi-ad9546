@@ -463,3 +463,18 @@ status.py --temp 0 0x48 # current reading [°C]
 ```
 
 Related warning events are then retrieved with the `irq.py` utility, refer to related section.
+
+## Typical configuration flows
+
+* load a profile preset, calibrate and get started
+
+```shell
+regmap.py --load profile.json --quiet 0 0x48
+status.py --pll --distrib --filter-by-key ch0 0 0x48
+calib.py --all 0 0x48
+status.py --pll --distrib --filter-by-key ch0 0 0x48
+```
+
+* distrib operation: mute / unmute + powerdown (TODO)
+
+* using integrated signal quality monitoring (TODO)
