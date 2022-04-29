@@ -83,6 +83,9 @@ Use the `help` menu to learn how to use this script:
 status.py -h
 ```
 
+There is basically a `--flag` option (reader) for pretty much all
+custom scripts (writer) down below, to readback related values.
+
 Several part of the integrated chips can be monitored at once.
 Output format is `json` and is streamed to `stdout`.
 Example of use:
@@ -111,6 +114,78 @@ if ret.exitcode == 0: # OK
    # build structure directly
    status = eval(status)
    status['info']['vendor'] # eval() is way cool!
+```
+
+Status (depending on sections of interest) is quiet verbose.   
+To reduce the quantity of information displayed, one can use the two availlable filters:
+
+* `--filter-by-key`: filters result by keyword identifiers.
+Identifiers are passed as comma separated strings.
+Filters only retain data that match the specified identifiers exactly
+(case sensitive).
+
+```shell
+# Clock infos filter
+status.py --info --filter-by-key vendor 0 0x48
+```
+
+It is possible to cummulate filters using comma separated description
+
+```shell
+# Retain two infos
+status.py --info --filter-by-key chip-type,vendor 0 0x48
+
+# Clock distribution status: focus on channel 0
+status.py --distrib --filter-by-key ch0 0 0x48
+
+# Retain only `a` and `b` paths among channel0
+status.py --distrib --filter-by-key ch0,a,b 0 0x48
+```
+
+By default, if requested keyword is not found,
+filter op is considered faulty and fulldata set is exposed.
+
+```shell
+# trying to filter general infos
+status.py --info --filter-by-key something 0 0x48
+```
+
+As always, flag order does not matter.
+It is possible to filter several status reports with
+relevant keywords:
+
+```shell
+# Request clock distribution status report
+# and ref-input status report
+# -> restrict distribution status report to `ch0`  
+# --> --ref-input status is untouched because it does not contain the `ch0` identifier
+status.py --distrib --ref-input filter-by-key ch0 0 0x48
+
+# Same thing idea, but we apply a filter on seperate status reports
+# `ch1` only applies to `distrib`, `slow` only applies to `ref-input`
+status.py --distrib --ref-input --filter-by-key ch1,slow 0 0x48
+```
+
+* `filter-by-value`: it is possible to filter status reports
+on matching values too. Once again, only exactly matching keywords
+are retained.
+
+```shell
+# Return `0x456` <=> vendor field
+status.py --info --filter-by-value 0x456 1 0x48
+
+# Return only deasserted values
+status.py --distrib --filter-by-value disabled 1 0x48
+
+# Optimum `deasserted` value filter, 
+# using cummulated filter
+status.py --distrib --filter-by-value disabled,false,inactive 1 0x48
+```
+
+It is possible to combine `key` and `value` restrictions:
+
+```shell
+# todo  
 ```
 
 ## Sys clock
@@ -288,7 +363,7 @@ To quickly reset the device
 
 ## Ref input script
 
-`ref_input.py` to control the reference input signal,
+`ref-input.py` to control the reference input signal,
 signal quality constraints, switching mechanisms 
 and the general clock state.
 

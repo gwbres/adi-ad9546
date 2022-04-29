@@ -26,29 +26,31 @@ def read_reg (handle, dev, status, reg, addr, bitfields):
         status[reg][b[0]] = bitfield(data, b[1])
 
 def filter_by_key (tree, key):
-    ret = tree.copy()
+    ret = {} 
     for k in tree.keys():
         if type(tree[k]) is dict:
-            if k != key: # not a top branch of interest
-                # ==> inner match?
-                has_child = len(tree[k].keys()) > 0
-                print(has_child, k)
-                if has_child:
-                    # ==> retain child only have a subbranch of interest
-                    retained = filter_by_key(tree[k], key)
-                    got_something = len(retained.keys()) > 0
-                    if got_something:
-                        print("Got something", k, retained)
-                    else:
-                        print("Found nothing" , k, key)
-                        del ret[k]
-                else:
-                    print("leaf: ", k)
-                    del ret[k]
-                    continue
+            if k == key: # top branch of interest
+                # => plain copy
+                ret[k] = tree[k].copy()
+            else: # top branch, not filtered
+                # ==> inner filter ?
+                retained = filter_by_key(tree[k], key)
+                got_something = len(retained.keys()) > 0
+                if got_something:
+                    ret[k] = retained
         else:
-            if k != key:
-                del ret[k]
+            if k == key: # value of interest
+                ret[k] = tree[k]
+    return ret
+
+def filter_by_value (tree, value):
+    ret = {}
+    for k in tree.keys():
+        if type(tree[k]) is dict:
+            continue
+        else:
+            if str(tree[k]) == value:
+                ret[k] = value
     return ret
 
 def main (argv):
@@ -875,22 +877,27 @@ def main (argv):
         filters = args.filter_by_key.split(",")
         for category in status.keys(): # filter all categories
             filtered[category] = {}
-            filtered_out = []
+            to_merge = []
             for f in filters:
-                filtered_out.append(filter_by_key(status[category], f))
-                #print("xxxxxxxxxx filtered with {} xxxxxxxxx\n{}".format(f, str(filtered_out[-1])))
-            # merge filtered out categories
-            print("xxxxxxxxxxxxxxx MERGED xxxxxxxxxxxxxxxxxxx")
+                to_merge.append(filter_by_key(status[category], f))
             all_empty = True
-            for f in filtered_out:
-                for k in f.keys():
+            for d in to_merge:
+                if len(d) > 0:
                     all_empty = False
-                    filtered[category][k] = f[k] 
-            if all_empty: # not a single match accros entire category => maintain
-                filtered[category] = status[category].copy()
-                
+                filtered[category] |= d 
+            if all_empty: # trick to catch non relevant filter ops
+                filtered[category] = status[category].copy()    
     else:
         filtered = status.copy()
+                
+    if args.filter_by_value:
+        filters = args.filter_by_value.split(",")
+        for category in status.keys(): # filter all categories
+            to_diff = []
+            for f in filters:
+                to_diff = filter_by_value(filtered[category], f)
+                print("========= diff ==============")
+                print(json.dumps(to_diff, sort_keys=True, indent=2))
     
     print(json.dumps(filtered, sort_keys=True, indent=2))
     
