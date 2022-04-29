@@ -306,7 +306,7 @@ a `q-sync` operation on channel 1,
 or an Mx-pin operation with dedicated script, to enable this output signal.
 
 * `--q-sync` : initializes a Qxy Divider synchronization sequence manually. 
-When x is the `channel` and `y` is the desired pin.
+When x is the `channel` and `y` is desired path.
 ```shell
 # triggers Q0A Q0B Q1A Q1B SYNC 
 distrib.py --q-sync 0 0x48
@@ -314,53 +314,56 @@ distrib.py --q-sync 0 0x48
 # triggers Q0A Q0B SYNC 
 distrib.py --q-sync --channel 0 0 0x48
 
-# triggers Q0B Q1B SYNC 
-distrib.py --q-sync --pin b 0 0x48
+# triggers Q0B Q1B SYNC because --channel `all` is implied 
+distrib.py --q-sync --path b 0 0x48
 ```
 
 * `--unmute` : controls QXY unmuting opmode,
-where x is the `channel` and `y` the desired pin.
+where x is the `channel` and `y` desired path.
+
 ```shell
 # Q0A Q0B + Q1A Q1B `immediate` unmuting 
 distrib.py --unmute immediate 0 0x48
 
 # Q0A Q1A `phase locked` unmuting 
-distrib.py --unmute phase --pin a 0 0x48
+distrib.py --unmute phase --path a 0 0x48
 
 # Q0B Q1B `freq locked` unmuting 
-distrib.py --unmute freq --pin b 0 0x48
+distrib.py --unmute freq --path b 0 0x48
 
 # Q0A + Q1B `immediate` unmuting 
-distrib.py --unmute immediate --pin a 0 0x48
-distrib.py --unmute immediate --pin b 0 0x48
+distrib.py --unmute immediate --path a 0 0x48
+distrib.py --unmute immediate --path b 0 0x48
 ```
 
 * `--pwm-enable` and `--pwm-disable`: constrols PWM modulator
-for OUTxy where x is the `channel` and `y` the desired pin.
+for OUTxy where x is the `channel` and `y` the desired path.
 
-* `--divider` : control integer division ratio at
-QXY pin, where 
+* `--divider` : control integer division ratio at Qxy stage
 
 ```shell
-# Q0A,AA,B,BB,C,CC + Q1A,AA,B,BB R=48 division ratio
+# Sets R=48 division ratio, 
+# for Q0A,AA,B,BB,C,CC and Q1A,AA,B,BB 
+# because --channel=`all` and --path=`all` is implied
 distrib.py --divider 48 0 0x48
 
-# Q1A,AA,B,BB R=64 division ratio
+# Sets Q1A,AA,B,BB R=64 division ratio
+# because --path=`all` is implied
 distrib.py --divider 64 --channel 1 0 0x48
 
 # Q0A & Q0B R=23 division ratio
+# requires dual assignment, because --pin {a,b} is not feasible at once
 distrib.py --divider 23 --channel 0 --pin a 0 0x48
 distrib.py --divider 23 --channel 0 --pin b 0 0x48
 ```
 
-* `--phase-offset` applies an instantaneous phase offset
-to selected channel + pin.
-Maximal value is 2\*D-1 where D is previous `--divider` ratio
+* `--phase-offset` applies instantaneous phase offset to desired
+output path. Maximal value is 2\*D-1 where D is previous `--divider` ratio
 for given channel + pin.
 
 ```shell
 # Apply Q0A,AA,B,BB,C,CC + Q1A,AA,B,BB 
-
+# TODO
 ```
 
 ## Reset script
@@ -371,6 +374,13 @@ To quickly reset the device
 * `--sans` : same thing but maintains current registers value 
 * `--watchdog` : resets internal watchdog timer
 * `-h` for more infos
+
+```shell
+# Resets (factory default)
+reset.py --soft 1 0x48
+regmap.py --load settings.json 1 0x48 
+reset.py --sans 1 0x48 # settings are maintained
+```
 
 ## Ref input script
 
