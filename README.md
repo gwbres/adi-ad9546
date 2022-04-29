@@ -160,8 +160,9 @@ relevant keywords:
 # Request clock distribution status report
 # and ref-input status report
 # -> restrict distribution status report to `ch0`  
+# -> restrict pll status to `ch0`
 # --> --ref-input status is untouched because it does not contain the `ch0` identifier
-status.py --distrib --ref-input filter-by-key ch0 0 0x48
+status.py --pll --distrib --ref-input filter-by-key ch0 0 0x48
 
 # Same thing idea, but we apply a filter on seperate status reports
 # `ch1` only applies to `distrib`, `slow` only applies to `ref-input`
