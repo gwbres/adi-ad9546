@@ -71,7 +71,7 @@ def main (argv):
         ('phase-offset', int, [], 'Apply inst. phase offset to Qxy output path'),
         ('half-divider', str, ['enable','disable'], 'Control Qxy Half integer divider'),
         ('q-sync', None, [], 'Initialize a sync sequence on Q div. stage manually. Refer to README & datasheet.'),
-        ('pwm', str, ['enable','disable'],  'Control OUTxy PWM modulator, where x = channel, y = output path'),
+        ('pwm', str, ['enable','disable'],  'Control Qxy PWM modulator, where x = channel, y = output path'),
         ('mute', None, [],   'Mute OUTxy+/- output path, x = channel, y = path and optionnal pin'),
         ('unmute', None, [], 'Unmute OUTxy+/- output path, x = channel, y = path and optionnal pin'),
     ]
@@ -390,6 +390,7 @@ def main (argv):
             write_data(handle, address, 0x000F, 0x01) # IO update
             write_data(handle, address, 0x2201, reg|0xF7) # clear
             write_data(handle, address, 0x000F, 0x01) # IO update
+        return 0 # force stop, to avoid corruption on misusage
     
     if args.unmuting:
         value = 0x00
@@ -414,6 +415,7 @@ def main (argv):
             reg = read_data(handle, address, 0x14DC) & 0xFC
             write_data(handle, address, 0x14DC, reg | value)
             write_data(handle, address, 0x000F, 0x01) # IO update
+        return 0 # force stop, to avoid corruption on misusage
 
     if args.pwm:
         regs = []
@@ -445,6 +447,7 @@ def main (argv):
             else:
                 write_data(handle, address, r&0xFE)
         write_data(handle, address, 0x000F, 0x01) # IO update
+        return 0 # force stop, to avoid corruption on misusage
     
     if args.half_divider:
         regs = []
@@ -497,6 +500,7 @@ def main (argv):
             else:
                 write_data(handle, address, reg, r&0xEF)
         write_data(handle, address, 0x000F, 0x01) # IO update
+        return 0 # force stop, to avoid corruption on misusage
 
     if args.mute or args.unmute:
         if args.channel == 'all':
@@ -540,7 +544,6 @@ def main (argv):
                                 write_data(handle, address, r&0xF7)
                             reg += 1
                         base += 0x100
-            write_data(handle, address, 0x000F, 0x01) # IO update
         elif args.channel == '0':
             if args.path == 'all':
                 if args.pin == 'all':
@@ -570,7 +573,6 @@ def main (argv):
                         elif args.unmute:
                             write_data(handle, address, r&0xF7)
                         base += 1
-            write_data(handle, address, 0x000F, 0x01) # IO update
         elif args.channel == '1':
             if args.path == 'all':
                 if args.pin == 'all':
@@ -600,7 +602,8 @@ def main (argv):
                         elif args.unmute:
                             write_data(handle, address, r&0xF7)
                         base += 1
-            write_data(handle, address, 0x000F, 0x01) # IO update
+        write_data(handle, address, 0x000F, 0x01) # IO update
+        return 0 # force stop, to avoid corruption on misusage
 
 if __name__ == "__main__":
     main(sys.argv[1:])
