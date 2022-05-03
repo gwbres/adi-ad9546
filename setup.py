@@ -17,5 +17,6 @@ setup(name="adi-ad9546",
         "ref-input.py",
         "reset.py",
         "status.py",
+        "sysclk.py",
     ],
 )
