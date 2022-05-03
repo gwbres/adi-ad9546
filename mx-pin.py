@@ -74,6 +74,11 @@ def main (argv):
         help="Ouptut current (drive strength); default is 6mA",
     )
     args = parser.parse_args(argv)
+
+    handle = SMBus()
+    handle.open(int(args.bus))
+    address = args.address
+
     pin = args.pin
     pin_n = int(pin.strip("M"))
     mode = args.mode
