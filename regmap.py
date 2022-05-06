@@ -95,6 +95,12 @@ REGMAP = [
     (0x3A00, 0x3A3B),
 ]
 
+def regmap_size():
+    s = 0
+    for (start, stop) in REGMAP:
+        s += stop-start+1
+    return s
+
 KNOWN_DEVICES = ["ad9545","ad9546"]
 
 def progress_bar (progress, width=100):
@@ -165,7 +171,7 @@ def main (argv):
         with open(args.load, encoding="utf-8-sig") as f:
             data = json.load(f)
             regmap = data["RegisterMap"]
-            N = len(regmap)
+            size = regmap_size()
             for addr in regmap:
                 value = int(regmap[addr], 16) & 0xFF # 1 byte from hex()
                 # 2 address bytes
@@ -174,7 +180,7 @@ def main (argv):
                 lsb = _addr & 0xFF
                 handle.write_i2c_block_data(address, msb, [lsb, value])
                 if not args.quiet:
-                    progress += 100 / N
+                    progress += 100 / size
                     if int(progress) % update_perc:
                         progress_bar(int(progress),width=50)
             handle.write_i2c_block_data(address, 0x00, [0x0F, 0x01]) # I/O update
@@ -192,6 +198,7 @@ def main (argv):
         struct["wizard"] = {}
         struct["wizard"]["version"] = "1.0.0.0"
         struct["RegisterMap"] = {}
+        size = regmap_size()
         for (start, stop) in REGMAP:
             for i in range (start, stop+1):
                 # 2 address bytes
@@ -201,7 +208,7 @@ def main (argv):
                 data = handle.read_byte(address)
                 struct["RegisterMap"]["0x{:04X}".format(i)] = "0x{:02X}".format(data)
                 if not args.quiet:
-                    progress += 100 / 1200 #N
+                    progress += 100 / size
                     if int(progress) % update_perc:
                         progress_bar(int(progress),width=50)
         struct = json.dumps(struct, sort_keys=True, indent=4)
