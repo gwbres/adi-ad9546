@@ -139,13 +139,6 @@ def main (argv):
         type=str,
         help="Dump current regmap")
     parser.add_argument(
-        "--diff",
-        nargs=2,
-        metavar=("loaded","dumped"),
-        help="""Runs `diff` between `loaded` (json file) : RegMap from A&D official Ui, and `dumped` 
-        (json file) dumped with this script"""
-    )
-    parser.add_argument(
         "--chip",
         metavar="{}".format(str(KNOWN_DEVICES)),
         type=str,
@@ -214,16 +207,6 @@ def main (argv):
         struct = json.dumps(struct, sort_keys=True, indent=4)
         with open(args.dump, "w") as fd:
             fd.write(struct)
-
-    if args.diff:
-        with open(args.diff[0], encoding="utf-8-sig") as fd:
-            ad_official = json.load(fd)["RegisterMap"]
-        with open(args.diff[1], encoding="utf-8-sig") as fd:
-            dumped = json.load(fd)["RegisterMap"]
-        for k in ad_official.keys():
-            expected = ad_official[k]
-            if dumped[k] != expected:
-                print("reg {} - expected {} - {}".format(k, expected, dumped[k]))
 
 if __name__ == "__main__":
     main(sys.argv[1:])
