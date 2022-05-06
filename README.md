@@ -61,11 +61,10 @@ See at the bottom of this page for typical configuration flows.
 
 `regmap.py` allows the user to quickly load an exported
 register map from the official A&D graphical tool.
-* Supported format is `json`
-* `i2c` bus must be specified.
-* `i2c slave address` must be specified
-* &#9888; Be careful, `--bus` and `--slv` are optionnal on this one
-and are passed as depicted down below &#9888;
+* Input/output is `json`
+* `i2c` bus is optionnally passed (&#9888; differs from other tools) with `--bus` 
+* `i2c` slave address is optionnally passed (&#9888; differs from other tools) with `--slv` 
+* `--quiet` to disable the stdout progress bar
 
 ```shell
 regmap.py -h
@@ -77,8 +76,6 @@ Export current register map to open it in A&D graphical tools:
 ```shell
 regmap.py --dump /tmp/output.json --bus 0 --slv 0x48
 ```
-
-* Use `--quiet` in both cases to disable the progress bar
 
 * It is possible to `--diff` an official json file
 from A&D tools, and a dumped one, mainly for debugging purposes.
