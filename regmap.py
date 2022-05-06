@@ -2,8 +2,7 @@
 #################################################################
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
-# regmap.py
-# small script to quickly load an exported regmap into chipset
+# regmap.py: load/dump a register map into device
 #################################################################
 import sys
 import json

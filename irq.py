@@ -2,8 +2,7 @@
 #################################################################
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
-# irq.py
-# IRQ clearing tool
+# irq.py: IRQ clearing tool
 #################################################################
 import sys
 import argparse
@@ -21,7 +20,7 @@ def read_data (handle, dev, addr):
     return data
 
 def main (argv):
-    parser = argparse.ArgumentParser(description="AD9545/46 IRQ clearing tool")
+    parser = argparse.ArgumentParser(description="AD9546 IRQ clearing tool")
     parser.add_argument(
         "bus",
         help="I2C bus",
