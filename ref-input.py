@@ -33,6 +33,7 @@ def main (argv):
     parser.add_argument(
         '--ref',
         choices=['a','aa','b','bb','aux-0','aux-1','aux-2','aux-3','all'],
+        default="all",
         help="""Select desired input reference. 
         Defaults to `all`. Aux-x means auxilary-x input reference, when feasible.""",
     )
