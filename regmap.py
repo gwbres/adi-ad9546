@@ -219,7 +219,11 @@ def main (argv):
         with open(args.diff[0], encoding="utf-8-sig") as fd:
             ad_official = json.load(fd)["RegisterMap"]
         with open(args.diff[1], encoding="utf-8-sig") as fd:
-            dumped = json.load(fd)
+            dumped = json.load(fd)["RegisterMap"]
+        for k in ad_official.keys():
+            expected = ad_official[k]
+            if dumped[k] != expected:
+                print("reg {} - expected {} - {}".format(k, expected, dumped[k]))
 
 if __name__ == "__main__":
     main(sys.argv[1:])

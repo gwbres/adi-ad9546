@@ -62,21 +62,38 @@ See at the bottom of this page for typical configuration flows.
 `regmap.py` allows the user to quickly load an exported
 register map from the official A&D graphical tool.
 * Supported format is `json`
-* `i2c` bus must be specified
+* `i2c` bus must be specified.
 * `i2c slave address` must be specified
+* &#9888; Be careful, `--bus` and `--slv` are optionnal on this one
+and are passed as depicted down below &#9888;
 
 ```shell
 regmap.py -h
 # load a register map (on bus #0 @0x48)
-regmap.py 0 0x48 --load test.json
+regmap.py --bus 0 --slv 0x48 --load test.json
 ```
 
 Export current register map to open it in A&D graphical tools:
 ```shell
-regmap.py --dump /tmp/output.json 0 0x48
+regmap.py --dump /tmp/output.json --bus 0 --slv 0x48
 ```
 
 * Use `--quiet` in both cases to disable the progress bar
+
+* It is possible to `--diff` an official json file
+from A&D tools, and a dumped one, mainly for debugging purposes.
+
+```shell
+# order is always (official A&D, dumped) files
+# ===> --bus and --slv are not required for the `diff` operation
+regmap.py --diff official_ad.json /tmp/output.json
+```
+
+This operation was developped mainly for debugging purposes.  
+It is equivalent to a `diff -q -Z official_ad.json /tmp/output.json`
+focused on the "RegisterMap" field.
+That command being impossible to use, because --dump
+does not replicate 100% of the official A&D file content (too complex).
 
 ## Status script
 
