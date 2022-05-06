@@ -48,12 +48,16 @@ to restrict to supported operations, when operating an AD9545.
 * `calib.py`: calibrates core portions of the clock. Typically required
 when booting or a new setup has just been loaded.
 * `distrib.py`: controls clock distribution and output signals
+* `irq.py`: IRQ clearing & masking operations 
 * `misc.py`: miscellaneous / optionnal stuff
+* `mx-pin.py`: Mx programmable I/O management 
 * `power-down.py` : power saving and management utility, turns core sections on and off.
-* `ref-input.py`: controls clock input signals 
+* `ref-input.py`: reference / input signal control & management
 * `regmap.py`: load or dump a register map preset
+* `regmap-diff.py`: loaded / dumped regmap differentiator (debug tool)
 * `reset.py`: reset the device
 * `status.py` : status monitoring, includes IRQ flag reports and onboard temperature reading
+* `sysclk.py` : sys clock control & management tool
 
 See at the bottom of this page for typical configuration flows.
 
