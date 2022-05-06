@@ -90,7 +90,8 @@ This operation was developped mainly for debugging purposes.
 It is equivalent to a `diff -q -Z official_ad.json /tmp/output.json`
 focused on the "RegisterMap" field.
 That command being impossible to use, because --dump
-does not replicate 100% of the official A&D file content (too complex).
+does not replicate 100% of the official A&D file content (too complex),
+and is not focused on the "RegisterMap" field.
 
 ## Status script
 
