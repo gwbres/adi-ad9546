@@ -130,24 +130,28 @@ def main (argv):
     
     if args.sel:
         r = read_data(handle, address, 0x0201)
+        r &= 0xF7 # mask out
         write_data(handle, address, 0x0201, r | (sel[args.sel]<<3))
         write_data(handle, address, 0x000F, 0x01) # I/O update
         return 0 # force stop
    
     if args.divider:
         r = read_data(handle, address, 0x0201)
+        r &= 0xF9
         write_data(handle, address, 0x0201, r | (round(math.log2(args.divider)) << 1))
         write_data(handle, address, 0x000F, 0x01) # I/O update
         return 0 # force stop
     
     if args.doubler:
         r = read_data(handle, address, 0x0201)
+        r &= 0xFE # mask bit out
         write_data(handle, address, 0x0201, r | en[args.doubler])
         write_data(handle, address, 0x000F, 0x01) # I/O update
         return 0 # force stop
 
     if args.dpll_source:
         r = read_data(handle, address, 0x0284)
+        r &= 0xE0 # mask bits out
         write_data(handle, address, 0x0284, r | dpll_sources[args.dpll_source])
         write_data(handle, address, 0x000F, 0x01) # I/O update
         return 0 # force stop
@@ -155,29 +159,35 @@ def main (argv):
     if args.dpll_bw:
         bw = args.dpll_bw * 10
         write_data(handle, address, 0x0285, r & 0xFF)
-        write_data(handle, address, 0x0285, (r & 0xFF00)>>8)
+        write_data(handle, address, 0x0286, (r & 0xFF00)>>8)
         write_data(handle, address, 0x000F, 0x01) # I/O update
         return 0 # force stop
 
     if args.dpll_ch:
         r = read_data(handle, address, 0x0287)
-        write_data(handle, address, 0x0287, r | dpll_ch[args.dpll_ch]) 
+        r &= 0xFE # mask bit out
+        write_data(handle, address, 0x0287, r | dpll_ch[args.dpll_ch]) # assign
         write_data(handle, address, 0x000F, 0x01) # I/O update
         return 0 # force stop
 
     if args.cutoff:
         r = read_data(handle, address, 0x0288)
+        r &= 0xF8 # mask bits out 
         write_data(handle, address, 0x0288, r | cutoffs[args.cutoff])
         write_data(handle, address, 0x000F, 0x01) # I/O update
         return 0 # force stop
 
     if args.free_run:
-        reg = read_data(handle, address, 0x2105)
+        r = read_data(handle, address, 0x2105)
+        r &= 0xFE # clear bits out
+        write_data(handle, address, 0x2105, r|0x01) # force free run
         write_data(handle, address, 0x000F, 0x01) # I/O update
         return 0 # force stop
 
     if args.holdover:
-        reg = read_data(handle, address, 0x2105)
+        r = read_data(handle, address, 0x2105)
+        r &= 0xFD
+        write_data(handle, address, 0x2105, r | 0x02) # force holdover
         write_data(handle, address, 0x000F, 0x01) # I/O update
         return 0 # force stop
 
@@ -193,6 +203,7 @@ def main (argv):
     
     if args.slew_rate_lim:
         r = read_data(handle, address, 0x0283)
+        r &= 0xF8
         write_data(handle, address, 0x0283, r | slew_r[args.slew_rate_lim])
         write_data(handle, address, 0x000F, 0x01) # I/O update
         return 0
