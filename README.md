@@ -228,7 +228,7 @@ To determine current `sysclock` related settings, use status.py with `--sysclock
 * `--freq`: to program input frequency [Hz]
 * `--sel` : to select the input path (internal crystal or external XOA/B pins)
 * `--div`: set integer division ratio on input frequency
-* `--doubler`: enables input doubler
+* `--doubler`: enables input frequency doubler
 
 ## Calibration script
 
