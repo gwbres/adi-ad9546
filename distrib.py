@@ -453,7 +453,7 @@ def main (argv):
         regs = []
         if args.channel == 'all':
             if args.path == 'all':
-                regs = [0x1108, 0x111A, 0x1111, 0x111A, 0x1123, 0x112C, 0x1135] 
+                regs = [0x1108, 0x1111, 0x111A, 0x1123, 0x112C, 0x1135, 0x1508, 0x1511, 0x151A, 0x1523] 
             elif args.path == 'a':
                 regs = [0x1108] 
             elif args.path == 'aa':
@@ -468,7 +468,7 @@ def main (argv):
                 regs = [0x1135] 
         elif args.channel == '0':
             if args.path == 'all':
-                regs = [0x1108, 0x111A, 0x1111, 0x111A, 0x1123, 0x112C, 0x1135]
+                regs = [0x1108, 0x1111, 0x111A, 0x1123, 0x112C, 0x1135]
             elif args.path == 'a':
                 regs = [0x1108] 
             elif args.path == 'aa':
