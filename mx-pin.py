@@ -89,8 +89,8 @@ def main (argv):
         '3mA': 1,
     }
     modes = {
-        'control': 0x00,
-        'status': 0x80,
+        'control': 0,
+        'status': 1,
     }
     drv = {
         'normal': 0,
@@ -106,23 +106,22 @@ def main (argv):
     }
 
     if pin_n < 4:
-        reg = 0x0100    
+        reg = 0x0100 
     else:
         reg = 0x0101 
-    
+
     r = read_data(handle, address, reg)
-    mask = 0x03 << pin_*2
+    mask = 0x03 << ((pin_n % 4)*2)
     r &= (mask ^0xFF) #mask bits out
     if args.rcv:
-        write_data(handle, address, reg, r | (recv[args.rcv] << (pin_n*2))) # assign
+        write_data(handle, address, reg, r | (recv[args.rcv] << ((pin_n%4)*2))) # assign
     elif args.drv:
-        write_data(handle, address, reg, r | (drv[args.drv] << (pin_n*2))) # assign
+        write_data(handle, address, reg, r | (drv[args.drv] << ((pin_n%4)*2))) # assign
     
     base = 0x0102
     r = read_data(handle, address, base + pin_n)
-    mask = 0x01 << 7
-    r &= (mask ^0xFF) # mask out
-    write_data(handle, address, base + pin_n, r | modes[args.mode])
+    r &= 0x7F # mask bit out
+    write_data(handle, address, base + pin_n, r | (modes[args.mode] <<7))
 
     r = read_data(handle, address, 0x0109)
     mask = 0x01 << pin_n
