@@ -86,7 +86,7 @@ def main (argv):
     
     currents = {
         '6mA': 0,
-        '3mA': 0,
+        '3mA': 1,
     }
     modes = {
         'control': 0x00,
@@ -111,16 +111,22 @@ def main (argv):
         reg = 0x0101 
     
     r = read_data(handle, address, reg)
+    mask = 0x03 << pin_*2
+    r &= (mask ^0xFF) #mask bits out
     if args.rcv:
-        write_data(handle, address, reg, r | (recv[args.rcv] << (pin_n*2)))
+        write_data(handle, address, reg, r | (recv[args.rcv] << (pin_n*2))) # assign
     elif args.drv:
-        write_data(handle, address, reg, r | (drv[args.drv] << (pin_n*2)))
+        write_data(handle, address, reg, r | (drv[args.drv] << (pin_n*2))) # assign
     
     base = 0x0102
     r = read_data(handle, address, base + pin_n)
+    mask = 0x01 << 7
+    r &= (mask ^0xFF) # mask out
     write_data(handle, address, base + pin_n, r | modes[args.mode])
 
     r = read_data(handle, address, 0x0109)
+    mask = 0x01 << pin_n
+    r &= (mask ^0xFF) # mask out
     write_data(handle, address, 0x0109, r | (currents[args.current] << pin_n))
     write_data(handle, address, 0x000F, 0x01) # IO update
 

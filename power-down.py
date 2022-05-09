@@ -70,12 +70,12 @@ def main (argv):
                 reg |= 0x04
         if args.refbb:
             if args.clear:
-                reg &= 0xF7 
+                reg &= 0xF7
             else:
                 reg |= 0x08
         if args.refa:
             if args.clear:
-                reg &= 0xFE 
+                reg &= 0xFE
             else:
                 reg |= 0x01
         if args.refaa:
