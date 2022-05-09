@@ -62,7 +62,7 @@ def main (argv):
         ('format', str, ['cml','hcsl'], u"""Select driver format for OUTx where x = chnnal.
         CML: Current Sink. External 50\u03A9 pull up needed.
         HCSL: External 50\u03A9 pull down needed."""),
-        ('current', float, [7.5,12.5,15], 'Set driver output current [mA] for OUTx, where x = channel'),
+        ('current', str, ['7.5mA','12.5mA','15mA'], 'Set driver output current [mA] for OUTx, where x = channel'),
         ('mode', str, ['diff','se','sedd'], """Select between Differential, Single Ended or
         Single Ended Dual Divider for OUTx path, where x = channel"""),
         ('autosync', str, ['manual', 'immediate','phase','freq'], 'Set PLLx drivers output mode, where x = channel. Refer to README & datasheet.'),
@@ -111,33 +111,41 @@ def main (argv):
         write_data(handle, address, 0x000F, 0x01) # IO update
         return 0 # force stop, avoids possible corruption when mishandling this script
 
+    autosyncs = {
+        'manual': 0,
+        'immediate': 1,
+        'phase': 2,
+        'freq': 3,
+    }
+
     if args.autosync:
-        value = 0x00
-        if args.auto_sync == 'immediate':
-            value = 0x01
-        if args.auto_sync == 'phase':
-            value = 0x02
-        if args.auto_sync == 'freq':
-            value = 0x03
+        mask = 0x03
         if args.channel == '0':
-            reg = read_data(handle, address, 0x10DB)
-            write_data(handle, address, 0x10DB, reg|value)
+            r = read_data(handle, address, 0x10DB)
+            r &= (mask^0xFF) # mask out
+            write_data(handle, address, 0x10DB, r | autosyncs[args.autosync])
             write_data(handle, address, 0x000F, 0x01) # IO update
         elif args.channel == '1':
-            reg = read_data(handle, address, 0x14DB)
-            write_data(handle, address, 0x14DB, reg|value)
+            r = read_data(handle, address, 0x14DB)
+            r &= (mask^0xFF) # mask out
+            write_data(handle, address, 0x14DB, r | autosyncs[args.autosync])
             write_data(handle, address, 0x000F, 0x01) # IO update
         else: # all
-            reg = read_data(handle, address, 0x10DB)
-            write_data(handle, address, 0x10DB, reg|value)
-            reg = read_data(handle, address, 0x14DB)
-            write_data(handle, address, 0x14DB, reg|value)
+            r = read_data(handle, address, 0x10DB)
+            r &= (mask^0xFF) # mask out
+            write_data(handle, address, 0x10DB, r | autosyncs[args.autosync])
+            r = read_data(handle, address, 0x14DB)
+            r &= (mask^0xFF) # mask out
+            write_data(handle, address, 0x14DB, r | autosyncs[args.autosync])
             write_data(handle, address, 0x000F, 0x01) # IO update
         return 0 # force stop, to avoid corruption on misusage
 
     if args.format:
         regs = []
-        value = 0x00 if args.format == 'cml' else 0x01 # hcsl
+        formats = {
+            'cml': 0,
+            'hcsl': 1,
+        }
         if args.channel == 'all':
             if args.path == 'all':
                 regs = [0x10D7, 0x10D8, 0x10D9, 0x14D7, 0x14D8]
@@ -166,19 +174,17 @@ def main (argv):
         for reg in regs:
             r = read_data(handle, address, reg)
             r &= 0xFE # mask out
-            r |= value # assign
-            write_data(handle, address, reg, r) 
+            write_data(handle, address, reg, r | formats[args.format])
         write_data(handle, address, 0x000F, 0x01) # IO update
         return 0 # force stop, to avoid corruption on misusage
             
     if args.current:
         regs = []
-        if args.current == 12.5:
-            value = 0x01
-        elif args.current == 15:
-            value = 0x02
-        else:
-            value = 0x00
+        currents = {
+            '7.5mA': 0,
+            '12.5mA': 1,
+            '15mA': 2,
+        }
         if args.channel == 'all':
             if args.path == 'all':
                 regs = [0x10D7, 0x10D8, 0x10D9, 0x14D7, 0x14D8]
@@ -206,20 +212,20 @@ def main (argv):
                 regs = [0x14D8]
         for reg in regs:
             r = read_data(handle, address, reg)
-            r &= 0xF9 # mask out
-            r |= (value <<1) # assign
-            write_data(handle, address, reg, r)
+            mask = (0x03)<<1
+            r &= (mask ^0xFF) #mask out
+            write_data(handle, address, reg, r | (currents[args.current]<<1))
         write_data(handle, address, 0x000F, 0x01) # IO update
         return 0 # force stop, to avoid corruption on misusage
     
     if args.mode:
         regs = []
-        if args.mode == 'se':
-            value = 0x01
-        elif args.mode == 'sedd':
-            value = 0x02
-        else: # diff
-            value = 0x00
+        modes = {
+            'diff': 0,
+            'se': 1,
+            'sedd': 2,
+        }
+        mask = 0x03 << 3
         if args.channel == 'all':
             if args.path == 'all':
                 regs = [0x10D7, 0x10D8, 0x10D9, 0x14D7, 0x14D8]
@@ -247,9 +253,8 @@ def main (argv):
                 regs = [0x14D8]
         for reg in regs:
             r = read_data(handle, address, reg)
-            r &= 0xF9 # mask out
-            r |= (value <<1) # assign
-            write_data(handle, address, reg, r)
+            r &= (mask ^0xFF)
+            write_data(handle, address, reg, r | (modes[args.mode] << 3))
         write_data(handle, address, 0x000F, 0x01) # IO update
         return 0 # force stop, to avoid corruption on misusage
     if args.phase_offset:
@@ -307,6 +312,7 @@ def main (argv):
             write_data(handle, address, reg+2, r2)
             write_data(handle, address, reg+3, r3)
             r = read_data(handle, address, reg+4)
+            r &= 0xBF # mask 1 bit out
             write_data(handle, address, reg+4, r | ((r4 & 0x01)<<6))
         write_data(handle, address, 0x000F, 0x01) # IO update
         return 0 # force stop, to avoid corruption on misusage
@@ -368,32 +374,38 @@ def main (argv):
 
     if args.q_sync:
         if args.channel == '0':
-            reg = read_data(handle, address, 0x2101)
-            write_data(handle, address, 0x2101, reg|0x08) # assert
+            r = read_data(handle, address, 0x2101)
+            write_data(handle, address, 0x2101, r|0x08) # assert
             write_data(handle, address, 0x000F, 0x01) # IO update
-            write_data(handle, address, 0x2101, reg|0xF7) # clear
+            write_data(handle, address, 0x2101, r|0xF7) # clear
             write_data(handle, address, 0x000F, 0x01) # IO update
         elif args.channel == '1':
-            reg = read_data(handle, address, 0x2201)
-            write_data(handle, address, 0x2201, reg|0x08) # assert
+            r = read_data(handle, address, 0x2201)
+            write_data(handle, address, 0x2201, r|0x08) # assert
             write_data(handle, address, 0x000F, 0x01) # IO update
-            write_data(handle, address, 0x2201, reg|0xF7) # clear
+            write_data(handle, address, 0x2201, r|0xF7) # clear
             write_data(handle, address, 0x000F, 0x01) # IO update
         else: # all
-            reg = read_data(handle, address, 0x2101)
-            write_data(handle, address, 0x2101, reg|0x08) # assert
+            r = read_data(handle, address, 0x2101)
+            write_data(handle, address, 0x2101, r|0x08) # assert
             write_data(handle, address, 0x000F, 0x01) # IO update
-            write_data(handle, address, 0x2101, reg|0xF7) # clear
+            write_data(handle, address, 0x2101, r|0xF7) # clear
             write_data(handle, address, 0x000F, 0x01) # IO update
-            reg = read_data(handle, address, 0x2201)
-            write_data(handle, address, 0x2201, reg|0x08) # assert
+            r = read_data(handle, address, 0x2201)
+            write_data(handle, address, 0x2201, r|0x08) # assert
             write_data(handle, address, 0x000F, 0x01) # IO update
-            write_data(handle, address, 0x2201, reg|0xF7) # clear
+            write_data(handle, address, 0x2201, r|0xF7) # clear
             write_data(handle, address, 0x000F, 0x01) # IO update
         return 0 # force stop, to avoid corruption on misusage
     
     if args.unmuting:
-        value = 0x00
+        mask = 0x03
+        unmutings = {
+            'immediate': 0,
+            'hitless': 1,
+            'phase': 2,
+            'freq': 3,
+        }
         if args.unmuting == 'hitless':
             value = 0x01
         elif args.unmuting == 'phase':
@@ -401,19 +413,23 @@ def main (argv):
         elif args.unmuting == 'freq':
             value = 0x03
         if args.channel == 'all':
-            reg = read_data(handle, address, 0x10DC) & 0xFC
-            write_data(handle, address, 0x10DC, reg | value)
-            reg = read_data(handle, address, 0x14DC) & 0xFC
-            write_data(handle, address, 0x14DC, reg | value)
+            r = read_data(handle, address, 0x10DC)
+            r &= (mask ^0xFF) # mask out
+            write_data(handle, address, 0x10DC, r | unmutings[args.unmuting])
+            r = read_data(handle, address, 0x14DC)
+            r &= (mask ^0xFF) # mask out
+            write_data(handle, address, 0x14DC, r | unmutings[args.unmuting])
             write_data(handle, address, 0x000F, 0x01) # IO update
             
         elif args.channel == '0':
-            reg = read_data(handle, address, 0x10DC) & 0xFC
-            write_data(handle, address, 0x10DC, reg | value)
+            r = read_data(handle, address, 0x10DC)
+            r &= (mask ^0xFF) # mask out
+            write_data(handle, address, 0x10DC, r | unmutings[args.unmuting])
             write_data(handle, address, 0x000F, 0x01) # IO update
         elif args.channel == '1':
-            reg = read_data(handle, address, 0x14DC) & 0xFC
-            write_data(handle, address, 0x14DC, reg | value)
+            r = read_data(handle, address, 0x14DC)
+            r &= (mask ^0xFF) # mask out
+            write_data(handle, address, 0x14DC, r | unmutings[args.unmuting])
             write_data(handle, address, 0x000F, 0x01) # IO update
         return 0 # force stop, to avoid corruption on misusage
 
@@ -496,9 +512,9 @@ def main (argv):
         for reg in regs:
             r = read_data(handle, address, reg)
             if args.half_divider == 'enable':
-                write_data(handle, address, reg, r|0x10)
+                write_data(handle, address, reg, r|0x10) # assign
             else:
-                write_data(handle, address, reg, r&0xEF)
+                write_data(handle, address, reg, r&0xEF) # mask out
         write_data(handle, address, 0x000F, 0x01) # IO update
         return 0 # force stop, to avoid corruption on misusage
 
@@ -510,9 +526,9 @@ def main (argv):
                     for ch in ['ch0','ch1']:
                         r = read_data(handle, address, base)
                         if args.mute:
-                            write_data(handle, address, base, r|0x02)
+                            write_data(handle, address, base, r|0x02) # assign
                         else:
-                            write_data(handle, address, base, r&0xFD)
+                            write_data(handle, address, base, r&0xFD) # mask out
                         base += 0x100
                 elif args.pin == '+':
                     base = 0x2102
@@ -524,9 +540,9 @@ def main (argv):
                         for path in paths: 
                             r = read_data(handle, address, reg)
                             if args.mute:
-                                write_data(handle, address, r|0x04)
+                                write_data(handle, address, r|0x04) # assign
                             elif args.unmute:
-                                write_data(handle, address, r&0xFB)
+                                write_data(handle, address, r&0xFB) # assign
                             reg += 1
                         base += 0x100
                 elif args.pin == '-':
@@ -539,9 +555,9 @@ def main (argv):
                         for path in paths: 
                             r = read_data(handle, address, reg)
                             if args.mute:
-                                write_data(handle, address, r|0x08)
+                                write_data(handle, address, r|0x08) # assign
                             elif args.unmute:
-                                write_data(handle, address, r&0xF7)
+                                write_data(handle, address, r&0xF7) # assign
                             reg += 1
                         base += 0x100
         elif args.channel == '0':
@@ -550,9 +566,9 @@ def main (argv):
                     base = 0x2101
                     r = read_data(handle, address, base)
                     if args.mute:
-                        write_data(handle, address, base, r|0x02)
+                        write_data(handle, address, base, r|0x02) # assign
                     else:
-                        write_data(handle, address, base, r&0xFD)
+                        write_data(handle, address, base, r&0xFD) # mask out
                 elif args.pin == '+':
                     base = 0x2102
                     paths = ['a','b','c']
