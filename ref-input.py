@@ -72,12 +72,14 @@ def main (argv):
     address = int(args.address, 16)
 
     if args.free_run:
-        reg = read_data(handle, address, 0x2105)
+        r = read_data(handle, address, 0x2105)
+        write_data(handle, address, 0x2105, r | 0x01)
         write_data(handle, address, 0x000F, 0x01) # I/O update
         return 0 # force stop
 
     if args.holdover:
-        reg = read_data(handle, address, 0x2105)
+        r = read_data(handle, address, 0x2105)
+        write_data(handle, address, 0x2105, r | 0x02)
         write_data(handle, address, 0x000F, 0x01) # I/O update
         return 0 # force stop
 
