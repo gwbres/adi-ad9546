@@ -145,7 +145,7 @@ if ret.exitcode == 0: # OK
    status['info']['vendor'] # eval() is way cool!
 ```
 
-Status (depending on sections of interest) is quiet verbose.   
+Status (depending on sections of interest) is quite verbose.   
 To reduce the quantity of information displayed, one can use the two availlable filters:
 
 * `--filter-by-key`: filters result by keyword identifiers.
