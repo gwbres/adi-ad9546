@@ -229,13 +229,13 @@ def main (argv):
             #TODO conclure
 
     if args.eeprom:
-        bitfields = [
-            ('crc-fault', 0x08),
-            ('fault', 0x04),
-            ('busy-downloading', 0x02),
-            ('busy-uploading', 0x01),
-        ]
-        read_reg(status, 'eeprom', 0x3000, bitfields)
+        status['eeprom'] = {}
+        r = dev.read_data(0x3000)
+        status['eeprom']['crc-fault'] = bool((r&0x08)>>3)
+        status['eeprom']['fault'] = bool((r&0x04)>>2)
+        status['eeprom']['busy'] = {}
+        status['eeprom']['busy']['downloading'] = bool((r&0x02)>>1)
+        status['eeprom']['busy']['uploading'] = bool((r&0x01)>>0)
     if args.pll:
         status['pll'] = {}
         for c in ['ch0','ch1']:
@@ -477,87 +477,82 @@ def main (argv):
             base += 1
     
     if args.irq:
-        bitfields = [
-            ('sysclk-unlock', 0x80),
-            ('sysclk-stable', 0x40),
-            ('sysclk-lock', 0x20),
-            ('sysclk-cal-end', 0x10),
-            ('sysclk-cal-start', 0x08),
-            ('watchdog-timeo', 0x04),
-            ('eeprom-fault', 0x02),
-            ('eepromm-complete', 0x01),
-        ]
-        read_reg(status, 'irq', 0x300B, bitfields)
-        bitfields = [
-            ('skew-limit', 0x20),
-            ('temp-warning', 0x10),
-            ('aux-dpll-unfault', 0x08),
-            ('aux-dpll-fault', 0x04),
-            ('aux-dpll-unlock', 0x02),
-            ('aux-dpll-lock', 0x01),
-        ]
-        read_reg(status, 'irq', 0x300C, bitfields)
-        bitfields = [
-            ('refaa-r-div-resync', 0x80),
-            ('refaa-valid', 0x40),
-            ('refaa-unfault', 0x20),
-            ('refaa-fault', 0x10),
-            ('refa-r-div-resync', 0x08),
-            ('refa-valid', 0x04),
-            ('refa-unfault', 0x02),
-            ('refa-fault', 0x01),
-        ]
-        read_reg(status, 'irq', 0x300D, bitfields)
-        bitfields = [
-            ('refbb-r-div-resync', 0x80),
-            ('refbb-valid', 0x40),
-            ('refbb-unfault', 0x20),
-            ('refbb-fault', 0x10),
-            ('refb-r-div-resync', 0x08),
-            ('refb-valid', 0x04),
-            ('refb-unfault', 0x02),
-            ('refb-fault', 0x01),
-        ]
-        read_reg(status, 'irq', 0x300E, bitfields)
-        bitfields = [
-            ('skew-update', 0x10),
-            ('utsp1-update', 0x08),
-            ('utps0-update', 0x04),
-            ('aux-nco1-event', 0x02),
-            ('aux-nco0-event', 0x01),
-        ]
-        read_reg(status, 'irq', 0x300F, bitfields)
-        bitfields = [
-            ('dpll0-freq-unclamped', 0x80),
-            ('dpll0-freq-clamped', 0x40),
-            ('dpll0-slew-limiter-inactive', 0x20),
-            ('dpll0-slew-limiter-active', 0x10),
-            ('dpll0-freq-unlocked', 0x08),
-            ('dpll0-freq-locked', 0x04),
-            ('dpll0-phase-unlocked', 0x02),
-            ('dpll0-phase-locked', 0x01),
-        ]
-        read_reg(status, 'irq', 0x3010, bitfields)
-        bitfields = [
-            ('dpll0-ref-switch', 0x80),
-            ('dpll0-freerun', 0x40),
-            ('dpll0-holdover', 0x20),
-            ('dpll0-hitless-entered', 0x10),
-            ('dpll0-hitless-exit', 0x08),
-            ('dpll0-holdover-ftw-upd', 0x04),
-            ('dpll0-phase-step', 0x01),
-        ]
-        read_reg(status, 'irq', 0x3011, bitfields)
+        status['irq'] = {}
+        for attr in ['sysclk', 'watchdog', 'ref', 'eeprom', 'aux-dpll', 'dpll', 'skew', 'utsp', 'aux-nco']:
+            status['irq'][attr] = {}
+        for ref in ['a','aa','b','bb']:
+            status['irq']['ref'][ref] = {}
+        for ch in [0,1]:
+            status['irq']['dpll'][ch] = {}
+            status['irq']['utsp'][ch] = {}
+            status['irq']['aux-nco'][ch] = {}
+
+        r = dev.read_data(0x300B)
+        status['irq']['sysclk']['unlocked'] = bool((r & 0x80)>>7)
+        status['irq']['sysclk']['stabled'] = bool((r & 0x40)>>6)
+        status['irq']['sysclk']['locked'] = bool((r & 0x20)>>5)
+        status['irq']['sysclk']['calibration'] = {}
+        status['irq']['sysclk']['calibration']['start'] = bool((r & 0x10)>>4)
+        status['irq']['sysclk']['calibration']['end'] = bool((r & 0x08)>>3)
+        status['irq']['watchdog']['timeout'] = bool((r & 0x04)>>2)
+        status['irq']['eeprom']['fault'] = bool((r & 0x02)>>1)
+        status['irq']['eeprom']['complete'] = bool((r & 0x01)>>0)
+
+        r = dev.read_data(0x300C)
+        status['irq']['skew']['limit'] = bool((r & 0x20)>>5) 
+        status['irq']['temperature-warning'] = bool((r & 0x10)>>4) 
+        status['irq']['aux-dpll']['unfault'] = bool((r & 0x08)>>3)
+        status['irq']['aux-dpll']['fault'] = bool((r & 0x04)>>2)
+        status['irq']['aux-dpll']['unlock'] = bool((r & 0x02)>>1)
+        status['irq']['aux-dpll']['lock'] = bool((r & 0x01)>>0)
+        
+        for (ref, addr) in [('a', 0x300D), ('b', 0x300E)]:
+            r = dev.read_data(addr)
+            status['irq']['ref'][ref+ref]['div-resync'] = bool((r & 0x80)>>7)
+            status['irq']['ref'][ref+ref]['valid'] = bool((r & 0x40)>>6)
+            status['irq']['ref'][ref+ref]['unfault'] = bool((r & 0x20)>>5)
+            status['irq']['ref'][ref+ref]['fault'] = bool((r & 0x10)>>4)
+            status['irq']['ref'][ref]['div-resync'] = bool((r & 0x08)>>3)
+            status['irq']['ref'][ref]['valid'] = bool((r & 0x04)>>2)
+            status['irq']['ref'][ref]['unfault'] = bool((r & 0x02)>>1)
+            status['irq']['ref'][ref]['fault'] = bool((r & 0x01)>>0)
+
+        r = dev.read_data(0x300F)
+        status['irq']['skew']['update'] = bool((r & 0x10)>>4) 
+        status['irq']['utsp'][1]['update'] = bool((r & 0x08)>>3) 
+        status['irq']['utsp'][0]['update'] = bool((r & 0x04)>>2) 
+        status['irq']['aux-nco'][1]['event'] = bool((r & 0x02)>>1) 
+        status['irq']['aux-nco'][0]['event'] = bool((r & 0x01)>>0) 
+        
+        r = dev.read_data(0x3010)
+        status['irq']['dpll'][0]['freq-unclamped'] = bool((r&0x80)>>7)
+        status['irq']['dpll'][0]['freq-clamped'] = bool((r&0x40)>>6)
+        status['irq']['dpll'][0]['slew-limiter-inactive'] = bool((r&0x20)>>5)
+        status['irq']['dpll'][0]['slew-limiter-active'] = bool((r&0x10)>>4)
+        status['irq']['dpll'][0]['freq-unlocked'] = bool((r&0x08)>>3)
+        status['irq']['dpll'][0]['freq-locked'] = bool((r&0x04)>>2)
+        status['irq']['dpll'][0]['phase-unlocked'] = bool((r&0x02)>>1)
+        status['irq']['dpll'][0]['phase-locked'] = bool((r&0x01)>>0)
+        r = dev.read_data(0x3011)
+        status['irq']['dpll'][0]['ref-switch'] = bool((r&0x80)>>7)
+        status['irq']['dpll'][0]['free-run'] = bool((r&0x40)>>6)
+        status['irq']['dpll'][0]['holdover'] = bool((r&0x20)>>5)
+        status['irq']['dpll'][0]['hitless-entered'] = bool((r&0x10)>>4)
+        status['irq']['dpll'][0]['hitless-exit'] = bool((r&0x08)>>3)
+        status['irq']['dpll'][0]['holdover-ftw-upd'] = bool((r&0x04)>>1)
+        status['irq']['dpll'][0]['phase-step'] = bool((r&0x01)>>0)
+        
     if args.watchdog:
         status['watchdog'] = {}
         status['watchdog']['period'] = dev.read_data(0x10A) & 0xFF
         status['watchdog']['period'] |= (dev.read_data(0x10B) & 0xFF)<<8
     if args.iuts:
-        bitfields = [
-            ('iuts1-valid', 0x02),
-            ('iuts2-valid', 0x01),
-        ]
-        read_reg(status, 'iuts', 0x3023, bitfields)
+        status['iuts'] = {}
+        r = dev.read_data(0x3023)
+        status['iuts'][1] = {}
+        status['iuts'][1]['valid'] = bool((r&0x02)>>1)
+        status['iuts'][2] = {}
+        status['iuts'][2]['valid'] = bool((r&0x01)>>0)
 
     if args.distrib:
         status['distrib'] = {}
