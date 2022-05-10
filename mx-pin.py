@@ -6,6 +6,7 @@
 #################################################################
 import sys
 import argparse
+from ad9546 import *
 
 def main (argv):
     parser = argparse.ArgumentParser(description="AD9546 Mx-pin programmable I/O")
