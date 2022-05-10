@@ -477,7 +477,7 @@ Clear them with `irq.py`:
 
 ## Misc
 
-`status.py --temp` returns the internal temperature sensor reading.  
+`status.py --misc` returns (amongst other infos) the internal temperature sensor reading.  
 
 * Program a temperature range :
 
