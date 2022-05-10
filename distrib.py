@@ -95,7 +95,7 @@ def main (argv):
     if args.sync_all:
         r = dev.read_data(0x2000)
         dev.write_data(0x2000, r|0x08)
-        dev.write_data(0x000F, 0x01) # IO update
+        dev.io_update()
         return 0 # force stop, avoids possible corruption when mishandling this script
 
     autosyncs = {
@@ -111,12 +111,12 @@ def main (argv):
             r = dev.read_data(0x10DB)
             r &= (mask^0xFF) # mask out
             dev.write_data(0x10DB, r | autosyncs[args.autosync])
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
         elif args.channel == '1':
             r = dev.read_data(0x14DB)
             r &= (mask^0xFF) # mask out
             dev.write_data(0x14DB, r | autosyncs[args.autosync])
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
         else: # all
             r = dev.read_data(0x10DB)
             r &= (mask^0xFF) # mask out
@@ -124,7 +124,7 @@ def main (argv):
             r = dev.read_data(0x14DB)
             r &= (mask^0xFF) # mask out
             dev.write_data(0x14DB, r | autosyncs[args.autosync])
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
         return 0 # force stop, to avoid corruption on misusage
 
     if args.format:
@@ -162,7 +162,7 @@ def main (argv):
             r = dev.read_data(reg)
             r &= 0xFE # mask out
             dev.write_data(reg, r | formats[args.format])
-        dev.write_data(0x000F, 0x01) # IO update
+        dev.io_update()
         return 0 # force stop, to avoid corruption on misusage
             
     if args.current:
@@ -202,7 +202,7 @@ def main (argv):
             mask = (0x03)<<1
             r &= (mask ^0xFF) #mask out
             dev.write_data(reg, r | (currents[args.current]<<1))
-        dev.write_data(0x000F, 0x01) # IO update
+        dev.io_update()
         return 0 # force stop, to avoid corruption on misusage
     
     if args.mode:
@@ -242,7 +242,7 @@ def main (argv):
             r = dev.read_data(reg)
             r &= (mask ^0xFF)
             dev.write_data(reg, r | (modes[args.mode] << 3))
-        dev.write_data(0x000F, 0x01) # IO update
+        dev.io_update()
         return 0 # force stop, to avoid corruption on misusage
     if args.phase_offset:
         regs = []
@@ -301,7 +301,7 @@ def main (argv):
             r = dev.read_data(reg+4)
             r &= 0xBF # mask 1 bit out
             dev.write_data(reg+4, r | ((r4 & 0x01)<<6))
-        dev.write_data(0x000F, 0x01) # IO update
+        dev.io_update()
         return 0 # force stop, to avoid corruption on misusage
 
     if args.divider:
@@ -356,33 +356,33 @@ def main (argv):
             dev.write_data(r+1, r1)
             dev.write_data(r+2, r2)
             dev.write_data(r+3, r3)
-        dev.write_data(0x000F, 0x01) # IO update
+        dev.io_update()
         return 0 # force stop, to avoid corruption on misusage
 
     if args.q_sync:
         if args.channel == '0':
             r = dev.read_data(0x2101)
             dev.write_data(0x2101, r|0x08) # assert
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
             dev.write_data(0x2101, r|0xF7) # clear
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
         elif args.channel == '1':
             r = dev.read_data(0x2201)
             dev.write_data(0x2201, r|0x08) # assert
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
             dev.write_data(0x2201, r|0xF7) # clear
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
         else: # all
             r = dev.read_data(0x2101)
             dev.write_data(0x2101, r|0x08) # assert
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
             dev.write_data(0x2101, r|0xF7) # clear
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
             r = dev.read_data(0x2201)
             dev.write_data(0x2201, r|0x08) # assert
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
             dev.write_data(0x2201, r|0xF7) # clear
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
         return 0 # force stop, to avoid corruption on misusage
     
     if args.unmuting:
@@ -406,18 +406,18 @@ def main (argv):
             r = dev.read_data(0x14DC)
             r &= (mask ^0xFF) # mask out
             dev.write_data(0x14DC, r | unmutings[args.unmuting])
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
             
         elif args.channel == '0':
             r = dev.read_data(0x10DC)
             r &= (mask ^0xFF) # mask out
             dev.write_data(0x10DC, r | unmutings[args.unmuting])
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
         elif args.channel == '1':
             r = dev.read_data(0x14DC)
             r &= (mask ^0xFF) # mask out
             dev.write_data(0x14DC, r | unmutings[args.unmuting])
-            dev.write_data(0x000F, 0x01) # IO update
+            dev.io_update()
         return 0 # force stop, to avoid corruption on misusage
 
     if args.pwm:
@@ -449,7 +449,7 @@ def main (argv):
                 dev.write_data(r|0x01)
             else:
                 dev.write_data(r&0xFE)
-        dev.write_data(0x000F, 0x01) # IO update
+        dev.io_update()
         return 0 # force stop, to avoid corruption on misusage
     
     if args.half_divider:
@@ -502,7 +502,7 @@ def main (argv):
                 dev.write_data(reg, r|0x10) # assign
             else:
                 dev.write_data(reg, r&0xEF) # mask out
-        dev.write_data(0x000F, 0x01) # IO update
+        dev.io_update()
         return 0 # force stop, to avoid corruption on misusage
 
     if args.mute or args.unmute:
@@ -605,7 +605,7 @@ def main (argv):
                         elif args.unmute:
                             dev.write_data(r&0xF7)
                         base += 1
-        dev.write_data(0x000F, 0x01) # IO update
+        dev.io_update()
         return 0 # force stop, to avoid corruption on misusage
 
 if __name__ == "__main__":

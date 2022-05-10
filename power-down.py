@@ -85,7 +85,7 @@ def main (argv):
             else:
                 reg |= 0x01
             dev.write_data(0x2200, reg)
-    dev.write_data(0x000F, 0x01) # I/O update
+    dev.io_update()
 
 if __name__ == "__main__":
     main(sys.argv[1:])

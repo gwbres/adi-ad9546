@@ -114,7 +114,7 @@ def main (argv):
     mask = 0x01 << pin_n
     r &= (mask ^0xFF) # mask out
     dev.write_data(0x0109, r | (currents[args.current] << pin_n))
-    dev.write_data(0x000F, 0x01) # IO update
+    dev.io_update()
 
 if __name__ == "__main__":
     main(sys.argv[1:])

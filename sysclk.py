@@ -113,70 +113,70 @@ def main (argv):
 
     if args.fb_div:
         dev.write_data(0x0200, args.fb_div & 0xFF)
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0 # force stop
     
     if args.sel:
         r = dev.read_data(0x0201)
         r &= 0xF7 # mask out
         dev.write_data(0x0201, r | (sel[args.sel]<<3))
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0 # force stop
    
     if args.divider:
         r = dev.read_data(0x0201)
         r &= 0xF9
         dev.write_data(0x0201, r | (round(math.log2(args.divider)) << 1))
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0 # force stop
     
     if args.doubler:
         r = dev.read_data(0x0201)
         r &= 0xFE # mask bit out
         dev.write_data(0x0201, r | en[args.doubler])
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0 # force stop
 
     if args.dpll_source:
         r = dev.read_data(0x0284)
         r &= 0xE0 # mask bits out
         dev.write_data(0x0284, r | dpll_sources[args.dpll_source])
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0 # force stop
     
     if args.dpll_bw:
         bw = args.dpll_bw * 10
         dev.write_data(0x0285, r & 0xFF)
         dev.write_data(0x0286, (r & 0xFF00)>>8)
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0 # force stop
 
     if args.dpll_ch:
         r = dev.read_data(0x0287)
         r &= 0xFE # mask bit out
         dev.write_data(0x0287, r | dpll_ch[args.dpll_ch]) # assign
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0 # force stop
 
     if args.cutoff:
         r = dev.read_data(0x0288)
         r &= 0xF8 # mask bits out 
         dev.write_data(0x0288, r | cutoffs[args.cutoff])
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0 # force stop
 
     if args.free_run:
         r = dev.read_data(0x2105)
         r &= 0xFE # clear bits out
         dev.write_data(0x2105, r|0x01) # force free run
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0 # force stop
 
     if args.holdover:
         r = dev.read_data(0x2105)
         r &= 0xFD
         dev.write_data(0x2105, r | 0x02) # force holdover
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0 # force stop
 
     if args.freq:
@@ -186,14 +186,14 @@ def main (argv):
         dev.write_data(0x0204, (freq & 0xFF0000)>>16)
         dev.write_data(0x0205, (freq & 0xFF000000)>>24)
         dev.write_data(0x0206, (freq & 0xFF00000000)>>32)
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0
     
     if args.slew_rate_lim:
         r = dev.read_data(0x0283)
         r &= 0xF8
         dev.write_data(0x0283, r | slew_r[args.slew_rate_lim])
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0
     
     if args.stability:
@@ -202,7 +202,7 @@ def main (argv):
         dev.write_data(0x0208, (stab & 0xFF00)>>8)
         r = dev.read_data(0x0209)
         dev.write_data(0x0209, r | ((stab & 0x0F0000)>>16))
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0
 
 if __name__ == "__main__":

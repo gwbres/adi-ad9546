@@ -63,13 +63,13 @@ def main (argv):
     if args.free_run:
         r = dev.read_data(0x2105)
         dev.write_data(0x2105, r | 0x01)
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0 # force stop
 
     if args.holdover:
         r = dev.read_data(0x2105)
         dev.write_data(0x2105, r | 0x02)
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0 # force stop
 
     if args.period:
@@ -109,7 +109,7 @@ def main (argv):
             dev.write_data(reg+4, r4)
             dev.write_data(reg+5, r5)
             dev.write_data(reg+6, r6 & 0xF)
-        dev.write_data(0x000F, 0x01) # I/O update
+        dev.io_update()
         return 0
 
     #if args.phase_lock_thresh:
