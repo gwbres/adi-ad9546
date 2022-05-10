@@ -7,7 +7,7 @@
 import sys
 import json
 import argparse
-from smbus import SMBus
+from ad9546 import *
 
 REGMAP = [
     (0x0000, 0x0001),
@@ -132,8 +132,8 @@ def main (argv):
     parser.add_argument(
         "address",
         metavar="address",
-        type=lambda x: int(x,0),
-        help="I2C slave address (hex)")
+        type=str,
+        help="I2C slave address (hex format)")
     parser.add_argument(
         "--load",
         metavar="filepath",
@@ -159,10 +159,8 @@ def main (argv):
         help="Disable progress bar",
     )
     args = parser.parse_args(argv)
-
-    handle = SMBus()
-    handle.open(int(args.bus))
-    address = args.address
+    # open device
+    dev = AD9546(int(args.bus), int(args.address, 16))
 
     progress = 0
     update_perc = 5
@@ -176,14 +174,12 @@ def main (argv):
                 value = int(regmap[addr], 16) & 0xFF # 1 byte from hex()
                 # 2 address bytes
                 _addr = int(addr, 16)
-                msb = (_addr & 0xFF00)>>8
-                lsb = _addr & 0xFF
-                handle.write_i2c_block_data(address, msb, [lsb, value])
+                dev.write_data(_addr, value)
                 if not args.quiet:
                     progress += 100 / size
                     if int(progress) % update_perc:
                         progress_bar(int(progress),width=50)
-            handle.write_i2c_block_data(address, 0x00, [0x0F, 0x01]) # I/O update
+            dev.io_update()
 
     if args.dump:
         # create a json struct
@@ -201,11 +197,7 @@ def main (argv):
         size = regmap_size()
         for (start, stop) in REGMAP:
             for i in range (start, stop+1):
-                # 2 address bytes
-                (msb, lsb) = ((i & 0xFF00)>>8, i & 0xFF)
-                handle.write_i2c_block_data(address, msb, [lsb])
-                # 1 data byte
-                data = handle.read_byte(address)
+                data = dev.read_data(i) # reads 1 byte
                 struct["RegisterMap"]["0x{:04X}".format(i)] = "0x{:02X}".format(data)
                 if not args.quiet:
                     progress += 100 / size

@@ -2,33 +2,22 @@
 #################################################################
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
-# Mx-pin.py
-# Programmable I/Os
+# Mx-pin.py: AD9546 programmable I/Os
 #################################################################
 import sys
 import argparse
-from smbus import SMBus
-
-def write_data (handle, dev, addr, data):
-    msb = (addr & 0xFF00)>>8
-    lsb = addr & 0xFF
-    handle.write_i2c_block_data(dev, msb, [lsb, data])
-def read_data (handle, dev, addr):
-    msb = (addr & 0xFF00)>>8
-    lsb = addr & 0xFF
-    handle.write_i2c_block_data(dev, msb, [lsb])
-    data = handle.read_byte(dev)
-    return data
 
 def main (argv):
-    parser = argparse.ArgumentParser(description="AD9545/46 Mx-pin programmable I/O")
+    parser = argparse.ArgumentParser(description="AD9546 Mx-pin programmable I/O")
     parser.add_argument(
         "bus",
-        help="I2C bus",
+        type=int,
+        help="i2c bus (int)",
     )
     parser.add_argument(
         "address",
-        help="I2C slv address",
+        type=str,
+        help="i2c slv address (hex)",
     )
     #parser.add_argument(
     #    "op",
@@ -74,10 +63,8 @@ def main (argv):
         help="Ouptut current (drive strength); default is 6mA",
     )
     args = parser.parse_args(argv)
-
-    handle = SMBus()
-    handle.open(int(args.bus))
-    address = args.address
+    # open device
+    dev = AD9546(args.bus, int(args.address,16))
 
     pin = args.pin
     pin_n = int(pin.strip("M"))
@@ -110,24 +97,24 @@ def main (argv):
     else:
         reg = 0x0101 
 
-    r = read_data(handle, address, reg)
+    r = dev.read_data(reg)
     mask = 0x03 << ((pin_n % 4)*2)
     r &= (mask ^0xFF) #mask bits out
     if args.rcv:
-        write_data(handle, address, reg, r | (recv[args.rcv] << ((pin_n%4)*2))) # assign
+        dev.write_data(reg, r | (recv[args.rcv] << ((pin_n%4)*2))) # assign
     elif args.drv:
-        write_data(handle, address, reg, r | (drv[args.drv] << ((pin_n%4)*2))) # assign
+        dev.write_data(reg, r | (drv[args.drv] << ((pin_n%4)*2))) # assign
     
     base = 0x0102
-    r = read_data(handle, address, base + pin_n)
+    r = dev.read_data(base + pin_n)
     r &= 0x7F # mask bit out
-    write_data(handle, address, base + pin_n, r | (modes[args.mode] <<7))
+    dev.write_data(base + pin_n, r | (modes[args.mode] <<7))
 
-    r = read_data(handle, address, 0x0109)
+    r = dev.read_data(0x0109)
     mask = 0x01 << pin_n
     r &= (mask ^0xFF) # mask out
-    write_data(handle, address, 0x0109, r | (currents[args.current] << pin_n))
-    write_data(handle, address, 0x000F, 0x01) # IO update
+    dev.write_data(0x0109, r | (currents[args.current] << pin_n))
+    dev.write_data(0x000F, 0x01) # IO update
 
 if __name__ == "__main__":
     main(sys.argv[1:])

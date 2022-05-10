@@ -6,28 +6,19 @@
 #################################################################
 import sys
 import argparse
-from smbus import SMBus
-
-def write_data (handle, dev, addr, data):
-    msb = (addr & 0xFF00)>>8
-    lsb = addr & 0xFF
-    handle.write_i2c_block_data(dev, msb, [lsb, data])
-def read_data (handle, dev, addr):
-    msb = (addr & 0xFF00)>>8
-    lsb = addr & 0xFF
-    handle.write_i2c_block_data(dev, msb, [lsb])
-    data = handle.read_byte(dev)
-    return data
+from ad9546 import *
 
 def main (argv):
     parser = argparse.ArgumentParser(description="AD9546 IRQ clearing tool")
     parser.add_argument(
         "bus",
-        help="I2C bus",
+        type=int,
+        help="i2c bus (int)",
     )
     parser.add_argument(
         "address",
-        help="I2C slv address",
+        type=str,
+        help="i2c slv address (hex)",
     )
     flags = [
         ('all', 'Clears all IRQ flags'),
@@ -59,54 +50,51 @@ def main (argv):
             help=helper,
         )
     args = parser.parse_args(argv)
-
     # open device
-    handle = SMBus()
-    handle.open(int(args.bus))
-    address = int(args.address, 16)
+    dev = AD9546(args.bus, int(args.address, 16))
 
     if args.all:
-        write_data(handle, address, 0x2005, 0x01)
+        dev.write_data(0x2005, 0x01)
     if args.watchdog:
-        write_data(handle, address, 0x2006, 0x04)
+        dev.write_data(0x2006, 0x04)
     if args.pll:
-        write_data(handle, address, 0x2005, 0x08|0x04)
+        dev.write_data(0x2005, 0x08|0x04)
     if args.pll1:
-        write_data(handle, address, 0x2005, 0x08)
+        dev.write_data(0x2005, 0x08)
     if args.pll0:
-        write_data(handle, address, 0x2005, 0x04)
+        dev.write_data(0x2005, 0x04)
     if args.other:
-        write_data(handle, address, 0x2005, 0x02)
+        dev.write_data(0x2005, 0x02)
     if args.sysclk:
-        write_data(handle, address, 0x2006, 0xF8)
+        dev.write_data(0x2006, 0xF8)
     if args.sysclk_unlock:
-        write_data(handle, address, 0x2006, 0x80)
+        dev.write_data(0x2006, 0x80)
     if args.sysclk_stab:
-        write_data(handle, address, 0x2006, 0x40)
+        dev.write_data(0x2006, 0x40)
     if args.sysclk_lock:
-        write_data(handle, address, 0x2006, 0x20)
+        dev.write_data(0x2006, 0x20)
     if args.sysclk_cal_end:
-        write_data(handle, address, 0x2006, 0x10)
+        dev.write_data(0x2006, 0x10)
     if args.sysclk_cal_start:
-        write_data(handle, address, 0x2006, 0x08)
+        dev.write_data(0x2006, 0x08)
     if args.eeprom:
-        write_data(handle, address, 0x2006, 0x01|0x02)
+        dev.write_data(0x2006, 0x01|0x02)
     if args.skew_limit:
-        write_data(handle, address, 0x2007, 0x20)
+        dev.write_data(0x2007, 0x20)
     if args.skew_meas:
-        write_data(handle, address, 0x200A, 0x10)
+        dev.write_data(0x200A, 0x10)
     if args.refa:
-        write_data(handle, address, 0x2008, 0x0F)
+        dev.write_data(0x2008, 0x0F)
     if args.refaa:
-        write_data(handle, address, 0x2008, 0xF0)
+        dev.write_data(0x2008, 0xF0)
     if args.refb:
-        write_data(handle, address, 0x2009, 0x0F)
+        dev.write_data(0x2009, 0x0F)
     if args.refbb:
-        write_data(handle, address, 0x2009, 0xF0)
+        dev.write_data(0x2009, 0xF0)
     if args.tsu:
-        write_data(handle, address, 0x200A, 0x08|0x04)
+        dev.write_data(0x200A, 0x08|0x04)
     if args.temp:
-        write_data(handle, address, 0x2007, 0x10)
+        dev.write_data(0x2007, 0x10)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

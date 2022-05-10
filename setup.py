@@ -6,6 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 setup(name="adi-ad9546",
+    py_modules=["ad9546"],
     scripts=[
         "calib.py",
         "distrib.py",
@@ -13,9 +14,9 @@ setup(name="adi-ad9546",
         "misc.py",
         "mx-pin.py",
         "power-down.py",
+        "ref-input.py",
         "regmap.py",
         "regmap-diff.py",
-        "ref-input.py",
         "reset.py",
         "status.py",
         "sysclk.py",

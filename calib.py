@@ -9,18 +9,7 @@
 #################################################################
 import sys
 import argparse
-from smbus import SMBus
-
-def write_data (handle, dev, addr, data):
-    msb = (addr & 0xFF00)>>8
-    lsb = addr & 0xFF
-    handle.write_i2c_block_data(dev, msb, [lsb, data])
-def read_data (handle, dev, addr):
-    lsb = addr & 0xFF
-    msb = (addr & 0xFF00)>>8
-    handle.write_i2c_block_data(dev, msb, [lsb])
-    data = handle.read_byte(dev)
-    return data
+from ad9546 import *
 
 def main (argv):
     parser = argparse.ArgumentParser(description="AD9545/46 calibration tool")
@@ -44,28 +33,26 @@ def main (argv):
         )
     args = parser.parse_args(argv)
 
-    # open device
-    handle = SMBus()
-    handle.open(int(args.bus))
-    address = int(args.address, 16)
+    dev = AD9546(int(args.bus), int(args.address, 16)) # open device
 
-    # [1] perform request
-    write_data(handle, address, 0x2000, 0x00)
-    write_data(handle, address, 0x000F, 0x01) # I/O update
-    reg = 0
+    dev.write_data(0x2000, 0x00)
+    dev.io_update()
+    
+    value = 0
     if args.sysclk:
-        reg |= 0x04
+        value |= 0x04
     if args.all:
-        reg |= 0x02
-    write_data(handle, address, 0x2000, reg)
-    write_data(handle, address, 0x000F, 0x01) # I/O update
+        value |= 0x02
+    dev.write_data(0x2000, value)
+    dev.io_update()
+    
     # [3] clear bits
     if args.sysclk:
-        reg &= 0xFB
+        value &= 0xFB
     if args.all:
-        reg &= 0xFD
-    write_data(handle, address, 0x2000, reg)
-    write_data(handle, address, 0x000F, 0x01) # I/O update
+        value &= 0xFD
+    dev.write_data(0x2000, value)
+    dev.io_update()
 
 if __name__ == "__main__":
     main(sys.argv[1:])

@@ -2,28 +2,13 @@
 #################################################################
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
-# status.py: AD9546,45 status monitor (read only)
+# status.py: AD9546 status monitoring (read only tool)
 #################################################################
 import sys
 import math
 import json
 import argparse
-from smbus import SMBus
-
-def read_data (handle, dev, addr):
-    msb = (addr & 0xFF00)>>8
-    lsb = addr & 0xFF
-    handle.write_i2c_block_data(dev, msb, [lsb])
-    data = handle.read_byte(dev)
-    return data
-def bitfield (data, mask):
-    return int((data & mask) >> int(math.log2(mask))) 
-def read_reg (handle, dev, status, reg, addr, bitfields):
-    if not reg in status:
-        status[reg] = {}
-    data = read_data(handle, dev, addr)
-    for b in bitfields:
-        status[reg][b[0]] = bitfield(data, b[1])
+from ad9546 import *
 
 def filter_by_key (tree, key):
     ret = {} 
@@ -57,11 +42,13 @@ def main (argv):
     parser = argparse.ArgumentParser(description="AD9545/46 status reporting")
     parser.add_argument(
         "bus",
-        help="I2C bus",
+        type=int,
+        help="I2C bus (int)",
     )
     parser.add_argument(
         "address",
-        help="I2C slv address",
+        type=str,
+        help="I2C slv address (hex)",
     )
     flags = [
         ("info",    "Device general infos (SN#, ..)"),
@@ -96,11 +83,8 @@ def main (argv):
         help="Filter results by matching (comma separeted) values.",
     )
     args = parser.parse_args(argv)
-
     # open device
-    handle = SMBus()
-    handle.open(int(args.bus))
-    address = int(args.address, 16)
+    dev = AD9546(args.bus, int(args.address, 16))
         
     status = {}
     done = {
@@ -122,81 +106,72 @@ def main (argv):
 
     if args.info:
         status['info'] = {}
-        status['info']['chip-type'] = hex(read_data(handle, address, 0x0003))
-        data = read_data(handle, address, 0x0004) & 0xFF
-        data |= (read_data(handle, address, 0x0005) & 0xFF)<<8
-        data |= (read_data(handle, address, 0x0006) & 0xFF)<<16
+        status['info']['chip-type'] = hex(dev.read_data(0x0003))
+        data = dev.read_data(0x0004)
+        data |= dev.read_data(0x0005)<<8
+        data |= dev.read_data(0x0006)<<16
         status['info']['device-code'] = hex(data) 
-        status['info']['spi-version'] = hex(read_data(handle, address, 0x000B) & 0xFF)
-        data = read_data(handle, address, 0x000C) & 0xFF
-        data |= (read_data(handle, address, 0x000D) & 0xFF)<<8
+        status['info']['spi-version'] = hex(dev.read_data(0x000B))
+        data  = dev.read_data(0x000C)
+        data |= dev.read_data(0x000D)<<8
         status['info']['vendor'] = hex(data) 
     if args.serial:
-        bitfields = [
-            ("soft-reset",0x01),
-            ("lsbf-spi",0x02),
-            ("addr-asc-spi",0x04),
-            ("sdo-spi",0x08),
-        ]
-        read_reg(handle, address, status, 'serial', 0x0000, bitfields)
-        bitfields = [
-            ('reset-regs', 0x04),
-            ('buffered-read', 0x40),
-        ]
-        read_reg(handle, address, status, 'serial', 0x0001, bitfields)
+        status['serial'] = {}
+        r = dev.read_data(0x0000)
+        status['serial']['soft-reset'] = bool((r & 0x01)>>0)
+        status['serial']['spi-lsbf'] = bool((r & 0x02)>>1)
+        status['serial']['spi-addr-asc'] = bool((r & 0x04)>>2)
+        status['serial']['spi-sdo'] = bool((r & 0x08)>>3)
+        r = dev.read_data(0x0001)
+        status['serial']['reset-registers'] = bool((r & 0x04)>>2)
+        status['serial']['buffered-read'] = bool((r & 0x40)>>6)
     if args.sysclk:
         status['sysclk'] = {}
         status['sysclk']['pll'] = {}
-        r = read_data(handle, address, 0x3001)
+        r = dev.read_data(0x3001)
         status['sysclk']['calibrating'] = bool((r & 0x04)>>2)
         status['sysclk']['stable'] = bool((r & 0x02)>>1)
         status['sysclk']['locked'] = bool((r & 0x01)>>0)
-        status['sysclk']['pll']['fb-div-ratio'] = read_data(handle, address, 0x200) 
-        data = read_data(handle, address, 0x201)
+        status['sysclk']['pll']['fb-div-ratio'] = dev.read_data(0x200) 
+        data = dev.read_data(0x201)
         status['sysclk']['pll']['input-sel'] = (data & 0x08)>>3
         status['sysclk']['pll']['input-div'] = (data & 0x06)>>1
         status['sysclk']['pll']['freq-doubler'] = bool(data & 0x01)
-        ref_freq = read_data(handle, address, 0x202)
-        ref_freq += read_data(handle, address, 0x203) << 8
-        ref_freq += read_data(handle, address, 0x204) << 16
-        ref_freq += read_data(handle, address, 0x205) << 24
-        ref_freq += read_data(handle, address, 0x206) << 32
+        ref_freq = dev.read_data(0x202)
+        ref_freq += dev.read_data(0x203) << 8
+        ref_freq += dev.read_data(0x204) << 16
+        ref_freq += dev.read_data(0x205) << 24
+        ref_freq += dev.read_data(0x206) << 32
         status['sysclk']['pll']['ref-freq'] = ref_freq * 1E3
-        per = read_data(handle, address, 0x207)
-        per += read_data(handle, address, 0x208) << 8
-        per += (read_data(handle, address, 0x209) & 0x0F) << 16
+        per = dev.read_data(0x207)
+        per += dev.read_data(0x208) << 8
+        per += (dev.read_data(0x209) & 0x0F) << 16
         status['sysclk']['pll']['stab-period'] = per * 10E-3 
     if args.sysclk:
         if not 'sysclk' in status:
             status['sysclk'] = {}
         status['sysclk']['comp'] = {}
-        bitfields = [
-            ('method2-aux-dpll', 0x20),
-            ('method1-aux-dpll', 0x10),
-            ('method3-tdcs', 0x04),
-            ('method2-tdcs', 0x02),
-            ('method1-tdcs', 0x01),
-        ]
-        read_reg(handle, address, status['sysclk'], 'comp', 0x0280, bitfields)
-        bitfields = [
-            ('method3-aux-nco1', 0x40),
-            ('method2-aux-nco1', 0x20),
-            ('method1-aux-nco1', 0x10),
-            ('method3-aux-nco0', 0x04),
-            ('method2-aux-nco0', 0x02),
-            ('method1-aux-nco0', 0x01),
-        ]
-        read_reg(handle, address, status['sysclk'], 'comp', 0x0281, bitfields)
-        bitfields = [
-            ('method3-dpll1', 0x40),
-            ('method2-dpll1', 0x20),
-            ('method2-dpll1', 0x10),
-            ('method3-dpll0', 0x04),
-            ('method2-dpll0', 0x02),
-            ('method2-dpll0', 0x01),
-        ]
-        read_reg(handle, address, status['sysclk'], 'comp', 0x0282, bitfields)
-        r = read_data(handle, address, 0x0283) & 0x07
+        r = dev.read_data(0x280)
+        status['sysclk']['comp']['method2-aux-dpll'] = bool((r & 0x20)>>5)
+        status['sysclk']['comp']['method1-aux-dpll'] = bool((r & 0x10)>>4)
+        status['sysclk']['comp']['method3-tcds'] = bool((r & 0x04)>>2)
+        status['sysclk']['comp']['method2-tcds'] = bool((r & 0x02)>>1)
+        status['sysclk']['comp']['method1-tcds'] = bool((r & 0x01)>>0)
+        r = dev.read_data(0x281)
+        status['sysclk']['comp']['method3-aux-nco1'] = bool((r & 0x40)>>6)
+        status['sysclk']['comp']['method2-aux-nco1'] = bool((r & 0x20)>>5)
+        status['sysclk']['comp']['method1-aux-nco1'] = bool((r & 0x10)>>4)
+        status['sysclk']['comp']['method3-aux-nco0'] = bool((r & 0x04)>>2)
+        status['sysclk']['comp']['method2-aux-nco0'] = bool((r & 0x02)>>1)
+        status['sysclk']['comp']['method1-aux-nco0'] = bool((r & 0x01)>>0)
+        r = dev.read_data(0x282)
+        status['sysclk']['comp']['method3-dpll1'] = bool((r & 0x40)>>6)
+        status['sysclk']['comp']['method3-dpll1'] = bool((r & 0x20)>>5)
+        status['sysclk']['comp']['method1-dpll1'] = bool((r & 0x10)>>4)
+        status['sysclk']['comp']['method3-dpll0'] = bool((r & 0x04)>>2)
+        status['sysclk']['comp']['method2-dpll0'] = bool((r & 0x02)>>1)
+        status['sysclk']['comp']['method1-dpll0'] = bool((r & 0x01)>>0)
+        r = dev.read_data(0x0283) & 0x07
         values = {
             0: '0',
             1: "0.715 ppm/s",
@@ -218,16 +193,16 @@ def main (argv):
             11: 'aux-REF2',
             12: 'aux-REF3',
         }
-        r = read_data(handle, address, 0x0284) & 0x0F
+        r = dev.read_data(0x0284) & 0x0F
         status['sysclk']['comp']['source']  = sources[r]
-        r = read_data(handle, address, 0x0285)
-        r += read_data(handle, address, 0x0286) << 8
+        r = dev.read_data(0x0285)
+        r += dev.read_data(0x0286) << 8
         status['sysclk']['comp']['dpll-bw'] = r /10
         sel = {
             0: 'dpll0',
             1: 'dpll1',
         }
-        status['sysclk']['comp']['dpll-sel'] = sel[read_data(handle, address, 0x0287)&0x01]
+        status['sysclk']['comp']['dpll-sel'] = sel[dev.read_data(0x0287)&0x01]
         cutoff = {
             0: '156 Hz',
             1: '78 Hz',
@@ -238,18 +213,18 @@ def main (argv):
             6: '2 Hz',
             7: '1 Hz',
         }
-        status['sysclk']['comp']['method1-cutoff'] = cutoff[read_data(handle, address, 0x0288)&0x07]
-        c0 = read_data(handle, address, 0x0289)
-        c0 += read_data(handle, address, 0x028A) << 8
-        c0 += read_data(handle, address, 0x028B) << 16
-        c0 += read_data(handle, address, 0x028C) << 24
-        c0 += read_data(handle, address, 0x028D) << 32
+        status['sysclk']['comp']['method1-cutoff'] = cutoff[dev.read_data(0x0288)&0x07]
+        c0 = dev.read_data(0x0289)
+        c0 += dev.read_data(0x028A) << 8
+        c0 += dev.read_data(0x028B) << 16
+        c0 += dev.read_data(0x028C) << 24
+        c0 += dev.read_data(0x028D) << 32
         status['sysclk']['comp']['method1-c0'] = c0 / pow(2,45)  
         base = 0x028E
         for cx in range (1, 6):
-            cx_s  = read_data(handle, address, base+0)
-            cx_s += read_data(handle, address, base+1) << 8
-            cx_e  = read_data(handle, address, base+2)
+            cx_s  = dev.read_data(base+0)
+            cx_s += dev.read_data(base+1) << 8
+            cx_e  = dev.read_data(base+2)
             base += 3
             #TODO conclure
 
@@ -260,7 +235,7 @@ def main (argv):
             ('busy-downloading', 0x02),
             ('busy-uploading', 0x01),
         ]
-        read_reg(handle, address, status, 'eeprom', 0x3000, bitfields)
+        read_reg(status, 'eeprom', 0x3000, bitfields)
     if args.pll:
         status['pll'] = {}
         for c in ['ch0','ch1']:
@@ -268,57 +243,57 @@ def main (argv):
             for a in ['digital','analog']:
                 status['pll'][c][a] = {}
 
-        r = read_data(handle, address, 0x3001)
+        r = dev.read_data(0x3001)
         status['pll']['ch1']['locked'] = bool((r&0x20)>>5)
         status['pll']['ch0']['locked'] = bool((r&0x10)>>4) 
         
         base = 0x3100
         for ch in ['ch0','ch1']:
-            r = read_data(handle, address, base+0)
+            r = dev.read_data(base+0)
             status['pll'][ch]['analog']['calibration'] = done[(r&0x20)>>5]
             status['pll'][ch]['analog']['calibrating'] = bool((r&0x10)>>4)
             status['pll'][ch]['analog']['phase-locked'] = bool((r&0x08)>>3)
             status['pll'][ch]['digital']['freq-locked'] = bool((r&0x04)>>2)
             status['pll'][ch]['digital']['phase-locked'] = bool((r&0x02)>>1)
             
-            r = read_data(handle, address, base+1)
+            r = dev.read_data(base+1)
             status['pll'][ch]['digital']['profile'] = (r & 0x70)>>4
             status['pll'][ch]['digital']['active'] = bool((r&0x08)>>3)
             status['pll'][ch]['digital']['switching-profile'] = bool((r & 0x04)>>2)
             status['pll'][ch]['digital']['holdover'] = bool((r&0x02) >>1)
             status['pll'][ch]['digital']['free-running'] = bool((r&0x01) >>0)
 
-            r = read_data(handle, address, base+2)
+            r = dev.read_data(base+2)
             status['pll'][ch]['digital']['fast-acquisition'] = done[(r&0x20)>>5]
             status['pll'][ch]['digital']['fast-acquisitionning'] = bool((r&0x10)>>4)
             status['pll'][ch]['digital']['phase-slew'] = active[(r&0x04)>>2]
             status['pll'][ch]['digital']['freq-clamping'] = active[(r&0x02)>>1]
             status['pll'][ch]['digital']['tunning-word-history'] = available[(r&0x01)>>0]
 
-            ftw = read_data(handle, address, base+3)
-            ftw += read_data(handle, address, base+4) <<8
-            ftw += read_data(handle, address, base+5) <<16
-            ftw += read_data(handle, address, base+6) <<24
-            ftw += read_data(handle, address, base+7) <<32
-            ftw += (read_data(handle, address, base+8) & 0x1F) <<40
+            ftw = dev.read_data(base+3)
+            ftw += dev.read_data(base+4) <<8
+            ftw += dev.read_data(base+5) <<16
+            ftw += dev.read_data(base+6) <<24
+            ftw += dev.read_data(base+7) <<32
+            ftw += (dev.read_data(base+8) & 0x1F) <<40
             status['pll'][ch]['digital']['ftw-history'] = ftw
 
-            value = read_data(handle, address, base+9)
-            value+= (read_data(handle, address, base+10) & 0x0F)<<8
+            value = dev.read_data(base+9)
+            value+= (dev.read_data(base+10) & 0x0F)<<8
             status['pll'][ch]['digital']['phase-lock-tub'] = value
-            value = read_data(handle, address, base+11)
-            value+= (read_data(handle, address, base+12) & 0x0F)<<8
+            value = dev.read_data(base+11)
+            value+= (dev.read_data(base+12) & 0x0F)<<8
             status['pll'][ch]['digital']['freq-lock-tub'] = value
 
             if ch == 'ch0':
-                r = read_data(handle, address, base+13)
+                r = dev.read_data(base+13)
                 status['pll'][ch]['cc-phase-slew'] = active[(r & 0x20)>>5]
                 status['pll'][ch]['c-phase-slew'] = active[(r & 0x10)>>4]
                 status['pll'][ch]['bb-phase-slew'] = active[(r & 0x08)>>3]
                 status['pll'][ch]['b-phase-slew'] = active[(r & 0x04)>>2]
                 status['pll'][ch]['aa-phase-slew'] = active[(r & 0x02)>>1]
                 status['pll'][ch]['a-phase-slew'] = active[(r & 0x01)>>0]
-                r = read_data(handle, address, base+14)
+                r = dev.read_data(base+14)
                 status['pll'][ch]['cc-phase-error'] = bool((r & 0x20)>>5)
                 status['pll'][ch]['c-phase-error'] =  bool((r & 0x10)>>4)
                 status['pll'][ch]['bb-phase-error'] = bool((r & 0x08)>>3)
@@ -326,12 +301,12 @@ def main (argv):
                 status['pll'][ch]['aa-phase-error'] = bool((r & 0x02)>>1)
                 status['pll'][ch]['a-phase-error'] =  bool((r & 0x01)>>0)
             else:
-                r = read_data(handle, address, base+13)
+                r = dev.read_data(base+13)
                 status['pll'][ch]['bb-phase-slew'] = active[(r & 0x08)>>3]
                 status['pll'][ch]['b-phase-slew'] = active[(r & 0x04)>>2]
                 status['pll'][ch]['aa-phase-slew'] = active[(r & 0x02)>>1]
                 status['pll'][ch]['a-phase-slew'] = active[(r & 0x01)>>0]
-                r = read_data(handle, address, base+14)
+                r = dev.read_data(base+14)
                 status['pll'][ch]['bb-phase-error'] = bool((r & 0x08)>>3)
                 status['pll'][ch]['b-phase-error'] =  bool((r & 0x04)>>2)
                 status['pll'][ch]['aa-phase-error'] = bool((r & 0x02)>>1)
@@ -340,21 +315,27 @@ def main (argv):
         
         base = 0x2100
         for ch in ['ch0','ch1']:
-            r = read_data(handle, address, base +0)
+            r = dev.read_data(base +0)
             status['pll'][ch]['power-down'] = available[r & 0x01] 
             base += 0x100
 
     if args.misc:
-        bitfields = [
-            ('aux-nco1-phase-error', 0x80),
-            ('aux-nco1-phase-slewing', 0x40),
-            ('aux-nco0-phase-error', 0x20),
-            ('aux-nco0-phase-slewing', 0x10),
-            ('aux-dpll-ref-status', 0x04),
-            ('aux-dpll-lock-status', 0x02),
-            ('temperature-alarm', 0x01),
-        ]
-        read_reg(handle, address, status, 'misc', 0x3002, bitfields)
+        status['misc'] = {}
+        status['misc']['aux-nco'] = {}
+        status['misc']['aux-dpll'] = {}
+        status['misc']['temperature'] = {}
+        r = dev.read_data(0x3002)
+        status['misc']['aux-nco']['nco1-phase-error'] = bool((r & 0x80)>>7)
+        status['misc']['aux-nco']['nco1-phase-slewing'] = bool((r & 0x40)>>6)
+        status['misc']['aux-nco']['nco0-phase-error'] = bool((r & 0x20)>>5)
+        status['misc']['aux-nco']['nco0-phase-slewing'] = bool((r & 0x10)>>4)
+        status['misc']['aux-dpll']['ref-status'] = (r & 0x04)>>2
+        status['misc']['aux-dpll']['lock-status'] = (r & 0x02)>>1
+        status['misc']['temperature']['alarm'] = bool((r & 0x01)>>0)
+        temp = (dev.read_data(0x3004) & 0xFF)<< 8 
+        temp |= dev.read_data(0x3003) & 0xFF
+        status['misc']['temperature']['value'] = u"{:.1f} degC".format(temp * pow(2,-7))
+
     if args.ref_input:
         status['ref-input'] = {}
         for ref in ['a','aa','b','bb']: #TODO '0','1','2'..aux
@@ -391,15 +372,15 @@ def main (argv):
             6: '75%',
             7: '87.5%',
         }
-        r = read_data(handle, address, 0x0300)
+        r = dev.read_data(0x0300)
         status['ref-input']['aa']['input-termination'] = coupling[(r & 0xC0)>>6]
         status['ref-input']['a']['input-termination'] = coupling[(r & 0x30)>>4]
         status['ref-input']['a']['differential'] = coupling[(r & 0x0C)>>2]
         status['ref-input']['a-aa-input-mode'] = ref_mode[r & 0x01]
-        status['ref-input']['a-aa-demod-bw'] = bw[read_data(handle, address, 0x0301) & 0x01]
+        status['ref-input']['a-aa-demod-bw'] = bw[dev.read_data(0x0301) & 0x01]
         base = 0x0302
         for ref in ['a','aa']:
-            r = read_data(handle, address, base)
+            r = dev.read_data(base)
             status['ref-input'][ref]['demod-polarity'] = demod_polarity[(r & 0x80)>>7]
             status['ref-input'][ref]['demod-persist-enabled'] = bool((r & 0x40)>>6)
             status['ref-input'][ref]['demod-sync-edge'] = (r & 0x30)>>4
@@ -407,15 +388,15 @@ def main (argv):
             status['ref-input'][ref]['demod-event-pol'] = event_pol[(r & 0x04)>>2]
             status['ref-input'][ref]['demod-sensitivity'] = r & 0x03
             base += 1
-        r = read_data(handle, address, 0x0304)
+        r = dev.read_data(0x0304)
         status['ref-input']['bb']['input-termination'] = coupling[(r & 0xC0)>>6]
         status['ref-input']['b']['input-termination'] = coupling[(r & 0x30)>>4]
         status['ref-input']['b']['differential'] = coupling[(r & 0x0C)>>2]
         status['ref-input']['b-bb-input-mode'] = ref_mode[r & 0x01]
-        status['ref-input']['b-bb-demod-bw'] = bw[read_data(handle, address, 0x0305) & 0x01]
+        status['ref-input']['b-bb-demod-bw'] = bw[dev.read_data(0x0305) & 0x01]
         base = 0x0306
         for ref in ['b','bb']:
-            r = read_data(handle, address, base)
+            r = dev.read_data(base)
             status['ref-input'][ref]['demod-polarity'] = demod_polarity[(r & 0x80)>>7]
             status['ref-input'][ref]['demod-persist-enabled'] = bool((r & 0x40)>>6)
             status['ref-input'][ref]['demod-sync-edge'] = (r & 0x30)>>4
@@ -426,7 +407,7 @@ def main (argv):
 
         #base = 0x030A
         #for ref in ['0','1']:
-        #    r = read_data(handle, address, base)
+        #    r = dev.read_data(base)
         #    status['ref-input'][ref]['aux-demod-polarity'] = demod_polarity[(r & 0x80)>>7]
         #    status['ref-input'][ref]['aux-demod-persist-enabled'] = bool((r & 0x40)>>6)
         #    status['ref-input'][ref]['aux-demod-sync-edge'] = (r & 0x30)>>4
@@ -437,7 +418,7 @@ def main (argv):
         #
         #base = 0x030E
         #for ref in ['ref2-aux','ref3-aux']:
-        #    r = read_data(handle, address, base)
+        #    r = dev.read_data(base)
         #    status['ref-input'][ref]['demod-polarity'] = demod_polarity[(r & 0x80)>>7]
         #    status['ref-input'][ref]['demod-persist-enabled'] = bool((r & 0x40)>>6)
         #    status['ref-input'][ref]['demod-sync-edge'] = (r & 0x30)>>4
@@ -448,31 +429,31 @@ def main (argv):
 
         base = 0x0400
         for ref in ['a','aa','b','bb']: # '0','1'
-            rdiv =  read_data(handle, address, base+0)
-            rdiv += read_data(handle, address, base+1) << 8
-            rdiv += read_data(handle, address, base+2) << 16
-            rdiv += (read_data(handle, address, base+3) & 0x1F) << 24
+            rdiv =  dev.read_data(base+0)
+            rdiv += dev.read_data(base+1) << 8
+            rdiv += dev.read_data(base+2) << 16
+            rdiv += (dev.read_data(base+3) & 0x1F) << 24
             status['ref-input'][ref]['r-div'] = rdiv+1 
-            per =  read_data(handle, address, base+4)
-            per += read_data(handle, address, base+5) << 8
-            per += read_data(handle, address, base+6) << 16
-            per += read_data(handle, address, base+7) << 24
-            per += read_data(handle, address, base+8) << 32
-            per += read_data(handle, address, base+9) << 40
-            per += read_data(handle, address, base+10) << 48
-            per += (read_data(handle, address, base+11) & 0x0F) << 56
+            per =  dev.read_data(base+4)
+            per += dev.read_data(base+5) << 8
+            per += dev.read_data(base+6) << 16
+            per += dev.read_data(base+7) << 24
+            per += dev.read_data(base+8) << 32
+            per += dev.read_data(base+9) << 40
+            per += dev.read_data(base+10) << 48
+            per += (dev.read_data(base+11) & 0x0F) << 56
             status['ref-input'][ref]['freq'] = pow(10,18)/per 
-            t = read_data(handle, address, base+12)
-            t += read_data(handle, address, base+13) << 8
-            t += read_data(handle, address, base+14) << 16
+            t = dev.read_data(base+12)
+            t += dev.read_data(base+13) << 8
+            t += dev.read_data(base+14) << 16
             status['ref-input'][ref]['max-freq-deviation'] = t /10E9 /(1-t/10E9)
-            status['ref-input'][ref]['mon-hysteresis'] = mon_hysteresis[read_data(handle, address, base+15) & 0x07]
-            t = read_data(handle, address, base+16)
-            t += read_data(handle, address, base+17)<<8
-            t += (read_data(handle, address, base+18)&0x0F)<<16
+            status['ref-input'][ref]['mon-hysteresis'] = mon_hysteresis[dev.read_data(base+15) & 0x07]
+            t = dev.read_data(base+16)
+            t += dev.read_data(base+17)<<8
+            t += (dev.read_data(base+18)&0x0F)<<16
             status['ref-input'][ref]['validation-time'] = '{:.3e} sec'.format(t /1000)
-            j = read_data(handle, address, base+19)
-            j += read_data(handle, address, base+20)
+            j = dev.read_data(base+19)
+            j += dev.read_data(base+20)
             status['ref-input'][ref]['jitter-tolerance'] = '{:.3e} sec rms'.format(j /10E9)
             base += 0x0020
 
@@ -486,7 +467,7 @@ def main (argv):
                 ('fast', 0x02),
                 ('slow', 0x01),
             ]
-            r = read_data(handle, address, base)
+            r = dev.read_data(base)
             status['ref-input'][ref]['loss-of-signal'] = bool((r&0x20)>>5)
             status['ref-input'][ref]['valid'] = bool((r&0x10)>>4)
             status['ref-input'][ref]['fault'] = bool((r&0x08)>>3)
@@ -506,7 +487,7 @@ def main (argv):
             ('eeprom-fault', 0x02),
             ('eepromm-complete', 0x01),
         ]
-        read_reg(handle, address, status, 'irq', 0x300B, bitfields)
+        read_reg(status, 'irq', 0x300B, bitfields)
         bitfields = [
             ('skew-limit', 0x20),
             ('temp-warning', 0x10),
@@ -515,7 +496,7 @@ def main (argv):
             ('aux-dpll-unlock', 0x02),
             ('aux-dpll-lock', 0x01),
         ]
-        read_reg(handle, address, status, 'irq', 0x300C, bitfields)
+        read_reg(status, 'irq', 0x300C, bitfields)
         bitfields = [
             ('refaa-r-div-resync', 0x80),
             ('refaa-valid', 0x40),
@@ -526,7 +507,7 @@ def main (argv):
             ('refa-unfault', 0x02),
             ('refa-fault', 0x01),
         ]
-        read_reg(handle, address, status, 'irq', 0x300D, bitfields)
+        read_reg(status, 'irq', 0x300D, bitfields)
         bitfields = [
             ('refbb-r-div-resync', 0x80),
             ('refbb-valid', 0x40),
@@ -537,7 +518,7 @@ def main (argv):
             ('refb-unfault', 0x02),
             ('refb-fault', 0x01),
         ]
-        read_reg(handle, address, status, 'irq', 0x300E, bitfields)
+        read_reg(status, 'irq', 0x300E, bitfields)
         bitfields = [
             ('skew-update', 0x10),
             ('utsp1-update', 0x08),
@@ -545,7 +526,7 @@ def main (argv):
             ('aux-nco1-event', 0x02),
             ('aux-nco0-event', 0x01),
         ]
-        read_reg(handle, address, status, 'irq', 0x300F, bitfields)
+        read_reg(status, 'irq', 0x300F, bitfields)
         bitfields = [
             ('dpll0-freq-unclamped', 0x80),
             ('dpll0-freq-clamped', 0x40),
@@ -556,7 +537,7 @@ def main (argv):
             ('dpll0-phase-unlocked', 0x02),
             ('dpll0-phase-locked', 0x01),
         ]
-        read_reg(handle, address, status, 'irq', 0x3010, bitfields)
+        read_reg(status, 'irq', 0x3010, bitfields)
         bitfields = [
             ('dpll0-ref-switch', 0x80),
             ('dpll0-freerun', 0x40),
@@ -566,22 +547,17 @@ def main (argv):
             ('dpll0-holdover-ftw-upd', 0x04),
             ('dpll0-phase-step', 0x01),
         ]
-        read_reg(handle, address, status, 'irq', 0x3011, bitfields)
+        read_reg(status, 'irq', 0x3011, bitfields)
     if args.watchdog:
         status['watchdog'] = {}
-        status['watchdog']['period'] = read_data(handle, address, 0x10A) & 0xFF
-        status['watchdog']['period'] |= (read_data(handle, address, 0x10B) & 0xFF)<<8
+        status['watchdog']['period'] = dev.read_data(0x10A) & 0xFF
+        status['watchdog']['period'] |= (dev.read_data(0x10B) & 0xFF)<<8
     if args.iuts:
         bitfields = [
             ('iuts1-valid', 0x02),
             ('iuts2-valid', 0x01),
         ]
-        read_reg(handle, address, status, 'iuts', 0x3023, bitfields)
-    if args.temp:
-        temp = (read_data(handle, address, 0x3004) & 0xFF)<< 8 
-        temp |= read_data(handle, address, 0x3003) & 0xFF
-        status['temp'] = {}
-        status['temp']['reading'] = temp * pow(2,-7)
+        read_reg(status, 'iuts', 0x3023, bitfields)
 
     if args.distrib:
         status['distrib'] = {}
@@ -655,16 +631,16 @@ def main (argv):
         #################
         base = 0x1100
         for pin in ['a','aa','b','bb','c','cc']:
-            div = read_data(handle, address,  base+0 )
-            div += read_data(handle, address, base+1 ) << 8
-            div += read_data(handle, address, base+2 ) << 16
-            div += read_data(handle, address, base+3 ) << 24
+            div = dev.read_data( base+0 )
+            div += dev.read_data(base+1 ) << 8
+            div += dev.read_data(base+2 ) << 16
+            div += dev.read_data(base+3 ) << 24
             status['distrib']['ch0'][pin]['q-div'] = div
-            offset = read_data(handle, address, base +4 )
-            offset += read_data(handle, address, base+5 ) <<8
-            offset += read_data(handle, address, base+6 ) <<16
-            offset += read_data(handle, address, base+7 ) <<24
-            r = read_data(handle, address, base+8)
+            offset = dev.read_data(base +4 )
+            offset += dev.read_data(base+5 ) <<8
+            offset += dev.read_data(base+6 ) <<16
+            offset += dev.read_data(base+7 ) <<24
+            r = dev.read_data(base+8)
             offset += ((r & 0x40)>>6) << 32
             status['distrib']['ch0'][pin]['phase-offset'] = offset
             status['distrib']['ch0'][pin]['half-div'] = enabled[(r & 0x20)>>5]
@@ -673,8 +649,8 @@ def main (argv):
             status['distrib']['ch0'][pin]['max-phase-slew'] = max_phase_slew[(r & 0x07)]
             base += 9
 
-        mod = read_data(handle, address, 0x10C0+0)
-        mod += read_data(handle, address, 0x10C1+1) << 8
+        mod = dev.read_data(0x10C0+0)
+        mod += dev.read_data(0x10C1+1) << 8
         for pin in ['a','b','c']:
             q_div = status['distrib']['ch0'][pin]['q-div']
             try:
@@ -684,32 +660,32 @@ def main (argv):
         
         base = 0x10C2
         for pin in ['a','b','c']:
-            mod = read_data(handle, address, base+0)
-            mod += read_data(handle, address, base+1) << 8
-            mod += read_data(handle, address, base+2) << 16
-            mod += (read_data(handle, address, base+3) &0x0F) << 24
+            mod = dev.read_data(base+0)
+            mod += dev.read_data(base+1) << 8
+            mod += dev.read_data(base+2) << 16
+            mod += (dev.read_data(base+3) &0x0F) << 24
             status['distrib']['ch0'][pin]['mod-counter'] = mod
             base += 6
 
-        r = read_data(handle, address, 0x10CE) & 0x03
+        r = dev.read_data(0x10CE) & 0x03
         status['distrib']['ch0']['pll']['fb-div-sync-edge'] = r 
 
         base = 0x10CF
         for pin in ['a','b','c']:
-            r = read_data(handle, address, base) & 0x0F
+            r = dev.read_data(base) & 0x0F
             status['distrib']['ch0'][pin]['n-shot-mod'] = shot_mod[(r & 0x08)>>3]
             status['distrib']['ch0'][pin]['single-pulse-modulation'] = single_pulse_mod[(r & 0x04)>>2]
             status['distrib']['ch0'][pin]['modulation-polarity'] = mod_polarity[(r & 0x02)>>1]
             status['distrib']['ch0'][pin]['modulation'] = enabled[r & 0x01]
             base += 1
 
-        r = read_data(handle, address, 0x10D2)
+        r = dev.read_data(0x10D2)
         status['distrib']['ch0']['pll']['n-shot-gap'] = r
-        r = read_data(handle, address, 0x10D3)
+        r = dev.read_data(0x10D3)
         status['distrib']['ch0']['pll']['n-shot-request-mode'] = n_shot_mod[(r & 0x40)>>6]
         status['distrib']['ch0']['pll']['n-shots'] = r & 0x3F
 
-        r = read_data(handle, address, 0x10D4)
+        r = dev.read_data(0x10D4)
         status['distrib']['ch0']['bb']['prbs'] = enabled[(r&0x80)>>7] 
         status['distrib']['ch0']['bb']['n-shot'] = enabled[(r&0x40)>>6]
         status['distrib']['ch0']['b']['prbs'] = enabled[(r&0x20)>>5]
@@ -718,25 +694,25 @@ def main (argv):
         status['distrib']['ch0']['aa']['n-shot'] = enabled[(r&0x04)>>2]
         status['distrib']['ch0']['a']['prbs'] = enabled[(r&0x02)>>1]
         status['distrib']['ch0']['a']['n-shot'] = enabled[r&0x01]
-        r = read_data(handle, address, 0x10D5)
+        r = dev.read_data(0x10D5)
         status['distrib']['ch0']['cc']['prbs'] = enabled[(r&0x08)>>3]
         status['distrib']['ch0']['cc']['n-shot'] = enabled[(r&0x04)>>2]
         status['distrib']['ch0']['c']['prbs'] = enabled[(r&0x02)>>1]
         status['distrib']['ch0']['c']['n-shot'] = enabled[r&0x01]
-        r = read_data(handle, address, 0x10D6)
+        r = dev.read_data(0x10D6)
         status['distrib']['ch0']['pll']['nshot-2-mod-retime'] = retime_to_mod[(r & 0x10)>>4]
         status['distrib']['ch0']['pll']['nshot-retiming'] = retiming[r & 0x01]
 
         base = 0x10D7
         for pin in ['a','b','c']:
-            r = read_data(handle, address, base)
+            r = dev.read_data(base)
             status['distrib']['ch0'][pin]['mute-retiming'] = enabled[(r & 0x20)>>5]
             status['distrib']['ch0'][pin]['mode'] = modes[(r & 0x18)>>3]
             status['distrib']['ch0'][pin]['current'] = currents[(r & 0x03)>>1]
             status['distrib']['ch0'][pin]['format'] = fmts[r & 0x01]
             base += 1
         
-        r = read_data(handle, address, 0x310D)
+        r = dev.read_data(0x310D)
         status['distrib']['ch0']['cc']['phase-slewing'] = enabled[(r & 0x20)>>5]
         status['distrib']['ch0']['c']['phase-slewing'] = enabled[(r & 0x10)>>4]
         status['distrib']['ch0']['bb']['phase-slewing'] = enabled[(r & 0x08)>>3]
@@ -744,7 +720,7 @@ def main (argv):
         status['distrib']['ch0']['aa']['phase-slewing'] = enabled[(r & 0x02)>>1]
         status['distrib']['ch0']['a']['phase-slewing'] = enabled[r & 0x01]
         
-        r = read_data(handle, address, 0x310E)
+        r = dev.read_data(0x310E)
         status['distrib']['ch0']['cc']['phase-ctrl-error'] = bool((r & 0x20)>>5)
         status['distrib']['ch0']['c']['phase-ctrl-error'] = bool((r & 0x10)>>4)
         status['distrib']['ch0']['bb']['phase-ctrl-error'] = bool((r & 0x08)>>3)
@@ -757,16 +733,16 @@ def main (argv):
         #################
         base = 0x1500
         for pin in ['a','aa','b','bb']:
-            div = read_data(handle, address,  base+0 )
-            div += read_data(handle, address, base+1 ) << 8
-            div += read_data(handle, address, base+2 ) << 16
-            div += read_data(handle, address, base+3 ) << 24
+            div = dev.read_data( base+0 )
+            div += dev.read_data(base+1 ) << 8
+            div += dev.read_data(base+2 ) << 16
+            div += dev.read_data(base+3 ) << 24
             status['distrib']['ch1'][pin]['q-div'] = div
-            offset = read_data(handle, address, base +4 )
-            offset += read_data(handle, address, base+5 ) <<8
-            offset += read_data(handle, address, base+6 ) <<16
-            offset += read_data(handle, address, base+7 ) <<24
-            r = read_data(handle, address, base+8)
+            offset = dev.read_data(base +4 )
+            offset += dev.read_data(base+5 ) <<8
+            offset += dev.read_data(base+6 ) <<16
+            offset += dev.read_data(base+7 ) <<24
+            r = dev.read_data(base+8)
             offset += ((r & 0x40)>>6) << 32
             status['distrib']['ch1'][pin]['phase-offset'] = offset
             status['distrib']['ch1'][pin]['half-div'] = enabled[(r & 0x20)>>5]
@@ -775,8 +751,8 @@ def main (argv):
             status['distrib']['ch1'][pin]['max-phase-slew'] = max_phase_slew[(r & 0x07)]
             base += 9
 
-        mod = read_data(handle, address, 0x14C0+0)
-        mod += read_data(handle, address, 0x14C1+1) << 8
+        mod = dev.read_data(0x14C0+0)
+        mod += dev.read_data(0x14C1+1) << 8
         for pin in ['a','b']:
             q_div = status['distrib']['ch1'][pin]['q-div']
             try:
@@ -786,32 +762,32 @@ def main (argv):
         
         base = 0x14C2
         for pin in ['a','b']:
-            mod = read_data(handle, address, base+0)
-            mod += read_data(handle, address, base+1) << 8
-            mod += read_data(handle, address, base+2) << 16
-            mod += (read_data(handle, address, base+3) &0x0F) << 24
+            mod = dev.read_data(base+0)
+            mod += dev.read_data(base+1) << 8
+            mod += dev.read_data(base+2) << 16
+            mod += (dev.read_data(base+3) &0x0F) << 24
             status['distrib']['ch1'][pin]['mod-counter'] = mod
             base += 6
 
-        r = read_data(handle, address, 0x14CE) & 0x03
+        r = dev.read_data(0x14CE) & 0x03
         status['distrib']['ch1']['pll']['fb-div-sync-edge'] = r 
 
         base = 0x14CF
         for pin in ['a','b']:
-            r = read_data(handle, address, base) & 0x0F
+            r = dev.read_data(base) & 0x0F
             status['distrib']['ch1'][pin]['n-shot-mod'] = shot_mod[(r & 0x08)>>3]
             status['distrib']['ch1'][pin]['single-pulse-modulation'] = single_pulse_mod[(r & 0x04)>>2]
             status['distrib']['ch1'][pin]['modulation-polarity'] = mod_polarity[(r & 0x02)>>1]
             status['distrib']['ch1'][pin]['modulation'] = enabled[r & 0x01]
             base += 1
 
-        r = read_data(handle, address, 0x14D2)
+        r = dev.read_data(0x14D2)
         status['distrib']['ch1']['pll']['n-shot-gap'] = r
-        r = read_data(handle, address, 0x14D3)
+        r = dev.read_data(0x14D3)
         status['distrib']['ch1']['pll']['n-shot-request-mode'] = n_shot_mod[(r & 0x40)>>6]
         status['distrib']['ch1']['pll']['n-shots'] = r & 0x3F
 
-        r = read_data(handle, address, 0x14D4)
+        r = dev.read_data(0x14D4)
         status['distrib']['ch1']['bb']['prbs'] = enabled[(r&0x80)>>7] 
         status['distrib']['ch1']['bb']['n-shot'] = enabled[(r&0x40)>>6]
         status['distrib']['ch1']['b']['prbs'] = enabled[(r&0x20)>>5]
@@ -820,26 +796,26 @@ def main (argv):
         status['distrib']['ch1']['aa']['n-shot'] = enabled[(r&0x04)>>2]
         status['distrib']['ch1']['a']['prbs'] = enabled[(r&0x02)>>1]
         status['distrib']['ch1']['a']['n-shot'] = enabled[r&0x01]
-        r = read_data(handle, address, 0x14D6)
+        r = dev.read_data(0x14D6)
         status['distrib']['ch1']['pll']['nshot-2-mod-retime'] = retime_to_mod[(r & 0x10)>>4]
         status['distrib']['ch1']['pll']['nshot-retiming'] = retiming[r & 0x01]
 
         base = 0x14D7
         for pin in ['a','b']:
-            r = read_data(handle, address, base)
+            r = dev.read_data(base)
             status['distrib']['ch1'][pin]['mute-retiming'] = enabled[(r & 0x20)>>5]
             status['distrib']['ch1'][pin]['mode'] = modes[(r & 0x18)>>3]
             status['distrib']['ch1'][pin]['current'] = currents[(r & 0x03)>>1]
             status['distrib']['ch1'][pin]['format'] = fmts[r & 0x01]
             base += 1
         
-        r = read_data(handle, address, 0x320D)
+        r = dev.read_data(0x320D)
         status['distrib']['ch1']['bb']['phase-slewing'] = enabled[(r & 0x08)>>3]
         status['distrib']['ch1']['b']['phase-slewing'] = enabled[(r & 0x04)>>2]
         status['distrib']['ch1']['aa']['phase-slewing'] = enabled[(r & 0x02)>>1]
         status['distrib']['ch1']['a']['phase-slewing'] = enabled[r & 0x01]
         
-        r = read_data(handle, address, 0x320E)
+        r = dev.read_data(0x320E)
         status['distrib']['ch1']['bb']['phase-ctrl-error'] = bool((r & 0x08)>>3)
         status['distrib']['ch1']['b']['phase-ctrl-error'] = bool((r & 0x04)>>2)
         status['distrib']['ch1']['aa']['phase-ctrl-error'] = bool((r & 0x02)>>1)
@@ -847,21 +823,21 @@ def main (argv):
 
         base = 0x2100
         for ch in ['ch0','ch1']:
-            r = read_data(handle, address, base+0)
+            r = dev.read_data(base+0)
             status['distrib'][ch]['reset'] = bool((r & 0x04)>>2)
             status['distrib'][ch]['muted'] = bool((r & 0x02)>>1)
-            r = read_data(handle, address, base+1)
+            r = dev.read_data(base+1)
             status['distrib'][ch]['outa']['reset'] = bool((r & 0x20)>>5)
             status['distrib'][ch]['outa']['power-down'] = bool((r & 0x10)>>4)
             status['distrib'][ch]['outa']['-']['muted'] = bool((r & 0x08)>>3)
             status['distrib'][ch]['outa']['+']['muted'] = bool((r & 0x04)>>2)
-            r = read_data(handle, address, base+2)
+            r = dev.read_data(base+2)
             status['distrib'][ch]['outb']['reset'] = bool((r & 0x20)>>5)
             status['distrib'][ch]['outb']['power-down'] = bool((r & 0x10)>>4)
             status['distrib'][ch]['outb']['-']['muted'] = bool((r & 0x08)>>3)
             status['distrib'][ch]['outb']['+']['muted'] = bool((r & 0x04)>>2)
             if ch == 'ch0':
-                r = read_data(handle, address, base+2)
+                r = dev.read_data(base+2)
                 status['distrib'][ch]['outc']['reset'] = bool((r & 0x20)>>5)
                 status['distrib'][ch]['outc']['power-down'] = bool((r & 0x10)>>4)
                 status['distrib'][ch]['outc']['-']['muted'] = bool((r & 0x08)>>3)

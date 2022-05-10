@@ -7,28 +7,19 @@
 #################################################################
 import sys
 import argparse
-from smbus import SMBus
-
-def write_data (handle, dev, addr, data):
-    msb = (addr & 0xFF00)>>8
-    lsb = addr & 0xFF
-    handle.write_i2c_block_data(dev, msb, [lsb, data])
-def read_data (handle, dev, addr):
-    msb = (addr & 0xFF00)>>8
-    lsb = addr & 0xFF
-    handle.write_i2c_block_data(dev, msb, [lsb])
-    data = handle.read_byte(dev)
-    return data
+from ad9546 import *
 
 def main (argv):
     parser = argparse.ArgumentParser(description="AD9545/46 reference control tool")
     parser.add_argument(
         "bus",
-        help="I2C bus",
+        type=int,
+        help="i2c bus (int)",
     )
     parser.add_argument(
         "address",
-        help="I2C slv address",
+        type=str,
+        help="i2c slv address (hex format)",
     )
     parser.add_argument(
         '--ref',
@@ -67,20 +58,18 @@ def main (argv):
     channel = args.channel
 
     # open device
-    handle = SMBus()
-    handle.open(int(args.bus))
-    address = int(args.address, 16)
+    dev = ad9546(args.bus, int(args.address, 16))
 
     if args.free_run:
-        r = read_data(handle, address, 0x2105)
-        write_data(handle, address, 0x2105, r | 0x01)
-        write_data(handle, address, 0x000F, 0x01) # I/O update
+        r = dev.read_data(0x2105)
+        dev.write_data(0x2105, r | 0x01)
+        dev.write_data(0x000F, 0x01) # I/O update
         return 0 # force stop
 
     if args.holdover:
-        r = read_data(handle, address, 0x2105)
-        write_data(handle, address, 0x2105, r | 0x02)
-        write_data(handle, address, 0x000F, 0x01) # I/O update
+        r = dev.read_data(0x2105)
+        dev.write_data(0x2105, r | 0x02)
+        dev.write_data(0x000F, 0x01) # I/O update
         return 0 # force stop
 
     if args.period:
@@ -113,14 +102,14 @@ def main (argv):
         elif pin == 'aux-3':
             regs = [0x04E4]
         for reg in regs:
-            write_data(handle, address, reg+0, r0)
-            write_data(handle, address, reg+1, r1)
-            write_data(handle, address, reg+2, r2)
-            write_data(handle, address, reg+3, r3)
-            write_data(handle, address, reg+4, r4)
-            write_data(handle, address, reg+5, r5)
-            write_data(handle, address, reg+6, r6 & 0xF)
-        write_data(handle, address, 0x000F, 0x01) # I/O update
+            dev.write_data(reg+0, r0)
+            dev.write_data(reg+1, r1)
+            dev.write_data(reg+2, r2)
+            dev.write_data(reg+3, r3)
+            dev.write_data(reg+4, r4)
+            dev.write_data(reg+5, r5)
+            dev.write_data(reg+6, r6 & 0xF)
+        dev.write_data(0x000F, 0x01) # I/O update
         return 0
 
     #if args.phase_lock_thresh:

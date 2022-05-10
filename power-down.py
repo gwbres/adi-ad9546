@@ -9,28 +9,18 @@
 #################################################################
 import sys
 import argparse
-from smbus import SMBus
-
-def write_data (handle, dev, addr, data):
-    msb = (addr & 0xFF00)>>8
-    lsb = addr & 0xFF
-    handle.write_i2c_block_data(dev, msb, [lsb, data])
-def read_data (handle, dev, addr):
-    msb = (addr & 0xFF00)>>8
-    lsb = addr & 0xFF
-    handle.write_i2c_block_data(dev, msb, [lsb])
-    data = handle.read_byte(dev)
-    return data
-
+from ad9546 import *
 def main (argv):
-    parser = argparse.ArgumentParser(description="AD9545/46 power-down tool")
+    parser = argparse.ArgumentParser(description="AD9546 power-down tool")
     parser.add_argument(
         "bus",
-        help="I2C bus",
+        type=int,
+        help="i2c bus (int)",
     )
     parser.add_argument(
         "address",
-        help="I2C slv address",
+        type=str,
+        help="i2c slv address (hex format)",
     )
     flags = [
         ('clear', 'Clear (recover from a previous) power down op'), 
@@ -49,20 +39,17 @@ def main (argv):
             help=helper,
         )
     args = parser.parse_args(argv)
-
     # open device
-    handle = SMBus()
-    handle.open(int(args.bus))
-    address = int(args.address, 16)
+    dev = AD9546(args.bus, int(args.address, 16))
 
     if args.all:
-        reg = read_data(handle, address, 0x2000)
+        reg = dev.read_data(0x2000)
         if args.clear:
-            write_data(handle, address, 0x2000, reg & 0xFE)
+            dev.write_data(0x2000, reg & 0xFE)
         else:
-            write_data(handle, address, 0x2000, reg | 0x01)
+            dev.write_data(0x2000, reg | 0x01)
     else:
-        reg = read_data(handle, address, 0x2001)
+        reg = dev.read_data(0x2001)
         if args.refb:
             if args.clear:
                 reg &= 0xFB
@@ -83,22 +70,22 @@ def main (argv):
                 reg &= 0xFD
             else:
                 reg |= 0x02 
-        write_data(handle, address, 0x2000, reg)
+        dev.write_data(0x2000, reg)
         if args.pll0:
-            reg = read_data(handle, address, 0x2100)
+            reg = dev.read_data(0x2100)
             if args.clear:
                 reg &= 0xFE
             else:
                 reg |= 0x01
-            write_data(handle, address, 0x2100, reg)
+            dev.write_data(0x2100, reg)
         if args.pll1:
-            reg = read_data(handle, address, 0x2200)
+            reg = dev.read_data(0x2200)
             if args.clear:
                 reg &= 0xFE
             else:
                 reg |= 0x01
-            write_data(handle, address, 0x2200, reg)
-    write_data(handle, address, 0x000F, 0x01) # I/O update
+            dev.write_data(0x2200, reg)
+    dev.write_data(0x000F, 0x01) # I/O update
 
 if __name__ == "__main__":
     main(sys.argv[1:])

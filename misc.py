@@ -2,33 +2,22 @@
 #################################################################
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
-# misc.py
-# miscellaneous features
+# misc.py: AD9546 miscellaneous features
 #################################################################
 import sys
 import argparse
-from smbus import SMBus
-
-def write_data (handle, dev, addr, data):
-    msb = (addr & 0xFF00)>>8
-    lsb = addr & 0xFF
-    handle.write_i2c_block_data(dev, msb, [lsb, data])
-def read_data (handle, dev, addr):
-    msb = (addr & 0xFF00)>>8
-    lsb = addr & 0xFF
-    handle.write_i2c_block_data(dev, msb, [lsb])
-    data = handle.read_byte(dev)
-    return data
-
+from ad9546 import *
 def main (argv):
     parser = argparse.ArgumentParser(description="AD9545/46 misc control tool")
     parser.add_argument(
         "bus",
-        help="I2C bus",
+        type=int,
+        help="I2C bus (int)",
     )
     parser.add_argument(
         "address",
-        help="I2C slv address",
+        type=str,
+        help="I2C slv address (hex format)",
     )
     flags = [
         ('temp-thres-high', int, 'Set temperature warning threshold high value'),
@@ -41,11 +30,8 @@ def main (argv):
             help=helper,
         )
     args = parser.parse_args(argv)
-
     # open device
-    handle = SMBus()
-    handle.open(int(args.bus))
-    address = int(args.address, 16)
+    dev = AD9546(args.bus, int(args.address, 16))
 
     if args.temp_thres_high:
         value = int(args.temp_thres_high * pow(2,7))
