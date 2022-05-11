@@ -471,6 +471,9 @@ UTS core status reports and current readings:
 
 ```shell
 status.py --uts 1 0x48
+
+# UTS0 + UTS Fifo status report
+status.py --uts 1 0x048 --filter-by-key fifo,0 
 ```
 
 It is useful to combine this status report to the digitized
