@@ -141,14 +141,6 @@ def main (argv):
         r = dev.read_data(0x0288)
         r &= 0xF8 # mask bits out 
         dev.write_data(0x0288, r | cutoffs[args.cutoff])
-    if args.free_run:
-        r = dev.read_data(0x2105)
-        r &= 0xFE # clear bits out
-        dev.write_data(0x2105, r|0x01) # force free run
-    if args.holdover:
-        r = dev.read_data(0x2105)
-        r &= 0xFD
-        dev.write_data(0x2105, r | 0x02) # force holdover
     if args.freq:
         freq = args.freq * pow(10,3)
         dev.write_data(0x0202, freq & 0xFF)
