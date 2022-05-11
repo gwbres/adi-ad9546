@@ -32,7 +32,8 @@ pip3 install -r requirements.txt
 
 * Each application comes with an `-h` help menu.  
 Refer to help menu for specific information. 
-* `flag` is a mandatory flag
+* `i2c` bus must always be specified
+* `i2c` slave address must always be specified 
 * `--flag` is optionnal: action will not be performed if not requested
 
 For complex flag values (basically involving white spaces), for example 
@@ -40,9 +41,11 @@ For complex flag values (basically involving white spaces), for example
 
 ```shell
 ref-input.py \
+    0 0x48 \ # bus #0 slave address is 0x48
     --ref a \ # simple, one word
     --coupling "AC 1.2V" # 'complex' but meaningful value
 ref-input.py \
+    1 0x4A  \ # bus #1 slave address is 0x4A
     --ref aa \ # simple, one word
     --coupling "internal pull-up" # 'complex' but meaningful value
 ```
@@ -83,8 +86,6 @@ See at the bottom of this page for typical configuration flows.
 `regmap.py` allows the user to quickly load an exported
 register map from the official A&D graphical tool.
 * Input/output is `json`
-* `i2c` bus must be specified
-* `i2c` slave address must be specified 
 * `--quiet` to disable the stdout progress bar
 
 ```shell
@@ -525,28 +526,6 @@ of the desired type.
 because `digital` is implied. 
 * `--holdover`: forces clock to holdover state, `--type` is disregarded 
 because `digital` is implied. 
-
-It is easier to always request a `free-run`, in the sense this
-request cannot fail.
-
-
-## Power down script
-
-`power-down.py` perform and recover power down operations.   
-Useful to power down non needed channels and internal cores. 
-
-The `--all` flag addresses all internal cores.  
-Otherwise, select internal units with related flag
-
-* Power down device entirely
-```shell
-power-down.py 0 0x4A --all
-```
-* Recover a complete power down operation
-```shell
-power-down.py 0 0x4A --all --clear
-```
-
 
 ## Power down script
 
