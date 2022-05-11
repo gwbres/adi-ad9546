@@ -57,13 +57,12 @@ def main (argv):
         ("pll", "Pll cores info"),
         ("ref-input",  "REFx and input signals infos"),
         ('distrib', 'Clock distribution & output signals infos'),
-        ("iuts", "User time stamping units infos"),
-        ("digitized-clocking", "Digitized clocking core infos"),
+        ("uts",  "User Time Stamping cores status + readings"),
+        ("iuts", "Inverse UTS cores status + readings"),
         ("irq", "IRQ registers"),
         ("watchdog", "Watchdog timer period"),
-        ("temp", "Temperature sensor reading [°C]"),
         ("eeprom", "EEPROM controller status"),
-        ("misc", "Auxilary NCOs, DPll and Temp info"),
+        ("misc", "Auxilary NCOs, DPll, temperature sensor reading, ..."),
     ]
     for (v_flag, v_helper) in flags:
         #_helper = helper if helper is not None else "Report {} Status".format(flag.upper())
@@ -838,7 +837,194 @@ def main (argv):
                 status['distrib'][ch]['outc']['-']['muted'] = bool((r & 0x08)>>3)
                 status['distrib'][ch]['outc']['+']['muted'] = bool((r & 0x04)>>2)
             base += 0x100
-            
+ 
+    if args.uts:
+        status['uts'] = {}
+        base = 0x0E00
+        offset = 0x05
+        formats = {
+            0: 'fractionnal seconds',
+            1: 'ptp',
+        }
+        sources = {
+            0: 'REFA',
+            1: 'REFAA',
+            2: 'REFB',
+            3: 'REFBB',
+            4: 'dpll0',
+            5: 'dpll1',
+            6: 'aux-ref0',
+            7: 'aux-ref1',
+            8: 'aux-nco0',
+            9: 'aux-nco1',
+            11: 'aux-ref2',
+            12: 'aux-ref3',
+            13: 'iuts0',
+            14: 'iuts1',
+        }
+
+        for c in range (9):
+            status['uts'][c] = {}
+            r = dev.read_data(base + c*offset) & 0x0F
+            status['uts'][c]['format'] = formats[(r & 0x02)>>1] 
+            status['uts'][c]['enabled'] = bool((r&0x01)>>0)
+            flags = (r & 0x1C)>>2
+            (invalid, fault, unlocked, fmt, tag) = (False,False,False,False)
+            if flags == 0:
+                tag = True
+                invalid = True
+                unlocked = True
+            elif flags == 1:
+                tag = True
+                fault = True
+                unlocked = True
+            elif flags == 2:
+                fmt = True
+                invalid = True
+                unlocked = True
+            elif flags == 3:
+                fmt = True
+                fault = True
+                unlocked = True
+            elif flags == 4:
+                fault = True
+                invalid = True
+                unlocked = True
+            elif flags == 5:
+                fmt = True
+                tag = True
+                unlocked = True
+                invalid = True
+            elif flags == 6:
+                fmt = True
+                tag = True
+                unlocked = True
+                fault = True
+            status['uts'][c]['flags'] = {}
+            status['uts'][c]['flags']['invalid'] = invalid
+            status['uts'][c]['flags']['fault'] = fault
+            status['uts'][c]['flags']['unlocked'] = fault
+            status['uts'][c]['flags']['format'] = fmt
+            status['uts'][c]['flags']['tag'] = tag
+
+            r = dev.read_data(base+1 + c*offset)
+            status['uts'][c]['tagged-timestamps'] = bool((r&0x10)>>4)
+            status['uts'][c]['source'] = sources[(r & 0x1F)]
+
+            v = dev.read_data(base+2 +c*offset)
+            v += dev.read_data(base+3 +c*offset) << 8
+            v += dev.read_data(base+4 +c*offset) << 16
+            # sign extend here for correct interpretation
+            binary = bin(v)[2:]
+            if binary[0] == '1':
+                l = 32 - len(binary)
+                for i in range (l):
+                    binary = '1' + binary
+                v = int(binary,2)
+            status['uts'][c]['reading'] = v * pow(2,-48) # 1 bit = 1sec/2^48
+
+        r = dev.read_data(0x0E2D)
+        status['uts']['fifo'] = {}
+        status['uts']['fifo']['overfill'] = bool((r & 0x80)>>7)
+        status['uts']['fifo']['count'] = r & 0x7F
+        r = dev.read_data(0x0E2E)
+        status['uts']['fifo']['flags'] = (r & 0xE0)>>5
+        status['uts']['fifo']['source'] = sources[(r & 0x1F)]
+        v0 = dev.read_data(0x0E2F)
+        v0 += dev.read_data(0x0E30) << 8 
+        v0 += dev.read_data(0x0E31) << 16 
+        v0 += dev.read_data(0x0E32) << 24 
+        v0 += dev.read_data(0x0E33) << 32 
+        v0 += dev.read_data(0x0E34) << 40 
+        v1 = dev.read_data(0x0E35) 
+        v1 += dev.read_data(0x0E36) << 8
+        v1 += dev.read_data(0x0E37) << 16 
+        v1 += dev.read_data(0x0E38) << 24 
+        v1 += dev.read_data(0x0E39) << 32 
+        v1 += dev.read_data(0x0E3A) << 40 
+        status['uts']['fifo']['timecode'] = {}
+        status['uts']['fifo']['timecode']['s'] = v1
+        if status['uts'][0]['format'] == 'ptp':
+            binary = bin(v0 & 0x3FFFFFFFFFFF)
+            if binary[0] == '1':
+                l = 48 - len(binary)
+                for i in range (l):
+                    binary = '1' + binary
+            ns = int(binary,2)
+            status['uts']['fifo']['timecode']['ns'] = ns * pow(2,-16)
+        else:
+            binary = bin(v0)
+            if binary[0] == '1':
+                l = 48 - len(binary)
+                for i in range (l):
+                    binary = '1' + binary
+            ns = int(binary,2)
+            status['uts']['fifo']['timecode']['ns'] = ns * pow(2,-48)
+
+    if args.iuts:
+        status['iuts'] = {}
+        base = 0x0F00
+        offset = 0x04
+        for i in range (2):
+            status['iuts'][i] = {}
+            r = dev.read_data(base + offset * i)
+            status['iuts'][i]['bypass-ccdpll-lock'] = bool((r & 0x02)>>1)
+            status['iuts'][i]['valid'] = bool((r & 0x01)>>0)
+            v = dev.read_data(base+1 + offset * i)
+            v += dev.read_data(base+2 + offset * i) << 8
+            v += dev.read_data(base+2 + offset * i) << 24
+            binary = bin(v)[2:]
+            if binary[0] == '1':
+                l = 32 - len(binary)
+                for i in range (l):
+                    binary = '1' + binary
+                v = int(binary,2)
+            status['iuts'][i]['reading'] = v * pow(2,-48)
+        
+        r = dev.read_data(0x0F09)
+        formats = {
+            0: 'fractionnal seconds',
+            1: 'ptp',
+        }
+        destinations = {
+            13: 'iuts0',
+            14: 'iuts1',
+            30: 'css sync0 timecode',
+            31: 'css sync1 timecode',
+        }
+        status['iuts']['format'] = formats[(r & 0x80)>>7] 
+        status['iuts']['destination'] = destinations[(r & 0x1F)]
+        v0 = dev.read_data(0x0F0A)
+        v0 += dev.read_data(0x0F0B) << 8
+        v0 += dev.read_data(0x0F0C) << 16
+        v0 += dev.read_data(0x0F0D) << 24
+        v0 += dev.read_data(0x0F0E) << 32
+        v0 += dev.read_data(0x0F0F) << 40
+        v1 = dev.read_data(0x0F10)
+        v1 += dev.read_data(0x0F11) << 8
+        v1 += dev.read_data(0x0F12) << 16
+        v1 += dev.read_data(0x0F13) << 24
+        v1 += dev.read_data(0x0F14) << 32
+        v1 += dev.read_data(0x0F15) << 40
+        status['iuts']['timecode'] = {}
+        status['iuts']['timecode']['s'] = v0
+        if status['iuts']['format'] == 'ptp':
+            binary = bin(v0 & 0x3FFFFFFFFFFF)
+            if binary[0] == '1':
+                l = 48 - len(binary)
+                for i in range (l):
+                    binary = '1' + binary
+            ns = int(binary,2)
+            status['iuts']['timecode']['ns'] = ns *pow(2,-16)
+        else:
+            binary = bin(v0)
+            if binary[0] == '1':
+                l = 48 - len(binary)
+                for i in range (l):
+                    binary = '1' + binary
+            ns = int(binary,2)
+            status['iuts']['timecode']['ns'] = ns *pow(2,-48)
+
     #print("======== TOTAL ===============")
     #print(json.dumps(status, sort_keys=True, indent=2))
     #print("==============================")

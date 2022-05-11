@@ -461,6 +461,36 @@ power-down.py 0 0x4A --refb --refbb --refaa
 power-down.py 0 0x4A --clear --refa 
 ```
 
+## User Time Stamping cores
+
+UTS cores allow the user to timestamp input data against
+a reference signal. UTS requires the CCDPPL that is
+part of the Digitized clocking core to be configured.
+
+UTS core status reports and current readings:
+
+```shell
+status.py --uts 1 0x48
+```
+
+It is useful to combine this status report to the digitized
+clocking status report.
+
+UTS Readings are either signed 24 bit or signed 48 bit values,
+this python script should scale and interprate those value
+correctly (double check that).
+
+It is not clear at the moment which UTSx core is fed
+to the UTS FIFO therefore which scaling should be used
+to interprate the UTS FIFO Reading. At the moment,
+is is hardcoded to Core #0 (1st one).
+
+## Inverse UTS
+
+Inverse UTS allows the user to synthesize signals 
+based on a local reference and a given timestamp related
+to that reference.
+
 ## IRQ events
 
 `status.py --irq` allows reading the current asserted IRQ flags.  
