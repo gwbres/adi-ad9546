@@ -57,6 +57,7 @@ def main (argv):
         ("pll", "Pll cores info"),
         ("ref-input",  "REFx and input signals infos"),
         ('distrib', 'Clock distribution & output signals infos'),
+        ('ccdpll', 'Common Clock DPLL core infos'),
         ("uts",  "User Time Stamping cores status + readings"),
         ("iuts", "Inverse UTS cores status + readings"),
         ("irq", "IRQ registers"),
@@ -831,12 +832,118 @@ def main (argv):
                 status['distrib'][ch]['outc']['+']['muted'] = bool((r & 0x04)>>2)
             base += 0x100
  
+    if args.ccdpll:
+        status['ccdpll'] = {}
+        status['ccdpll']['ccs'] = {}
+        status['ccdpll']['lock-detector'] = {}
+        r = dev.read_data(0x0D00)
+        r += dev.read_data(0x0D01) << 8
+        status['ccdpll']['lock-detector']['threshold'] = r * pow(10,-12)
+        status['ccdpll']['lock-detector']['fill'] = dev.read_data(0x0D02) 
+        status['ccdpll']['lock-detector']['drain'] = dev.read_data(0x0D03) 
+        r = dev.read_data(0x0D04)
+        r += dev.read_data(0x0D05) << 8
+        status['ccdpll']['lock-detector']['delay'] = r 
+
+        sources = {
+            0: 'REFA',
+            1: 'REFAA',
+            2: 'REFB',
+            3: 'REFBB',
+            6: 'aux-ref0',
+            7: 'aux-ref1',
+            11: 'aux-ref2',
+            12: 'aux-ref3',
+            30: 'local timescale immediate sync',
+            31: 'None',
+        }
+        tagging = {
+            0: 'normal',
+            1: 'tagged',
+        }
+
+        base = 0x0D10
+        for cr in ['cr0','cr1']:
+            status['ccdpll'][cr] = {}
+            r = dev.read_data(base+0)
+            status['ccdpll'][cr]['enabled'] = bool((r&0x80)>>7)
+            status['ccdpll'][cr]['ts-source'] = sources[r & 0x1F]
+
+            r = dev.read_data(base +1)
+            status['ccdpll'][cr]['css'] = {}
+            status['ccdpll'][cr]['css']['tagging'] = tagging[(r & 0x80)>>7]
+            status['ccdpll'][cr]['css']['source-sync'] = sources[(r & 0x1F)>>0]
+
+            num = dev.read_data(base +2)
+            num+= dev.read_data(base +3) <<8
+            num+= dev.read_data(base +4) <<16
+            num+= dev.read_data(base +5) <<24
+            denom = dev.read_data(base +6)
+            denom+= dev.read_data(base +7) <<8
+            denom+= dev.read_data(base +8) <<16
+            denom+= dev.read_data(base +9) <<24
+            denom+= dev.read_data(base +10) <<32
+            status['ccdpll'][cr]['numerator'] = num
+            status['ccdpll'][cr]['denominator'] = denom
+            skew = dev.read_data(base +11)
+            skew+= dev.read_data(base +12)<<8
+            skew+= dev.read_data(base +13)<<16
+            status['ccdpll'][cr]['skew'] = skew * pow(2,-48)
+            base += 0x010
+
+        t = dev.read_data(0x0D30)
+        t+= dev.read_data(0x0D31) <<8
+        t+= dev.read_data(0x0D32) <<16
+        t+= dev.read_data(0x0D33) <<24
+        status['ccdpll']['ccs']['offset'] = t*pow(2,-48)
+
+        skew = dev.read_data(0x0D34)
+        skew+= dev.read_data(0x0D35)<<8
+        skew+= dev.read_data(0x0D36)<<16
+        status['ccdpll']['ccs']['skew-limit'] = '{:.3e} ppm'.format(skew * pow(2,-16))
+
+        status['ccdpll']['css']['guard'] = {}
+        guard = dev.read_data(0x0D37)
+        guard+= dev.read_data(0x0D38)<<8
+        status['ccdpll']['css']['guard']['latency'] = guard * pow(2,-16)
+        guard = dev.read_data(0x0D39)
+        guard+= dev.read_data(0x0D3A)<<8
+        guard+= (dev.read_data(0x0D3B) & 0x0F)<<16
+        status['ccdpll']['css']['guard']['adjustment'] = guard * pow(2,-12)
+        status['ccdpll']['css']['guard']['bypass-lock'] = bool(dev.read_data(0x0D3C)&0x01)
+
+        r = dev.read_data(0x0D40)
+        states = {
+            0: 'normal',
+            1: 'triggered by event',
+        }
+        slew_status = {
+            0: 'not active',
+            1: 'actively limiting',
+        }
+        valid = {
+            0: 'invalid',
+            1: 'valid',
+        }
+        primary = {
+            0: "primary",
+            1: "secondary",
+        }
+        status['ccdpll']['css']['guard']['status'] = states[(r & 0x80)>>7] 
+        status['ccdpll']['css']['slew-limiter-status'] = slew_status[(r & 0x40)>>6] 
+        status['ccdpll']['cr1']['source'] = valid[(r & 0x20)>>5] 
+        status['ccdpll']['cr0']['source'] = valid[(r & 0x10)>>4]
+        status['ccdpll']['active-source'] = primary[(r & 0x80)>>3]
+        status['ccdpll']['ready'] = bool((r & 0x04)>>2)
+        status['ccdpll']['phase-locked'] = bool((r & 0x02)>>1)
+        status['ccdpll']['active'] = bool((r & 0x01)>>0)
+
     if args.uts:
         status['uts'] = {}
         base = 0x0E00
         offset = 0x05
         formats = {
-            0: 'fractionnal seconds',
+            0: 'normal',
             1: 'ptp',
         }
         sources = {
@@ -976,7 +1083,7 @@ def main (argv):
         
         r = dev.read_data(0x0F09)
         formats = {
-            0: 'fractionnal seconds',
+            0: 'normal',
             1: 'ptp',
         }
         destinations = {
@@ -1022,10 +1129,8 @@ def main (argv):
             status['iuts']['timecode']['ns'] = ns *pow(2,-48)
     
         r = dev.read_data(0x3023)
-        status['iuts'][str(1)] = {}
-        status['iuts'][str(1)]['valid'] = bool((r&0x02)>>1)
-        status['iuts'][str(2)] = {}
-        status['iuts'][str(2)]['valid'] = bool((r&0x01)>>0)
+        status['iuts']['0']['valid'] = bool((r&0x02)>>1)
+        status['iuts']['1']['valid'] = bool((r&0x01)>>0)
 
     #print("======== TOTAL ===============")
     #print(json.dumps(status, sort_keys=True, indent=2))

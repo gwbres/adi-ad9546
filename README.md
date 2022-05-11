@@ -461,6 +461,16 @@ power-down.py 0 0x4A --refb --refbb --refaa
 power-down.py 0 0x4A --clear --refa 
 ```
 
+## CCDPLL : Digitized Clocking Common Clock Synchronizer
+
+CCDPLL status report:
+
+```shell
+status.py --ccdpll 1 0x48
+```
+
+CCDPLL must be configured and monitored for UTS & IUTS related operations
+
 ## User Time Stamping cores
 
 UTS cores allow the user to timestamp input data against
