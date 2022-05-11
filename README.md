@@ -254,7 +254,7 @@ status.py 0 0x4A \`
 ```
 
 Such scenario (meaningful filters) is handy when trying to interprate 
-raw data into another. Here's an example on how to do this in python once again:
+raw data into another script. Here's an example on how to do this in python once again:
 
 ```shell
 # call status.py from another python script;
@@ -313,6 +313,15 @@ calib.py --all 0 0x4A
 
 ```shell
 calib.py --sysclk 0 0x4A
+```
+
+Monitor internal calibration process with
+
+```shell
+status.py 1 0x4A \
+    -pll --sysclk --filter-by-key calibrating
+status.py 1 0x4A \
+    --sysclk --irq --filter-by-key calibration 
 ```
 
 ## Clock distribution
