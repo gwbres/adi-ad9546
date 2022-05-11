@@ -54,7 +54,7 @@ scripts will reject those with a runtime error.
 
 ## AD9545 / 46
 
-These scripts are developped and tested on an AD9546 chip.
+These scripts are developped and tested with an AD9546 chip.
 
 ## Utilities
 
@@ -128,12 +128,8 @@ Use the `help` menu to learn how to use this script:
 status.py -h
 ```
 
-There is basically a `--flag` option (reader) for pretty much all
-custom scripts (writer) down below, to readback related values.
-
-Several part of the integrated chips can be monitored at once.
 Output format is `json` and is streamed to `stdout`.
-Example of use:
+Each `--flag` can be cumulated and increase the size of the status report:
 
 ```shell
 # Grab general / high level info (bus=0, 0x4A):
@@ -147,27 +143,20 @@ status.py --irq 0 0x4A
 
 # dump status to a file
 status.py --info --serial --pll 0 0x4A > /tmp/status.json
-
-# call status.py from another python script;
-# evaluate json content (dict) directly from `stdout`
-import subprocess
-args = ['status.py', '--info', '0', '0x4A']
-ret = subprocess.run(args)
-if ret.exitcode == 0: # OK
-   # grab `stdout`
-   status = ret.stdout.decode('utf-8') 
-   # build structure directly
-   status = eval(status)
-   print(status['info']['vendor'])
 ```
 
-Status (depending on sections of interest) is quite verbose.   
-To reduce the quantity of information displayed, one can use the two availlable filters:
+### Status report filtering
+
+Status report can be quite verbose.
+It is possible to filter the status report by field indentifiers
+and field values. Filters of the same kind, and different kinds
+can be cummulated, meaning, it is possible to cummulate
+several identifiers filter and value filters.
 
 * `--filter-by-key`: filters result by keyword identifiers.
 Identifiers are passed as comma separated strings.
-Filters only retain data that match the specified identifiers exactly
-(case sensitive).
+Filters are cummulated (comma separated) and applied according to
+descripted order. Identifiers must match exactly (case sensitive).
 
 ```shell
 # Clock infos filter
@@ -212,39 +201,85 @@ status.py --distrib --ref-input --filter-by-key ch1,slow 0 0x48
 ```
 
 * `filter-by-value`: it is possible to filter status reports
-on matching values too. Once again, only exactly matching keywords
+by matching values. Once again, only exactly matching keywords
 are retained.
 
 ```shell
 # Return `0x456` <=> vendor field
-status.py --info --filter-by-value 0x456 1 0x48
+status.py 1 0x48 \
+    --info \
+    --filter-by-value 0x456
 
 # Return only deasserted values
-status.py --distrib --filter-by-value disabled 1 0x48
+status.py 1 0x48 \
+    --distrib \
+    --filter-by-value disabled 
 
-# Optimum `deasserted` value filter, 
-# using cummulated filter
-status.py --distrib --filter-by-value disabled,false,inactive 1 0x48
+# Event better `deasserted` value filter
+status.py 1 0x48 \
+    --distrib \
+    --filter-by-value disabled,false,inactive
 ```
 
 It is possible to combine `key` and `value` filters:
 
 ```shell
-# todo  
+# from CH0 return only deasserted values
+status.py 1 0x48 \
+    --distrib \
+    --filter-by-value ch0 \
+    --filter-by-value disabled,false,inactive
 ```
 
-* The `--unpack` option unpacks the default dictionnary structure
- * exposing a single value if we zoomed in on a unique value, using filters
- * exposing a 1D disctionnary structure if we still expose several values
+### Extract raw data from status report
+
+By default everything is encapsulated in json.   
+It is possible to use the `--unpack` option,
+to either:
+
+* unpack the data of interest as raw data.
+This works if we applied enough filter to zoom in on a single/unique field
 
 ```shell
-# grab raw temperature reading
-# using `--unpack` and zooming in on this unique field
-status.py --misc 0 0x4A --filter-by-key temperature,value --unpack
+status.py 0 0x4A \
+    --info --filter-by-key vendor # extract vendor info \
+    --unpack # raw value
+status.py 0 0x4A \
+    --misc --filter-by-key temperature,value # extract t° reading \
+    --unpack # raw value
+# extract temperature alarm bit
+status.py 0 0x4A \`
+    --misc --filter-by-key temperature,alarm # extract t° alarm bit \
+    --unpack # raw value
+```
 
-# if we did not zoom in enough (more than 1 value to expose),
-# --unpack simply reduces the output to 1D
-status.py --misc 0 0x4A --filter-by-key temperature --unpack
+Such scenario (meaningful filters) is handy when trying to interprate 
+raw data into another. Here's an example on how to do this in python once again:
+
+```shell
+# call status.py from another python script;
+import subprocess
+args = ['
+    status.py', 
+    '--misc', '0', '0x4A',
+    '--filter-by-key', 'temperature,alarm', # --> efficient filter
+    '--unpack', # bool() direct cast 
+]
+# interprate filtered stdout content directly
+ret = subprocess.run(args)
+if ret.exitcode == 0: # OK
+    # direct cast
+    has_alarm = bool(ret.stdout.decode('utf-8')) 
+```
+
+* reduce the data structure to 1D. 
+"Simplifies" the output structure, but we lose data
+if two identical identifiers still coexist
+
+```shell
+status.py 0 0x4A \
+    --misc --filter-by-key temperature,value # extract t° reading \
+    --unpack # raw value
 ```
 
 ## Sys clock

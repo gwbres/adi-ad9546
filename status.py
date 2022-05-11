@@ -32,15 +32,15 @@ def filter_by_value (tree, value):
     ret = {} 
     for k in tree.keys():
         if type(tree[k]) is dict:
-            # top branch, not filtered
-            # ==> inner filter ?
-            retained = filter_by_value(tree[k], value)
-            got_something = len(retained.keys()) > 0
-            if got_something:
-                ret[k] = retained
+            continue
+            #data = filter_by_value(tree[k], value)
+            #if len(data) > 0:
+            #    ret[k] = data
         else:
-            if str(tree[k]) == value: # matched value
-                ret[k] = tree[k] # copy
+            print(str(tree[k]).lower(), value.lower())
+            if str(tree[k]).lower() == value.lower(): # matched value
+                print("matched")
+                ret[k] = tree[k] # maintain this data 
     return ret
 
 def unpack (tree):
@@ -1123,32 +1123,33 @@ def main (argv):
     #print("==============================")
  
     if args.filter_by_key:
-        filtered = {}
         filters = args.filter_by_key.split(",")
-        for category in status.keys(): # filter all categories
-            filtered[category] = {}
-            to_merge = []
-            for f in filters:
-                to_merge.append(filter_by_key(status[category], f))
-            all_empty = True
-            for d in to_merge:
-                if len(d) > 0:
-                    all_empty = False
-                filtered[category] |= d 
-            if all_empty: # trick to catch non relevant filter ops
-                filtered[category] = status[category].copy()    
-    else:
+        for _filter in filters:
+            if _filter == filters[0]: # first filter
+                # => create work structure
+                filtered = {}
+            for category in status.keys(): # filter all categories
+                if _filter == filters[0]: # first filter
+                    # => create work structure
+                    filtered[category] = {}
+                    # and work from status report
+                    data = filter_by_key(status[category], _filter)
+                else:
+                    # work from already filtered data
+                    data = filter_by_key(filtered[category], _filter)
+
+                if len(data) == 0: # not a single match
+                    # assumes key/filter is incorrect
+                    # ==> preserve complete data set
+                    filtered[category] = status[category].copy()
+                else:
+                    filtered[category] = data
+    else: # plain copy
         filtered = status.copy()
                 
     if args.filter_by_value:
         filters = args.filter_by_value.split(",")
-        for category in status.keys(): # filter all categories
-            to_diff = []
-            for f in filters:
-                to_diff = filter_by_value(filtered[category], f)
-                #TODO conclude diff op
-                #print("========= diff ==============")
-                #print(json.dumps(to_diff, sort_keys=True, indent=2))
+        print("filter by value is work in progress")
     
     if args.unpack:
         filtered = unpack(filtered)
