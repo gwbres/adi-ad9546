@@ -142,7 +142,7 @@ if ret.exitcode == 0: # OK
    status = ret.stdout.decode('utf-8') 
    # build structure directly
    status = eval(status)
-   status['info']['vendor'] # eval() is way cool!
+   print(status['info']['vendor'])
 ```
 
 Status (depending on sections of interest) is quite verbose.   
