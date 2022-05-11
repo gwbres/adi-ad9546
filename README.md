@@ -37,7 +37,7 @@ Refer to help menu for specific information.
 * `--flag` is optionnal: action will not be performed if not requested
 
 For complex flag values (basically involving white spaces), for example 
-`ref-input --coupling`, don't forget to encapsulate by inverted commas:
+`ref-input --coupling`, don't forget to encapsulate with inverted commas:
 
 ```shell
 ref-input.py \
@@ -47,6 +47,10 @@ ref-input.py \
     --ref aa \ # simple, one word
     --coupling "internal pull-up" # 'complex' but meaningful value
 ```
+
+Flag values are case sensitive and must be exactly matched.
+It is not possible to pass a non supported / unknown flag value,
+scripts will reject those with a runtime error.
 
 ## AD9545 / 46
 
