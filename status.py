@@ -870,9 +870,9 @@ def main (argv):
             status['ccdpll'][cr]['ts-source'] = sources[r & 0x1F]
 
             r = dev.read_data(base +1)
-            status['ccdpll'][cr]['css'] = {}
-            status['ccdpll'][cr]['css']['tagging'] = tagging[(r & 0x80)>>7]
-            status['ccdpll'][cr]['css']['source-sync'] = sources[(r & 0x1F)>>0]
+            status['ccdpll'][cr]['ccs'] = {}
+            status['ccdpll'][cr]['ccs']['tagging'] = tagging[(r & 0x80)>>7]
+            status['ccdpll'][cr]['ccs']['source-sync'] = sources[(r & 0x1F)>>0]
 
             num = dev.read_data(base +2)
             num+= dev.read_data(base +3) <<8
@@ -902,15 +902,15 @@ def main (argv):
         skew+= dev.read_data(0x0D36)<<16
         status['ccdpll']['ccs']['skew-limit'] = '{:.3e} ppm'.format(skew * pow(2,-16))
 
-        status['ccdpll']['css']['guard'] = {}
+        status['ccdpll']['ccs']['guard'] = {}
         guard = dev.read_data(0x0D37)
         guard+= dev.read_data(0x0D38)<<8
-        status['ccdpll']['css']['guard']['latency'] = guard * pow(2,-16)
+        status['ccdpll']['ccs']['guard']['latency'] = guard * pow(2,-16)
         guard = dev.read_data(0x0D39)
         guard+= dev.read_data(0x0D3A)<<8
         guard+= (dev.read_data(0x0D3B) & 0x0F)<<16
-        status['ccdpll']['css']['guard']['adjustment'] = guard * pow(2,-12)
-        status['ccdpll']['css']['guard']['bypass-lock'] = bool(dev.read_data(0x0D3C)&0x01)
+        status['ccdpll']['ccs']['guard']['adjustment'] = guard * pow(2,-12)
+        status['ccdpll']['ccs']['guard']['bypass-lock'] = bool(dev.read_data(0x0D3C)&0x01)
 
         r = dev.read_data(0x0D40)
         states = {
@@ -929,8 +929,8 @@ def main (argv):
             0: "primary",
             1: "secondary",
         }
-        status['ccdpll']['css']['guard']['status'] = states[(r & 0x80)>>7] 
-        status['ccdpll']['css']['slew-limiter-status'] = slew_status[(r & 0x40)>>6] 
+        status['ccdpll']['ccs']['guard']['status'] = states[(r & 0x80)>>7] 
+        status['ccdpll']['ccs']['slew-limiter-status'] = slew_status[(r & 0x40)>>6] 
         status['ccdpll']['cr1']['source'] = valid[(r & 0x20)>>5] 
         status['ccdpll']['cr0']['source'] = valid[(r & 0x10)>>4]
         status['ccdpll']['active-source'] = primary[(r & 0x80)>>3]
@@ -1089,8 +1089,8 @@ def main (argv):
         destinations = {
             13: 'iuts0',
             14: 'iuts1',
-            30: 'css sync0 timecode',
-            31: 'css sync1 timecode',
+            30: 'ccs sync0 timecode',
+            31: 'ccs sync1 timecode',
         }
         status['iuts']['format'] = formats[(r & 0x80)>>7] 
         try:
