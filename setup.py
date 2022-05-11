@@ -21,5 +21,6 @@ setup(name="adi-ad9546",
         "reset.py",
         "status.py",
         "sysclk.py",
+        "uts.py",
     ],
 )
