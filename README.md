@@ -46,11 +46,11 @@ These scripts are developped and tested on an AD9546 chip.
 when booting or a new setup has just been loaded.
 * `distrib.py`: controls clock distribution and output signals.
 Includes signal paths and output pins muting operations.
-* `pll.py`: APLLx and DPLLx cores management. Includes
-free running + holdover manual actions.
 * `irq.py`: IRQ clearing & masking operations 
 * `misc.py`: miscellaneous operations
 * `mx-pin.py`: Mx programmable I/O management 
+* `pll.py`: APLLx and DPLLx cores management. Includes
+free running + holdover manual forcing operation
 * `power-down.py` : power saving and management utility
 * `ref-input.py`: reference & input signals management
 * `regmap.py`: load or dump a register map preset
