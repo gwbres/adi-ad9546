@@ -958,6 +958,9 @@ def main (argv):
         status['ccdpll']['active'] = bool((r & 0x01)>>0)
 
     if args.uts:
+        dev.io_update() # triggers UTPSx latching, that
+            # we deal with at the very end
+
         status['uts'] = {}
         base = 0x0E00
         offset = 0x05
@@ -1062,6 +1065,26 @@ def main (argv):
         else:
             ns = sign_extend(v0, 48)
             status['uts']['fifo']['timecode']['ns'] = ns * pow(2,-48)
+
+        base = 0x3A14
+        for ch in range(2):
+            status['uts'][str(ch)]['output'] = {}
+            itg = dev.read_data(base)
+            itg+= dev.read_data(base+1)<<8
+            itg+= dev.read_data(base+2)<<16
+            itg+= dev.read_data(base+3)<<24
+            itg+= dev.read_data(base+4)<<32
+            fract = dev.read_data(base+5)
+            fract+= dev.read_data(base+6)<<8
+            fract+= dev.read_data(base+7)<<16
+            fract+= dev.read_data(base+8)<<24
+            fract+= dev.read_data(base+9)<<32
+            t0 = 1 # TODO retrieve time scale 
+            status['uts'][str(ch)]['output']['integer'] = itg * t0 
+            status['uts'][str(ch)]['output']['fractionnal'] = fract * t0 * pow(2,-40)
+            status['uts'][str(ch)]['missed'] = dev.read_data(base+10)
+            status['uts'][str(ch)]['overdue'] = bool(dev.read_data(base+11) & 0x01)
+            base += 12
 
     if args.iuts:
         status['iuts'] = {}
