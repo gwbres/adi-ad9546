@@ -44,15 +44,18 @@ These scripts are developped and tested on an AD9546 chip.
 
 * `calib.py`: calibrates core portions of the clock. Typically required
 when booting or a new setup has just been loaded.
-* `distrib.py`: controls clock distribution and output signals
+* `distrib.py`: controls clock distribution and output signals.
+Includes signal paths and output pins muting operations.
+* `pll.py`: APLLx and DPLLx cores management. Includes
+free running + holdover manual actions.
 * `irq.py`: IRQ clearing & masking operations 
-* `misc.py`: miscellaneous / optionnal stuff
+* `misc.py`: miscellaneous operations
 * `mx-pin.py`: Mx programmable I/O management 
-* `power-down.py` : power saving and management utility, turns core sections on and off.
-* `ref-input.py`: reference / input signal control & management
+* `power-down.py` : power saving and management utility
+* `ref-input.py`: reference & input signals management
 * `regmap.py`: load or dump a register map preset
 * `regmap-diff.py`: loaded / dumped regmap differentiator (debug tool)
-* `reset.py`: reset the device
+* `reset.py`: device reset operations
 * `status.py` : status monitoring, includes IRQ flag reports and onboard temperature reading
 * `sysclk.py` : sys clock control & management tool
 
