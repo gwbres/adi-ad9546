@@ -43,6 +43,25 @@ def filter_by_value (tree, value):
                 ret[k] = tree[k] # copy
     return ret
 
+def unpack (tree):
+    ret = {}
+    for k in tree.keys(): 
+        if type(tree[k]) is dict:
+            # reduce dimension
+            unpacked = unpack(tree[k])
+            if type(unpacked) is dict:
+                for key in unpacked.keys():
+                    ret[key] = unpacked[key]
+            else:
+                ret[k] = unpacked
+        else:
+            ret[k] = tree[k]
+    
+    if len(ret) == 1:
+        return ret[list(ret.keys())[0]]
+    else:
+        return ret
+
 def main (argv):
     parser = argparse.ArgumentParser(description="AD9545/46 status reporting")
     parser.add_argument(
@@ -86,6 +105,11 @@ def main (argv):
         "--filter-by-value",
         type=str,
         help="Filter results by matching (comma separeted) values.",
+    )
+    parser.add_argument(
+        "--unpack",
+        action="store_true",
+        help="Reduce output to 1D or extract single field value",
     )
     args = parser.parse_args(argv)
     # open device
@@ -1126,6 +1150,9 @@ def main (argv):
                 #print("========= diff ==============")
                 #print(json.dumps(to_diff, sort_keys=True, indent=2))
     
+    if args.unpack:
+        filtered = unpack(filtered)
+
     print(json.dumps(filtered, sort_keys=True, indent=2))
     
 if __name__ == "__main__":

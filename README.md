@@ -195,7 +195,6 @@ filter op is considered faulty and fulldata set is exposed.
 status.py --info --filter-by-key something 0 0x48
 ```
 
-As always, flag order does not matter.
 It is possible to filter several status reports with
 relevant keywords:
 
@@ -228,10 +227,24 @@ status.py --distrib --filter-by-value disabled 1 0x48
 status.py --distrib --filter-by-value disabled,false,inactive 1 0x48
 ```
 
-It is possible to combine `key` and `value` restrictions:
+It is possible to combine `key` and `value` filters:
 
 ```shell
 # todo  
+```
+
+* The `--unpack` option unpacks the default dictionnary structure
+ * exposing a single value if we zoomed in on a unique value, using filters
+ * exposing a 1D disctionnary structure if we still expose several values
+
+```shell
+# grab raw temperature reading
+# using `--unpack` and zooming in on this unique field
+status.py --misc 0 0x4A --filter-by-key temperature,value --unpack
+
+# if we did not zoom in enough (more than 1 value to expose),
+# --unpack simply reduces the output to 1D
+status.py --misc 0 0x4A --filter-by-key temperature --unpack
 ```
 
 ## Sys clock
@@ -573,6 +586,15 @@ Clear them with `irq.py`:
 ## Misc
 
 `status.py --misc` returns (amongst other infos) the internal temperature sensor reading.  
+
+* Get current reading :
+```shell
+status.py --misc 1 0x48
+# Filter on field of interest like this
+status.py --misc 1 0x48 --filter-by-key temperature,value --unpack
+# Is temperature range currently exceeded
+status.py --misc 1 0x48 --filter-by-key temperature,alarm --unpack
+```
 
 * Program a temperature range :
 
