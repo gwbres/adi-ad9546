@@ -425,9 +425,6 @@ and the general clock state.
 * `--coupling` control REFx input coupling
 `lock` must be previously acquired.
 
-It is easier to always request a `free-run`, in the sense this
-request cannot fail
-
 * `freq-lock-thresh` : frequency locking mechanism constraint.
 * `phase-lock-thresh` : phase locking mechanism constraint.
 * `phase-step-thresh` : inst. phase step threshold 
@@ -451,6 +448,10 @@ of the desired type.
 because `digital` is implied. 
 * `--holdover`: forces clock to holdover state, `--type` is disregarded 
 because `digital` is implied. 
+
+It is easier to always request a `free-run`, in the sense this
+request cannot fail.
+
 
 ## Power down script
 

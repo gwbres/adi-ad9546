@@ -34,8 +34,6 @@ def main (argv):
         ('diff-mode', str, ['AC','DC','DC-LVDS'], 'Set REFx input differential mode'),
         ('differential', None, [], 'Set REFx as differential input. REFx and REFxx is a differential pair'),
         ('single-ended', None, [], 'Set REFx as single-ended input. REFx and REFxx are independent pins'),
-        ('free-run', None, [], 'Force DPLLx to free-run state manually, where x = channel'),
-        ('holdover', None, [], 'Force DPLLx to holdover state manually, `lock` being already be acquired. x = channel'),
         ('demod', str, ['enable','disable'], 'Enable / Disable REFx demodulator'),
         ('demod-bw', str, ['narrow','wide'], 'Select REFx/xx demodulator bandwidth'),
         ('demod-sensitivity', int, [0,1,2,3], 'Select REFx demodulator level sensitivity (0=max, 3=min)'),
@@ -64,18 +62,6 @@ def main (argv):
     ref = args.ref
     # open device
     dev = AD9546(args.bus, int(args.address, 16))
-
-    if args.free_run:
-        r = dev.read_data(0x2105)
-        dev.write_data(0x2105, r|0x01)
-        dev.io_update()
-        return 0 # force stop
-
-    if args.holdover:
-        r = dev.read_data(0x2105)
-        dev.write_data(0x2105, r|0x02)
-        dev.io_update()
-        return 0 # force stop
 
     if args.coupling:
         couplings = {
