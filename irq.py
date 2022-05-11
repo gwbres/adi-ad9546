@@ -50,8 +50,7 @@ def main (argv):
             help=helper,
         )
     args = parser.parse_args(argv)
-    # open device
-    dev = AD9546(args.bus, int(args.address, 16))
+    dev = AD9546(args.bus, int(args.address, 16)) # open device
 
     if args.all:
         dev.write_data(0x2005, 0x01)
