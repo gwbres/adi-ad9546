@@ -32,7 +32,6 @@ pip3 install -r requirements.txt
 
 * Each application comes with an `-h` help menu.  
 Refer to help menu for specific information. 
-* Flags order does not matter
 * `flag` is a mandatory flag
 * `--flag` is optionnal: action will not be performed if not requested
 
