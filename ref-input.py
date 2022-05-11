@@ -40,7 +40,7 @@ def main (argv):
         ('demod-bw', str, ['narrow','wide'], 'Select REFx/xx demodulator bandwidth'),
         ('demod-sensitivity', int, [0,1,2,3], 'Select REFx demodulator level sensitivity (0=max, 3=min)'),
         ('demod-sync-edge', int, [0,1,2,3], 'Select REFx synchronization edge'),
-        ('demod-persist', str, ['enable','disable'], 'Enable / Disable REFx demodulator persistence'),
+        ('demod-persistence', str, ['enable','disable'], 'Enable / Disable REFx demodulator persistence'),
         ('freq-lock-thresh',  float, [], 'Set REFx freq lock threshold. Requires `freq` to be previously set, for internal calculations, [n.a: df/f]'),
         ('phase-lock-thresh', float, [], 'Set REFx phase lock threshold [s]'),
         ('phase-step-thresh', float, [], 'Set REFx phase step detector threshold [s]'),
@@ -63,7 +63,7 @@ def main (argv):
     args = parser.parse_args(argv)
     ref = args.ref
     # open device
-    dev = ad9546(args.bus, int(args.address, 16))
+    dev = AD9546(args.bus, int(args.address, 16))
 
     if args.free_run:
         r = dev.read_data(0x2105)
