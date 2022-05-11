@@ -147,9 +147,7 @@ def main (argv):
         per += dev.read_data(0x208) << 8
         per += (dev.read_data(0x209) & 0x0F) << 16
         status['sysclk']['pll']['stab-period'] = per * 10E-3 
-    if args.sysclk:
-        if not 'sysclk' in status:
-            status['sysclk'] = {}
+        
         status['sysclk']['comp'] = {}
         r = dev.read_data(0x280)
         status['sysclk']['comp']['method2-aux-dpll'] = bool((r & 0x20)>>5)
@@ -459,14 +457,6 @@ def main (argv):
 
         base = 0x3005
         for ref in ['a','aa','b','bb']:
-            bitfields = [
-                ('loss-of-signal', 0x20),
-                ('valid', 0x10),
-                ('fault', 0x08),
-                ('jitter-excess', 0x04),
-                ('fast', 0x02),
-                ('slow', 0x01),
-            ]
             r = dev.read_data(base)
             status['ref-input'][ref]['loss-of-signal'] = bool((r&0x20)>>5)
             status['ref-input'][ref]['valid'] = bool((r&0x10)>>4)
