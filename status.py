@@ -29,13 +29,18 @@ def filter_by_key (tree, key):
     return ret
 
 def filter_by_value (tree, value):
-    ret = {}
+    ret = {} 
     for k in tree.keys():
         if type(tree[k]) is dict:
-            continue
+            # top branch, not filtered
+            # ==> inner filter ?
+            retained = filter_by_value(tree[k], value)
+            got_something = len(retained.keys()) > 0
+            if got_something:
+                ret[k] = retained
         else:
-            if str(tree[k]) == value:
-                ret[k] = value
+            if str(tree[k]) == value: # matched value
+                ret[k] = tree[k] # copy
     return ret
 
 def main (argv):
@@ -1004,14 +1009,7 @@ def main (argv):
             v = dev.read_data(base+2 +c*offset)
             v += dev.read_data(base+3 +c*offset) << 8
             v += dev.read_data(base+4 +c*offset) << 16
-            # sign extend here for correct interpretation
-            binary = bin(v)[2:]
-            if binary[0] == '1':
-                l = 32 - len(binary)
-                for i in range (l):
-                    binary = '1' + binary
-                v = int(binary,2)
-            status['uts'][str(c)]['reading'] = v * pow(2,-48) # 1 bit = 1sec/2^48
+            status['uts'][str(c)]['reading'] = sign_extend(v,48) * pow(2,-48) # 1 bit = 1sec/2^48
 
         r = dev.read_data(0x0E2D)
         status['uts']['fifo'] = {}
@@ -1035,20 +1033,10 @@ def main (argv):
         status['uts']['fifo']['timecode'] = {}
         status['uts']['fifo']['timecode']['s'] = v1
         if status['uts']['0']['format'] == 'ptp':
-            binary = bin(v0 & 0x3FFFFFFFFFFF)
-            if binary[0] == '1':
-                l = 48 - len(binary)
-                for i in range (l):
-                    binary = '1' + binary
-            ns = int(binary,2)
+            ns = sign_extend(v0 & 0x3FFFFFFFFFFF, 48)
             status['uts']['fifo']['timecode']['ns'] = ns * pow(2,-16)
         else:
-            binary = bin(v0)
-            if binary[0] == '1':
-                l = 48 - len(binary)
-                for i in range (l):
-                    binary = '1' + binary
-            ns = int(binary,2)
+            ns = sign_extend(v0, 48)
             status['uts']['fifo']['timecode']['ns'] = ns * pow(2,-48)
 
     if args.iuts:
@@ -1063,13 +1051,7 @@ def main (argv):
             v = dev.read_data(base+1 + offset * i)
             v += dev.read_data(base+2 + offset * i) << 8
             v += dev.read_data(base+2 + offset * i) << 24
-            binary = bin(v)[2:]
-            if binary[0] == '1':
-                l = 32 - len(binary)
-                for i in range (l):
-                    binary = '1' + binary
-                v = int(binary,2)
-            status['iuts'][str(i)]['reading'] = v * pow(2,-48)
+            status['iuts'][str(i)]['reading'] = sign_extend(v,32) * pow(2,-48)
         
         r = dev.read_data(0x0F09)
         formats = {
@@ -1102,20 +1084,10 @@ def main (argv):
         status['iuts']['timecode'] = {}
         status['iuts']['timecode']['s'] = v0
         if status['iuts']['format'] == 'ptp':
-            binary = bin(v0 & 0x3FFFFFFFFFFF)
-            if binary[0] == '1':
-                l = 48 - len(binary)
-                for i in range (l):
-                    binary = '1' + binary
-            ns = int(binary,2)
+            ns = sign_extend(v0 & 0x3FFFFFFFFFFF, 48)
             status['iuts']['timecode']['ns'] = ns *pow(2,-16)
         else:
-            binary = bin(v0)
-            if binary[0] == '1':
-                l = 48 - len(binary)
-                for i in range (l):
-                    binary = '1' + binary
-            ns = int(binary,2)
+            ns = sign_extend(v0, 48)
             status['iuts']['timecode']['ns'] = ns *pow(2,-48)
     
         r = dev.read_data(0x3023)

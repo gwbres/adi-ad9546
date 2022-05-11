@@ -4,6 +4,17 @@
 # Class and macros to interact with AD9546 chipsets
 #################################################################
 from smbus import SMBus
+
+def sign_extend (value, length):
+    """ sign extends given integer number to desired length """
+    binary = bin(value)[2:]
+    if binary[0] == '1':
+        l = length - len(binary) 
+        for i in range(l):
+            binary = '1' + binary
+        return int(binary,2)
+    return value
+
 class AD9546 :
     """ Class to interact with AD9546 chipset,
     only I2C bus supported @ the moment """
