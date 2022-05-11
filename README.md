@@ -36,12 +36,9 @@ Refer to help menu for specific information.
 * `flag` is a mandatory flag
 * `--flag` is optionnal: action will not be performed if not requested
 
-## AD9545,46
+## AD9545 / 46
 
-The two chip share similar functionnalities, except that
-AD9546 is more capable than 45.   
-Therefore, both can share the following tools, but it is up to the user
-to restrict to supported operations, when operating an AD9545.
+These scripts are developped and tested on an AD9546 chip.
 
 ## Utilities
 
@@ -426,8 +423,6 @@ and the general clock state.
 
 * `--freq` set REFxy input frequency [Hz]
 * `--coupling` control REFx input coupling
-* `--free-run` force clock to move to free-run state
-* `--holdover` force clock to move to holdover state,
 `lock` must be previously acquired.
 
 It is easier to always request a `free-run`, in the sense this
@@ -437,6 +432,43 @@ request cannot fail
 * `phase-lock-thresh` : phase locking mechanism constraint.
 * `phase-step-thresh` : inst. phase step threshold 
 * `phase-skew`: phase skew
+
+## PLL script
+
+`pll.py` to control both analog and digital internal PLL cores.  
+`pll.py` also allows to set the clock to free run or holdover state.
+
+* `--type`: to specify whether we are targetting an Analog PLL (APLLx) 
+or a Digital PLL (APLLx). This field is only required
+for operations where it is ambiguous (can be performed on both cores).   
+`--type all` : performs desired operation on both APLLx and DPLLx cores.
+
+* `--channel` : set `x` in DPLLx or APLLx targeted cores.   
+`--channel all`: is the default behavior, targets both channel 0 and 1 
+of the desired type.
+
+* `--free-run`: forces clock to free run state, `--type` is disregarded 
+because `digital` is implied. 
+* `--holdover`: forces clock to holdover state, `--type` is disregarded 
+because `digital` is implied. 
+
+## Power down script
+
+`power-down.py` perform and recover power down operations.   
+Useful to power down non needed channels and internal cores. 
+
+The `--all` flag addresses all internal cores.  
+Otherwise, select internal units with related flag
+
+* Power down device entirely
+```shell
+power-down.py 0 0x4A --all
+```
+* Recover a complete power down operation
+```shell
+power-down.py 0 0x4A --all --clear
+```
+
 
 ## Power down script
 
