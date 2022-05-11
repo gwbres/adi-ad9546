@@ -36,6 +36,18 @@ Refer to help menu for specific information.
 * `flag` is a mandatory flag
 * `--flag` is optionnal: action will not be performed if not requested
 
+For complex flag values (basically involving white spaces), for example 
+`ref-input --coupling`, don't forget to encapsulate by inverted commas:
+
+```shell
+ref-input.py \
+    --ref a \ # simple, one word
+    --coupling "AC 1.2V" # 'complex' but meaningful value
+ref-input.py \
+    --ref aa \ # simple, one word
+    --coupling "internal pull-up" # 'complex' but meaningful value
+```
+
 ## AD9545 / 46
 
 These scripts are developped and tested on an AD9546 chip.
