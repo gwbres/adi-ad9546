@@ -545,13 +545,6 @@ def main (argv):
         status['watchdog'] = {}
         status['watchdog']['period'] = dev.read_data(0x10A) & 0xFF
         status['watchdog']['period'] |= (dev.read_data(0x10B) & 0xFF)<<8
-    if args.iuts:
-        status['iuts'] = {}
-        r = dev.read_data(0x3023)
-        status['iuts'][1] = {}
-        status['iuts'][1]['valid'] = bool((r&0x02)>>1)
-        status['iuts'][2] = {}
-        status['iuts'][2]['valid'] = bool((r&0x01)>>0)
 
     if args.distrib:
         status['distrib'] = {}
@@ -864,12 +857,12 @@ def main (argv):
         }
 
         for c in range (9):
-            status['uts'][c] = {}
+            status['uts'][str(c)] = {}
             r = dev.read_data(base + c*offset) & 0x0F
-            status['uts'][c]['format'] = formats[(r & 0x02)>>1] 
-            status['uts'][c]['enabled'] = bool((r&0x01)>>0)
+            status['uts'][str(c)]['format'] = formats[(r & 0x02)>>1] 
+            status['uts'][str(c)]['enabled'] = bool((r&0x01)>>0)
             flags = (r & 0x1C)>>2
-            (invalid, fault, unlocked, fmt, tag) = (False,False,False,False)
+            (invalid, fault, unlocked, fmt, tag) = (False,False,False,False,False)
             if flags == 0:
                 tag = True
                 invalid = True
@@ -900,16 +893,16 @@ def main (argv):
                 tag = True
                 unlocked = True
                 fault = True
-            status['uts'][c]['flags'] = {}
-            status['uts'][c]['flags']['invalid'] = invalid
-            status['uts'][c]['flags']['fault'] = fault
-            status['uts'][c]['flags']['unlocked'] = fault
-            status['uts'][c]['flags']['format'] = fmt
-            status['uts'][c]['flags']['tag'] = tag
+            status['uts'][str(c)]['flags'] = {}
+            status['uts'][str(c)]['flags']['invalid'] = invalid
+            status['uts'][str(c)]['flags']['fault'] = fault
+            status['uts'][str(c)]['flags']['unlocked'] = fault
+            status['uts'][str(c)]['flags']['format'] = fmt
+            status['uts'][str(c)]['flags']['tag'] = tag
 
             r = dev.read_data(base+1 + c*offset)
-            status['uts'][c]['tagged-timestamps'] = bool((r&0x10)>>4)
-            status['uts'][c]['source'] = sources[(r & 0x1F)]
+            status['uts'][str(c)]['tagged-timestamps'] = bool((r&0x10)>>4)
+            status['uts'][str(c)]['source'] = sources[(r & 0x1F)]
 
             v = dev.read_data(base+2 +c*offset)
             v += dev.read_data(base+3 +c*offset) << 8
@@ -921,7 +914,7 @@ def main (argv):
                 for i in range (l):
                     binary = '1' + binary
                 v = int(binary,2)
-            status['uts'][c]['reading'] = v * pow(2,-48) # 1 bit = 1sec/2^48
+            status['uts'][str(c)]['reading'] = v * pow(2,-48) # 1 bit = 1sec/2^48
 
         r = dev.read_data(0x0E2D)
         status['uts']['fifo'] = {}
@@ -944,7 +937,7 @@ def main (argv):
         v1 += dev.read_data(0x0E3A) << 40 
         status['uts']['fifo']['timecode'] = {}
         status['uts']['fifo']['timecode']['s'] = v1
-        if status['uts'][0]['format'] == 'ptp':
+        if status['uts']['0']['format'] == 'ptp':
             binary = bin(v0 & 0x3FFFFFFFFFFF)
             if binary[0] == '1':
                 l = 48 - len(binary)
@@ -966,10 +959,10 @@ def main (argv):
         base = 0x0F00
         offset = 0x04
         for i in range (2):
-            status['iuts'][i] = {}
+            status['iuts'][str(i)] = {}
             r = dev.read_data(base + offset * i)
-            status['iuts'][i]['bypass-ccdpll-lock'] = bool((r & 0x02)>>1)
-            status['iuts'][i]['valid'] = bool((r & 0x01)>>0)
+            status['iuts'][str(i)]['bypass-ccdpll-lock'] = bool((r & 0x02)>>1)
+            status['iuts'][str(i)]['valid'] = bool((r & 0x01)>>0)
             v = dev.read_data(base+1 + offset * i)
             v += dev.read_data(base+2 + offset * i) << 8
             v += dev.read_data(base+2 + offset * i) << 24
@@ -979,7 +972,7 @@ def main (argv):
                 for i in range (l):
                     binary = '1' + binary
                 v = int(binary,2)
-            status['iuts'][i]['reading'] = v * pow(2,-48)
+            status['iuts'][str(i)]['reading'] = v * pow(2,-48)
         
         r = dev.read_data(0x0F09)
         formats = {
@@ -993,7 +986,10 @@ def main (argv):
             31: 'css sync1 timecode',
         }
         status['iuts']['format'] = formats[(r & 0x80)>>7] 
-        status['iuts']['destination'] = destinations[(r & 0x1F)]
+        try:
+            status['iuts']['destination'] = destinations[(r & 0x1F)]
+        except KeyError:
+            status['iuts']['destination'] = 'unknown/default' 
         v0 = dev.read_data(0x0F0A)
         v0 += dev.read_data(0x0F0B) << 8
         v0 += dev.read_data(0x0F0C) << 16
@@ -1024,6 +1020,12 @@ def main (argv):
                     binary = '1' + binary
             ns = int(binary,2)
             status['iuts']['timecode']['ns'] = ns *pow(2,-48)
+    
+        r = dev.read_data(0x3023)
+        status['iuts'][str(1)] = {}
+        status['iuts'][str(1)]['valid'] = bool((r&0x02)>>1)
+        status['iuts'][str(2)] = {}
+        status['iuts'][str(2)]['valid'] = bool((r&0x01)>>0)
 
     #print("======== TOTAL ===============")
     #print(json.dumps(status, sort_keys=True, indent=2))
