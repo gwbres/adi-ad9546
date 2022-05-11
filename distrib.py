@@ -10,7 +10,7 @@ import sys
 import argparse
 from ad9546 import *
 def main (argv):
-    parser = argparse.ArgumentParser(description="AD9545/46 clock distribution tool")
+    parser = argparse.ArgumentParser(description="AD9546 clock distribution tool")
     parser.add_argument(
         "bus",
         type=int,

@@ -2,8 +2,8 @@
 #################################################################
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
-# reference.py
-# Reference, input signal, switching mechanism control
+# reference.py: reference, input signal, 
+# switching mechanism control
 #################################################################
 import sys
 import argparse

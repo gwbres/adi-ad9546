@@ -8,7 +8,7 @@ import sys
 import argparse
 from ad9546 import *
 def main (argv):
-    parser = argparse.ArgumentParser(description="AD9545/46 misc control tool")
+    parser = argparse.ArgumentParser(description="AD9546 misc control tool")
     parser.add_argument(
         "bus",
         type=int,

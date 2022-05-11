@@ -122,7 +122,7 @@ def progress_bar (progress, width=100):
     sys.stdout.flush()
 
 def main (argv):
-    parser = argparse.ArgumentParser(description="Load /dump a regmap into AD95xx chipsets")
+    parser = argparse.ArgumentParser(description="Load /dump a regmap into AD9546 chipset")
     parser.add_argument(
         "bus",
         metavar="bus",

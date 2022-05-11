@@ -2,16 +2,13 @@
 #################################################################
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
-# power-down.py
-# small script to perform power down operations
-# Any power down will probably require either a partial
-# or a complete recalibration
+# power-down.py: power down operations for power management
 #################################################################
 import sys
 import argparse
 from ad9546 import *
 def main (argv):
-    parser = argparse.ArgumentParser(description="AD9546 power-down tool")
+    parser = argparse.ArgumentParser(description="AD9546 power management tool")
     parser.add_argument(
         "bus",
         type=int,

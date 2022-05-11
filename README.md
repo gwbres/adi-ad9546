@@ -54,7 +54,9 @@ scripts will reject those with a runtime error.
 
 ## AD9545 / 46
 
-These scripts are developped and tested with an AD9546 chip.
+These scripts are developped and tested with an AD9546 chip.   
+AD9545 is pin & register compatible, so it should work.   
+It is up to the user to restrain to restricted operations in that scenario.
 
 ## Utilities
 

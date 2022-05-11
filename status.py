@@ -63,7 +63,7 @@ def unpack (tree):
         return ret
 
 def main (argv):
-    parser = argparse.ArgumentParser(description="AD9545/46 status reporting")
+    parser = argparse.ArgumentParser(description="AD9546 status reporting")
     parser.add_argument(
         "bus",
         type=int,

@@ -2,8 +2,7 @@
 #################################################################
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
-# reference.py
-# Reference, input signal, switching mechanism control
+# sysclk.py: sys clock management tool
 #################################################################
 import sys
 import math
@@ -11,7 +10,7 @@ import argparse
 from ad9546 import *
 
 def main (argv):
-    parser = argparse.ArgumentParser(description="AD9545/46 reference control tool")
+    parser = argparse.ArgumentParser(description="AD9546 sys clock management")
     parser.add_argument(
         "bus",
         type=int,
