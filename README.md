@@ -89,15 +89,16 @@ register map from the official A&D graphical tool.
 * Input/output is `json`
 * `--quiet` to disable the stdout progress bar
 
+Load a register map created with A&D official tools
 ```shell
-regmap.py -h
-# load a register map (on bus #0 @0x48)
-regmap.py 0 0x48 --load test.json
+regmap.py 0 0x48 \
+    --load config.json
 ```
 
-Export current register map to open it in A&D graphical tools:
+Extract current settings in A&D compliant format:
 ```shell
-regmap.py --dump /tmp/output.json 0 0x48
+regmap.py --dump /tmp/output.json \
+    0 0x48
 ```
 
 ### Register map `diff`
@@ -683,6 +684,48 @@ calib.py --all 0 0x48
 status.py --pll --distrib --filter-by-key ch0 0 0x48
 ```
 
-* distrib operation: mute / unmute + powerdown (TODO)
+* input reference definition, rework and constrains
+```shell
+TODO
+```
 
-* using integrated signal quality monitoring (TODO)
+* power saving operation
+```shell
+TODO
+```
+
+* reference switching 
+```shell
+TODO
+```
+
+* dpll rework (internal filter + REF)
+```shell
+TODO
+```
+
+* obtain phase + freq lock
+```shell
+TODO
+```
+
+* distrib operations: rework distribution behavior,
+modify output frequency and signal shape
+```shell
+TODO
+```
+
+* skew and integrated signal quality indicators
+```shell
+TODO
+```
+
+* UTS : time stamping measurement special opmode 
+```shell
+TODO
+```
+
+* IUTS : synthesis using inverse time stamping special opmode
+```shell
+TODO
+```
