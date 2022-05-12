@@ -528,10 +528,9 @@ and the general clock state.
 * `--freq` set REFxy input frequency [Hz]
 * `--coupling` control REFx input coupling
 `lock` must be previously acquired.
-
 * `freq-lock-thresh` : frequency locking mechanism constraint.
 * `phase-lock-thresh` : phase locking mechanism constraint.
-* `phase-step-thresh` : inst. phase step threshold 
+* `phase-step-thresh` : inst. phase step threshold
 * `phase-skew`: phase skew
 
 ## PLL script
@@ -541,8 +540,9 @@ and the general clock state.
 
 * `--type`: to specify whether we are targetting an Analog PLL (APLLx) 
 or a Digital PLL (APLLx). This field is only required
-for operations where it is ambiguous (can be performed on both cores).   
-`--type all` : performs desired operation on both APLLx and DPLLx cores.
+for operations where it is ambiguous (can be performed on both cores).
+`all` is the default value. 
+`--type all` targets both APLLx and DPLLx core(s).
 
 * `--channel` : set `x` in DPLLx or APLLx targeted cores.   
 `--channel all`: is the default behavior, targets both channel 0 and 1 
