@@ -20,8 +20,7 @@ def filter_by_key (tree, key):
             else: # top branch, not filtered
                 # ==> inner filter ?
                 retained = filter_by_key(tree[k], key)
-                got_something = len(retained.keys()) > 0
-                if got_something:
+                if len(retained) > 0: # got something
                     ret[k] = retained
         else:
             if k == key: # value of interest
@@ -31,16 +30,14 @@ def filter_by_key (tree, key):
 def filter_by_value (tree, value):
     ret = {} 
     for k in tree.keys():
-        if type(tree[k]) is dict:
-            continue
-            #data = filter_by_value(tree[k], value)
-            #if len(data) > 0:
-            #    ret[k] = data
+        if type(tree[k]) is dict: # is a branch
+            # filter inside branch
+            data = filter_by_value(tree[k], value)
+            if len(data) > 0: # got something
+                ret[k] = data # construct
         else:
-            print(str(tree[k]).lower(), value.lower())
             if str(tree[k]).lower() == value.lower(): # matched value
-                print("matched")
-                ret[k] = tree[k] # maintain this data 
+                ret[k] = tree[k] # construct 
     return ret
 
 def unpack (tree):
@@ -1162,18 +1159,28 @@ def main (argv):
                     data = filter_by_key(filtered[category], _filter)
 
                 if len(data) == 0: # not a single match
-                    # assumes key/filter is incorrect
+                    # assumes incorrect key filter 
                     # ==> preserve complete data set
                     filtered[category] = status[category].copy()
                 else:
-                    filtered[category] = data
+                    filtered[category] |= data
     else: # plain copy
         filtered = status.copy()
                 
     if args.filter_by_value:
         filters = args.filter_by_value.split(",")
-        print("filter by value is work in progress")
-    
+        print("Filter by value is work in progress")
+        #_filtered = {} # next dataset
+        #for _filter in filters:
+        #    # works on previously filtered dataset
+        #    for category in filtered.keys(): 
+        #        if not category in _filtered:
+        #            _filtered[category] = {} # create work struct
+        #        data = filter_by_value(filtered[category], _filter) 
+        #        if len(data) > 0:
+        #            _filtered[category] |= data 
+        #filtered = _filtered.copy() # replace by possibily stripped dataset
+
     if args.unpack:
         filtered = unpack(filtered)
 
