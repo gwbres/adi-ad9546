@@ -592,32 +592,46 @@ UTS cores allow the user to timestamp input data against
 a reference signal. UTS requires the CCDPPL that is
 part of the Digitized clocking core to be configured.
 
-UTS core status reports and current readings:
+`uts.py` controls both the UTS core and the inverse UTS core.
+This is controlled by the `--type inverse` option.  
+The default `--type` is "normal" for UTS management by default.  
+Therefore it is mandatory to specify `inverse` for IUTS management.
+
+UTS and IUTS status reports are reported by the status.py script:
 
 ```shell
-status.py --uts 1 0x48
+status.py 1 0x4A \
+    --uts \
+    --iuts
 
-# UTS0 + UTS Fifo status report
-status.py --uts 1 0x048 --filter-by-key fifo,0 
+status.py 0 0x48 \
+    --uts \
+    --filter-by-key fifo,0 
 ```
 
 It is useful to combine this status report to the digitized
-clocking status report.
+clocking status report as they are closely related
 
-UTS Readings are either signed 24 bit or signed 48 bit values,
-this python script should scale and interprate those value
-correctly (double check that).
+```shell
+status.py 1 0x4A \
+    --ccdpll \
+    --uts
+```
 
-It is not clear at the moment which UTSx core is fed
-to the UTS FIFO therefore which scaling should be used
-to interprate the UTS FIFO Reading. At the moment,
-is is hardcoded to Core #0 (1st one).
+Some UTS/IUTS raw data are signed 24 or 48 bit values, this
+portion of the status script should interprate those values correctly,
+but it has to be confirmed / verified.
 
-## Inverse UTS
+It is not clear at the moment which UTSx core (8 cores) is fed
+to the UTS FIFO (unique fifo).
+Therefore it is not clear to me which scaling should apply
+when interprating the data contained in the UTS FIFO.   
+At the moment, I hardcoded Core #0 (1st one) as the frequency source
+&#10140; to clarify and improve.
 
-Inverse UTS allows the user to synthesize signals 
-based on a local reference and a given timestamp related
-to that reference.
+### Inverse UTS management
+
+TODO
 
 ## IRQ events
 

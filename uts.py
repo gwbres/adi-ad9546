@@ -24,6 +24,7 @@ def main (argv):
         metavar="type",
         choices=["normal","inverse"],
         type=str,
+        default="normal",
         help="""Select whether we are addressing a regular Time Stamping unit (default),
         or a inverse Timpe Stamping unit.""",
     )
