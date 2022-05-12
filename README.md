@@ -540,8 +540,8 @@ and the general clock state.
 
 * `--type`: to specify whether we are targetting an Analog PLL (APLLx) 
 or a Digital PLL (APLLx). This field is only required
-for operations where it is ambiguous (can be performed on both cores).
-`all` is the default value. 
+for operations where it is ambiguous (can be performed on both cores).  
+`all` is the default value.   
 `--type all` targets both APLLx and DPLLx core(s).
 
 * `--channel` : set `x` in DPLLx or APLLx targeted cores.   
