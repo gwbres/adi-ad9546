@@ -122,89 +122,115 @@ and is not focused on the "RegisterMap" field.
 
 ## Status script
 
-`status.py` is a read only tool, to interact with the integrated chip.  
-`i2c` bus number (integer number) and slave address (hex) must be specified.
+`status.py` is a read only tool to monitor the chipset status current status.
+That includes IRQ status reports, calibration reports, integrated
+sensors and measurement readings..
 
-Use the `help` menu to learn how to use this script:
-```shell
-status.py -h
-```
+* `status.py -h` to figure all known keys
 
 Output format is `json` and is streamed to `stdout`.
-Each `--flag` can be cumulated and increase the size of the status report:
+Each `--flag` can be cumulated which increases the status report size/verbosity:
 
 ```shell
 # Grab general / high level info (bus=0, 0x4A):
-status.py --info --serial --pll 0 0x4A
+status.py 0 0x4A \
+    --info --serial # general info \
+    --pll # pll core (timing general info)
 
-# General clock infos + ref-input status (bus=1, 0x48):
-status.py --info --pll --sysclk --ref-input 1 0x48
+status.py 1 0x48 \
+    --info \
+    --pll --sysclk # timing cores info \
+    --ref-input # input / ref. signals info
 
-# IRQ status register
-status.py --irq 0 0x4A
+status.py 0 0x4A \
+    --irq # IRQ status register 
+```
 
-# dump status to a file
+Dump status report from stdout into a file
+
+```shell
 status.py --info --serial --pll 0 0x4A > /tmp/status.json
 ```
 
+Output is a `json` structure. That means it can be directly
+interprated into another python script. Here's an example
+on how to do that:
+
+```shell
+import subprocess
+args = ['status.py', '--distrib', '0', '0x4A']
+# interprate filtered stdout content directly
+ret = subprocess.run(args)
+if ret.exitcode == 0: # syscall OK
+    # direct interpratation
+    struct = eval(ret.stdout.decode('utf-8'))
+    print(struct["distrib"]["ch0"]["a"]["q-div"])
+```
+
+Status report depicts a lot of information depending
+on the targeted internal cores. Status.py supports
+filtering operations, we we'll later describe how
+an efficient filter can make things easier when
+grabbing data from another script
+
 ### Status report filtering
 
-Status report can be quite verbose.
-It is possible to filter the status report by field indentifiers
-and field values. Filters of the same kind, and different kinds
-can be cummulated, meaning, it is possible to cummulate
-several identifiers filter and value filters.
+Filters are described by comma separated values.
+It is possible to cummulate filter of the same kind
+and of different kind. Filters are applied in
+order of appearance / description.
+Identifier filter is applied priori Value filter.
 
-* `--filter-by-key`: filters result by keyword identifiers.
-Identifiers are passed as comma separated strings.
-Filters are cummulated (comma separated) and applied according to
-descripted order. Identifiers must match exactly (case sensitive).
+* `--filter-by-key`: filters result by identification keyword.
+This is useful to retain fields of interests
 
 ```shell
-# Clock infos filter
-status.py --info --filter-by-key vendor 0 0x48
+# grab vendor field
+status.py 0 0x48 \
+    --info --filter-by-key vendor # single field filter
+
+# zoom in on temperature info
+status.py 0 0x48 \
+    --misc --filter-by-key temperature # single field filter
+
+# only care about CH0
+status.py 0 0x48 \
+    --distrib --filter-by-key ch0 # single field filter
+
+# only care about AA path(s) 
+# [CH0:AA ; CH1:AA] in this case
+status.py 0 0x48 \
+    --distrib --filter-by-key aa # single field filter
 ```
 
-It is possible to cummulate filters using comma separated description
+Example of cummulated filters:
 
 ```shell
-# Retain two infos
-status.py --info --filter-by-key chip-type,vendor 0 0x48
+# grab (vendor + chiptype) fields
+status.py 0 0x48 \
+    --info --filter-by-key chip-type,vendor # comma separated
 
-# Clock distribution status: focus on channel 0
-status.py --distrib --filter-by-key ch0 0 0x48
+# zoom in on temperature reading
+status.py 0 0x48 \
+    --misc --filter-by-key temperature,value # zoom in 
 
-# Retain only `a` and `b` paths among channel0
-status.py --distrib --filter-by-key ch0,a,b 0 0x48
+# Retain `aa` path from CH0
+# Filter by order of appearance, 
+# specifying CH0 then AA ;)
+status.py 0 0x48 \
+    --distrib --filter-by-key ch0,aa
 ```
 
-By default, if requested keyword is not found,
-filter op is considered faulty and fulldata set is exposed.
+By default, if requested keyword is not found (non effective filter),
+fulldata set is preserved.
 
 ```shell
-# trying to filter general infos
+# non effective filter example:
 status.py --info --filter-by-key something 0 0x48
 ```
 
-It is possible to filter several status reports with
-relevant keywords:
-
-```shell
-# Request clock distribution status report
-# and ref-input status report
-# -> restrict distribution status report to `ch0`  
-# -> restrict pll status to `ch0`
-# --> --ref-input status is untouched because it does not contain the `ch0` identifier
-status.py --pll --distrib --ref-input filter-by-key ch0 0 0x48
-
-# Same thing idea, but we apply a filter on seperate status reports
-# `ch1` only applies to `distrib`, `slow` only applies to `ref-input`
-status.py --distrib --ref-input --filter-by-key ch1,slow 0 0x48
-```
-
 * `filter-by-value`: it is possible to filter status reports
-by matching values. Once again, only exactly matching keywords
-are retained.
+by matching values
 
 ```shell
 # Return `0x456` <=> vendor field
@@ -235,53 +261,53 @@ status.py 1 0x48 \
 
 ### Extract raw data from status report
 
-By default everything is encapsulated in json.   
-It is possible to use the `--unpack` option,
-to either:
+The `--unpack` option allows convenient 
+data reduction
 
-* unpack the data of interest as raw data.
-This works if we applied enough filter to zoom in on a single/unique field
+* if the requested filter has reduced the dataset
+to a single value, we expose the raw data:
 
 ```shell
 status.py 0 0x4A \
     --info --filter-by-key vendor # extract vendor info \
     --unpack # raw value
+
 status.py 0 0x4A \
     --misc --filter-by-key temperature,value # extract t° reading \
     --unpack # raw value
+
 # extract temperature alarm bit
 status.py 0 0x4A \`
     --misc --filter-by-key temperature,alarm # extract t° alarm bit \
     --unpack # raw value
 ```
 
-Such scenario (meaningful filters) is handy when trying to interprate 
-raw data into another script. Here's an example on how to do this in python once again:
+This is very convenient when importing data into an external script.
+Here's an example in python once again:
 
 ```shell
-# call status.py from another python script;
 import subprocess
-args = ['
-    status.py', 
-    '--misc', '0', '0x4A',
-    '--filter-by-key', 'temperature,alarm', # --> efficient filter
-    '--unpack', # bool() direct cast 
+args = [
+    'status.py', 
+    '0', '0x4A',
+    '--misc', 
+    '--filter-by-key', 'temperature,alarm' # extract raw bit
 ]
-# interprate filtered stdout content directly
 ret = subprocess.run(args)
-if ret.exitcode == 0: # OK
-    # direct cast
-    has_alarm = bool(ret.stdout.decode('utf-8')) 
+if ret.exitcode == 0: # syscall OK
+    # bool() direct cast 
+    has_alarm = bool(ret.stdout.decode('utf-8'))
 ```
 
-* reduce the data structure to 1D. 
-"Simplifies" the output structure, but we lose data
-if two identical identifiers still coexist
+* If the status report comprises several value,
+then `--unpack` simply reduces the structure to 1D.
+That means we lose data because we can only have
+a unique value per identifier
 
 ```shell
 status.py 0 0x4A \
-    --misc --filter-by-key temperature,value # extract t° reading \
-    --unpack # raw value
+    --misc --filter-by-key temperature # extract temperature fields \
+    --unpack
 ```
 
 ## Sys clock
