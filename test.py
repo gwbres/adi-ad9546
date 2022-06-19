@@ -1,18 +1,21 @@
 #! /usr/bin/env python3
+import json
 from ad9546 import *
 
 def main ():
     dev = AD9546("fake")
+    #print(json.dumps(dev.regmap, sort_keys=True, indent=2))
+    #return 0
+    
+    print("==============================================")
+    print("             MMAP special methods             ")
+    assert(dev.range() == (0x0, 0x320C))
+    print("================== PASSED ====================\n")
 
-    # regmap maccros testbench
-    # [1] unique register (simple)
-    #     search by address & regname produces same result
     print("==============================================")
     print("Test simple registers search / indentification")
     r = AD9546.RegistersByAddress(dev.regmap, 0x3)[0]
     assert(r == AD9546.RegisterAttributes(dev.regmap, "type"))
-    r = AD9546.RegistersByAddress(dev.regmap, 0xB)[0]
-    assert(r == AD9546.RegisterAttributes(dev.regmap, "soft-reset"))
     print("================== PASSED ====================\n")
 
     print("==============================================")
@@ -27,17 +30,20 @@ def main ():
     a = AD9546.RegistersByAddress(dev.regmap, 0xC)
     b = AD9546.RegistersByAddress(dev.regmap, 0xD)
     assert(a == b)
+
+    r = AD9546.RegistersByAddress(dev.regmap, 0xB)
+    print(r)
     print("================== PASSED ====================\n")
 
-    # tests update()
+    print("==============================================")
+    print("                   Update()                   ")
     dev.update()
-    
     # modify one attribute randomly
     # tests apply()
     dev.apply()
-
     # testbench
     dev.update()
+    print("================== PASSED ====================\n")
     
 if __name__ == "__main__":
     main()

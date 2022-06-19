@@ -32,27 +32,9 @@ def main (argv):
             help=helper,
         )
     args = parser.parse_args(argv)
-
-    dev = AD9546(int(args.bus), int(args.address, 16)) # open device
-
-    dev.write_data(0x2000, 0x00)
-    dev.io_update()
-    
-    value = 0
-    if args.sysclk:
-        value |= 0x04
-    if args.all:
-        value |= 0x02
-    dev.write_data(0x2000, value)
-    dev.io_update()
-    
-    # [3] clear bits
-    if args.sysclk:
-        value &= 0xFB
-    if args.all:
-        value &= 0xFD
-    dev.write_data(0x2000, value)
-    dev.io_update()
+    dev = AD9546(args.bus, int(args.address, 16)) 
+    dev.open()
+    dev.calibrate(sysclk=args.sysclk, all=args.all)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

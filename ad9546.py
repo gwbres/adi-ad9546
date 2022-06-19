@@ -1,7 +1,7 @@
 #################################################################
 # Guillaume W. Bres, 2022          <guillaume.bressaix@gmail.com>
 #################################################################
-# Class and macros to interact with AD9546 chipsets
+# AD9546 is the main class to manage and interact with the device 
 #################################################################
 import math
 from smbus import SMBus
@@ -16,11 +16,130 @@ def sign_extend (value, length):
         return int(binary,2)
     return value
 
+def single_bit_mask (mask):
+    """
+    Returns true if given mask has a unique bit asserted
+    """
+    return bin(mask).count('1') == 1 
+
 def binary_shift (mask):
     """
     Deduces appropriate binary shift for this bitmask
     """
-    return int(math.log2(mask))
+    if mask == 0xFF:
+        return 0
+    elif single_bit_mask(mask):
+        return int(math.log2(mask))
+    else:
+        return bin(mask).count('0') -1 #'0b'
+
+class Interprator :
+    """
+    `Complex` data interprator
+    """
+    def __init__ (self):
+        self.__loadtable()
+
+    def interprate (self, fmt, data):
+        """
+        `complex` data interpratation,
+        never fails
+        """
+        if fmt == "bool":
+            return bool(data)
+        elif fmt == "int":
+            return int(data)
+        elif "complex:" in fmt:
+            fmt = fmt.split(":")[-1]
+            if fmt in self.table:
+                return hex(data)
+            else:
+                return hex(data)
+        else:
+            return hex(data) 
+
+    def __loadtable (self):
+        self.table = {
+            "enable": {
+                "disabled": 0,
+                "enabled": 1,
+            },
+            "available": {
+                "unavailable": 0,
+                "available": 1,
+            },
+            "active": {
+                "disabled": 0,
+                "active": 1,
+            },
+            "done": {
+                "idle or busy": 0,
+                "done": 1,
+            },
+            "pin": {
+                "logics": {
+                    "cml": 0,
+                    "hcsl": 1,
+                },
+                "diff-modes": {
+                    "AC": 0,
+                    "DC": 1,
+                    "DC-LVDS": 2,
+                },
+                "currents": {
+                    "7.5 mA": 0,
+                    "12.5 mA": 1,
+                    "15 mA": 2,
+                },
+            },
+            "modes": {
+                "diff": 0,
+                "se": 1,
+                "sedd": 2,
+            },
+            "autosync": {
+                "manual": 0,
+                "immediate": 0,
+                "phase": 0,
+                "freq": 0,
+            },
+            "unmutings": {
+                "immediate": 0,
+                "hitless": 1,
+                "phase": 2,
+                "freq": 3,
+            },
+            "couplings": {
+                'AC 1.2V': 0,
+                'DC 1.2V CMOS': 1,
+                'DC 1.8V CMOS': 2,
+                'internal pull-up': 3,
+            },
+            "bandwith" : {
+                "narrow": 0,
+                "wide": 1,
+            },
+            'slew-rate-threshold': {
+                0: '0',
+                1: "0.715 ppm/s",
+                2: "1.430 ppm/s",
+                3: "2.860 ppm/s",
+                4: "5.720 ppm/s",
+                5: "11.44 ppm/s",
+                6: "22.88 ppm/s",
+                7: "45.76 ppm/s",
+            },
+            'comp-sources': {
+                0: 'REFA',
+                1: 'REFAA',
+                2: 'REFB',
+                3: 'REFBB',
+                6: 'aux-REF0',
+                7: 'aux-REF1',
+                11: 'aux-REF2',
+                12: 'aux-REF3',
+            },
+        }
 
 def BuildRegMap():
     """
@@ -29,56 +148,461 @@ def BuildRegMap():
     return {
         'chip': {
             'type': {
-                # cast(), when interprating this register's data
-                # hex() is default value and can be omitted
-                'cast': hex, 
                 # reg addr : for HW access
                 # might involve several accesses [array] 
                 'addr': 0x0003,
-                # to store current value
-                'value': None,
+                'access': 'ro',
             }, # chip::type
             'code': {
                 "addr": [0x0004, 0x0005, 0x0006],
-                'value': None,
+                'access': 'ro',
             }, # chip::code
             'vendor': {
                 'addr': [0x0C, 0x0D],
-                'value': None,
+                'access': 'ro',
             }, # chip::vendor
         }, # chip::
         'serial': {
             'soft-reset': {
-                'cast': bool,
-                'addr': 0x0B,
+                'addr': 0x00,
+                'format': 'bool',
                 'mask': 0x01,
-                'value': None,
             }, # serial::softreset
             'spi': {
                 'version': {
                     'addr': 0x0B,
-                    'value': None,
+                    'access': 'ro',
                 }, # serial::spi::version
                 'lbsf': {
-                    'cast': bool,
-                    'addr': 0x0B,
+                    'addr': 0x00,
+                    'format': 'bool',
                     'mask': 0x02,
-                    'value': None,
                 }, # serial::spi::lbsf
                 'addr-asc': {
-                    'cast': bool,
-                    'addr': 0x0B,
+                    'addr': 0x00,
+                    'format': 'bool',
                     'mask': 0x04,
-                    'value': None,
                 }, # serial::spi::addr-asc
                 'sdo': {
-                    'cast': bool,
-                    'addr': 0x0B,
+                    'addr': 0x00,
+                    'format': 'bool',
                     'mask': 0x08,
-                    'value': None,
                 }, # serial::spi::sdo
-            },
+            }, # serial::spi::
+            'reset-registers': {
+                'addr': 0x01,
+                'mask': 0x04,
+                'format': 'bool',
+            }, # serial::reset-registers
+            'buffered-read' : {
+                'addr': 0x01,
+                'mask': 0x40,
+                'format': 'bool',
+            }, # seria::bufferedread
         }, # serial::
+        'sysclk': {
+            'pll': {
+                'fb-div-ratio': {
+                    'addr': 0x200,
+                    'format': 'int',
+                },
+                'freq-doubler': {
+                    'addr': 0x201,
+                    'mask': 0x01,
+                    'format': 'complex:enabled',
+                },
+                'input-sel': {
+                    'addr': 0x201,
+                    'mask': 0x08,
+                },
+                'input-div': {
+                    'addr': 0x201,
+                    'mask': 0x06,
+                    'format': 'int',
+                },
+                'ref-freq': {
+                    'addr': [0x202, 0x203, 0x204, 0x205, 0x206],
+                    'format': 'int',
+                    'scaling': 1E3, # *1E3 TODO
+                },
+                'stability-period': {
+                    'addr': [0x207, 0x208, 0x209],
+                    'mask': [0xFF, 0xFF, 0x0F],
+                    'format': 'int',
+                    'scaling': 10E-3 #TODO
+                },
+            },
+            'compensation': {
+                'method2-aux-dpll': {
+                    'addr': 0x280,
+                    'mask': 0x20,
+                    'format': 'bool',
+                },
+                'method1-aux-dpll': {
+                    'addr': 0x280,
+                    'mask': 0x10,
+                    'format': 'bool',
+                },
+                'method3-tcds': {
+                    'addr': 0x280,
+                    'mask': 0x04,
+                    'format': 'bool',
+                },
+                'method2-tcds': {
+                    'addr': 0x280,
+                    'mask': 0x02,
+                    'format': 'bool',
+                },
+                'method1-tcds': {
+                    'addr': 0x280,
+                    'mask': 0x01,
+                    'format': 'bool',
+                },
+                'method3-aux-nco1': {
+                    'addr': 0x281,
+                    'mask': 0x40,
+                    'format': 'bool',
+                },
+                'method2-aux-nco1': {
+                    'addr': 0x281,
+                    'mask': 0x20,
+                    'format': 'bool',
+                },
+                'method1-aux-nco1': {
+                    'addr': 0x281,
+                    'mask': 0x10,
+                    'format': 'bool',
+                },
+                'method3-aux-nco0': {
+                    'addr': 0x281,
+                    'mask': 0x04,
+                    'format': 'bool',
+                },
+                'method2-aux-nco0': {
+                    'addr': 0x281,
+                    'mask': 0x02,
+                    'format': 'bool',
+                },
+                'method1-aux-nco0': {
+                    'addr': 0x281,
+                    'mask': 0x01,
+                    'format': 'bool',
+                },
+                'method3-dpll1': {
+                    'addr': 0x282,
+                    'mask': 0x40,
+                    'format': 'bool',
+                },
+                'method2-dpll1': {
+                    'addr': 0x282,
+                    'mask': 0x20,
+                    'format': 'bool',
+                },
+                'method1-dpll1': {
+                    'addr': 0x282,
+                    'mask': 0x10,
+                    'format': 'bool',
+                },
+                'method3-dpll0': {
+                    'addr': 0x282,
+                    'mask': 0x04,
+                    'format': 'bool',
+                },
+                'method2-dpll0': {
+                    'addr': 0x282,
+                    'mask': 0x02,
+                    'format': 'bool',
+                },
+                'method1-dpll0': {
+                    'addr': 0x282,
+                    'mask': 0x01,
+                    'format': 'bool',
+                },
+                'slew-rate-limiter': {
+                    'threshold': {
+                        'addr': 0x0283,
+                        'mask': 0x07,
+                        'format': 'complex:slew-rate-threshold',
+                    },
+                },
+                'source': {
+                    'addr': 0x0284,
+                    'format': 'complex:comp-sources',
+                    'mask': 0x0F,
+                },
+                'dpll': {
+                    'bandwith': {
+                        'addr': [0x285, 0x286],
+                        'format': 'int', #/10 #TODO
+                    },
+                    'selector': {
+                        'addr': 0x287,
+                        'mask': 0x01,
+                        #0 : 'dpll0', 1: "dpll1"
+                        'format': 'complex:comp:dpll:selector',
+                    },
+                },
+                "method1-cutoff": {
+                    'addr': 0x288,
+                    'mask': 0x07,
+                    #0: '156 Hz',
+                    #1: '78 Hz',
+                    #2: '39 Hz',
+                    #3: '20 Hz',
+                    #4: '10 Hz',
+                    #5: '5 Hz',
+                    #6: '2 Hz',
+                    #7: '1 Hz',
+                    'format': 'complex:comp:cutoffs',
+                },
+                #TODO
+                #'method1-coefficients': {
+                #addr: 0x289
+                #}
+            },
+            'locked': {
+                'addr': 0x3001,
+                'mask': 0x01,
+                'format': 'bool',
+                'access': 'ro',
+            },
+            'stable': {
+                'addr': 0x3001,
+                'mask': 0x02,
+                'format': 'bool',
+                'access': 'ro',
+            },
+            'calibrating': {
+                'addr': 0x3001,
+                'mask': 0x04,
+                'format': 'bool',
+                'access': 'ro',
+            },
+        }, # sysclk::
+        "pll": {
+            "ch0": {
+                "locked": {
+                    "addr": 0x3001,
+                    "mask": 0x20,
+                    "format": "bool",
+                },
+                "digital": {
+                    "freq-locked": {
+                        "format": "bool",
+                        "addr": 0x3100,
+                        "mask": 0x04,
+                    },
+                    "phase-locked": {
+                        "format": "bool",
+                        "addr": 0x3100,
+                        "mask": 0x02,
+                    },
+                    "profile": {
+                        "addr": 0x3101,
+                        "mask": 0x70,
+                    },
+                    "active": {
+                        "addr": 0x3101,
+                        "format": "bool",
+                        "mask": 0x08,
+                    },
+                    "switching-profile": {
+                        "addr": 0x3101,
+                        "mask": 0x04,
+                    },
+                    "holdover": {
+                        "addr": 0x3101,
+                        "mask": 0x02,
+                        "format": "bool",
+                    },
+                    "free-running": {
+                        "addr": 0x3101,
+                        "mask": 0x01,
+                        "format": "bool",
+                    },
+                    "fast-acquisition": {
+                        "format": "complex:done",
+                        "addr": 0x3102,
+                        "mask": 0x20,
+                    },
+                    "fast-acquisitionning": {
+                        "format": "bool",
+                        "addr": 0x3102,
+                        "mask": 0x10,
+                    },
+                    "phase-slew": {
+                        "format": "complex:active",
+                        "addr": 0x3102,
+                        "mask": 0x04,
+                    },
+                    "freq-campling": {
+                        "format": "complex:active",
+                        "addr": 0x3102,
+                        "mask": 0x02,
+                    },
+                    "tuning-word-history": {
+                        "format": "complex:available",
+                        "addr": 0x3102,
+                        "mask": 0x01,
+                    },
+                    "ftw-history": {
+                        "format": "int",
+                        "addr": [0x3103, 0x3104, 0x3105, 0x3106, 0x3107, 0x3108],
+                        "mask": [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x1F],
+                    },
+                    "phase-lock-tub": {
+                        "format": "int",
+                        "addr": [0x3109, 0x310A],
+                        "mask": [0xFF, 0x0F],
+                    },
+                    "freq-lock-tub": {
+                        "format": "int",
+                        "addr": [0x310B, 0x310C],
+                        "mask": [0xFF, 0x0F],
+                    },
+                },
+                "analog": {
+                    "calibration": {
+                        "format": "complex:done",
+                        "addr": 0x3100,
+                        "mask": 0x20,
+                    },
+                    "calibrating": {
+                        "format": "bool",
+                        "addr": 0x3100,
+                        "mask": 0x10,
+                    },
+                    "phase-locked": {
+                        "format": "bool",
+                        "addr": 0x3100,
+                        "mask": 0x08,
+                    },
+                },
+            }, # pll::ch0
+            "ch1": {
+                "locked": {
+                    "addr": 0x3001,
+                    "mask": 0x20,
+                    "format": "bool",
+                },
+                "digital": {
+                    "freq-locked": {
+                        "format": "bool",
+                        "addr": 0x3100+0x100,
+                        "mask": 0x04,
+                    },
+                    "phase-locked": {
+                        "format": "bool",
+                        "addr": 0x3100+0x100,
+                        "mask": 0x02,
+                    },
+                    "profile": {
+                        "addr": 0x3101+0x100,
+                        "mask": 0x70,
+                    },
+                    "active": {
+                        "addr": 0x3101+0x100,
+                        "format": "bool",
+                        "mask": 0x08,
+                    },
+                    "switching-profile": {
+                        "addr": 0x3101+0x100,
+                        "mask": 0x04,
+                    },
+                    "holdover": {
+                        "addr": 0x3101+0x100,
+                        "mask": 0x02,
+                        "format": "bool",
+                    },
+                    "free-running": {
+                        "addr": 0x3101+0x100,
+                        "mask": 0x01,
+                        "format": "bool",
+                    },
+                    "fast-acquisition": {
+                        "format": "complex:done",
+                        "addr": 0x3102+0x100,
+                        "mask": 0x20,
+                    },
+                    "fast-acquisitionning": {
+                        "format": "bool",
+                        "addr": 0x3102+0x100,
+                        "mask": 0x10,
+                    },
+                    "phase-slew": {
+                        "format": "complex:active",
+                        "addr": 0x3102+0x100,
+                        "mask": 0x04,
+                    },
+                    "freq-campling": {
+                        "format": "complex:active",
+                        "addr": 0x3102+0x100,
+                        "mask": 0x02,
+                    },
+                    "tuning-word-history": {
+                        "format": "complex:available",
+                        "addr": 0x3102+0x100,
+                        "mask": 0x01,
+                    },
+                    "ftw-history": {
+                        "format": "int",
+                        "addr": [0x3203, 0x3204, 0x3205, 0x3206, 0x3207, 0x3208],
+                        "mask": [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x1F],
+                    },
+                    "phase-lock-tub": {
+                        "format": "int",
+                        "addr": [0x3209, 0x320A],
+                        "mask": [0xFF, 0x0F],
+                    },
+                    "freq-lock-tub": {
+                        "format": "int",
+                        "addr": [0x320B, 0x320C],
+                        "mask": [0xFF, 0x0F],
+                    },
+                },
+                "analog": {
+                    "calibration": {
+                        "format": "complex:done",
+                        "addr": 0x3100,
+                        "mask": 0x20,
+                    },
+                    "calibrating": {
+                        "format": "bool",
+                        "addr": 0x3100,
+                        "mask": 0x10,
+                    },
+                    "phase-locked": {
+                        "format": "bool",
+                        "addr": 0x3100,
+                        "mask": 0x08,
+                    },
+                },
+            }, # pll::ch1
+        }, # pll::
+        "eeprom": {
+            "crc-fault": {
+                "addr": 0x3000,
+                "format": "bool",
+                "mask": 0x08,
+            }, # eeprom::crc-fault
+            "fault": {
+                "addr": 0x3000,
+                "mask": 0x04,
+                "format": "bool",
+            }, # eeprom::fault
+            "busy": {
+                "downloading": {
+                    "addr": 0x3000,
+                    "format": "bool",
+                    "mask": 0x02,
+                }, # eeprom::busy::downloading
+                "uploading": {
+                    "addr": 0x3000,
+                    "format": "bool",
+                    "mask": 0x01,
+                } # eeprom::busy::uploading
+            }, # eeprom::busy
+        }, # eeprom::
     }
 
 class AD9546 :
@@ -97,6 +621,7 @@ class AD9546 :
         when /dev/i2c-x entry is provided
         """
         self.loadRegMap() # internal register descriptor
+        self.interprator = Interprator() # data interprator
         self.__make_handle(bus, address=address) # H/W access handle
 
     def RegisterAttributes (mmap, reg):
@@ -152,6 +677,49 @@ class AD9546 :
         """
         return str(self.regmap)
 
+    def min (self, mmap=None):
+        """
+        Returns smallest address in table
+        """
+        mmap = self.regmap if mmap is None else mmap
+        m = 0xFFFFF
+        for key in mmap.keys():
+            if "addr" in mmap[key]:
+                a = mmap[key]["addr"]
+                for _a in a:
+                    if _a < m:
+                        m = _a
+            else:
+                a = self.min(mmap=mmap[key])
+                if a < m:
+                    m = a
+        return m
+
+    def max (self, mmap=None):
+        """
+        Returns largest address in table
+        """
+        mmap = self.regmap if mmap is None else mmap
+        m = 0
+        for key in mmap.keys():
+            if "addr" in mmap[key]:
+                a = mmap[key]["addr"]
+                for _a in a:
+                    if _a > m:
+                        m = _a
+            else:
+                a = self.max(mmap=mmap[key])
+                if a > m:
+                    m = a
+        return m
+
+    def range (self):
+        """
+        Returns regmap range, for convenient address
+        interation
+        """
+        return (self.min(), self.max())
+
     def __iter__ (self):
         """
         Provides convenient interator over self.regmap
@@ -198,7 +766,39 @@ class AD9546 :
         Builds internal regmap,
         to be later used when addressing device
         """
-        self.regmap = BuildRegMap()
+        mmap = BuildRegMap()
+        self.regmap = self.rework_table(mmap)
+    
+    def rework_table (self, table):
+        """
+        recursively reworks declared table where
+        fields might be ommitted
+        """
+        rework = table.copy()
+        for key in table.keys():
+            if "addr" in table[key]:
+                if not "access" in table[key]:
+                    rework[key]["access"] = "rw"
+
+                if not type(table[key]["addr"]) is list:
+                    rework[key]["addr"] = [table[key]["addr"],]
+
+                l = len(rework[key]["addr"])
+                if not "mask" in table[key]:
+                    rework[key]["mask"] = []
+                    for _ in range(0, l):
+                        rework[key]["mask"].append(0xFF)
+                else:
+                    if not type(rework[key]["mask"]) is list:
+                        rework[key]["mask"] = [table[key]["mask"],]
+                        for _ in range(1, l):
+                            rework[key]["mask"].append(0xFF)
+                
+                if not "format" in table[key]:
+                    rework[key]["format"] = 'hex'
+            else:
+                rework[key] = self.rework_table(table[key])
+        return rework
 
     def write_byte (self, addr, data):
         """ 
@@ -226,56 +826,61 @@ class AD9546 :
                 data = self.handle.read_byte(self.slv_addr)
             return data
 
-    def io_update (self):
-        """ 
-        Performs `I/O update` operation. 
-        Refer to device datasheet 
-        """
-        self.write_data(0x000F, 0x01)
-    
-    def read_reg (self, reg):
-        """
-        Reads given reg from regmap
-        """
-        reg = reg.split(":")
-        if len(reg) == 2:
-            (category, reg) = (reg[0],reg[1])
-            pointer = self.regmap[category][reg]
-        else:
-            (category, reg) = (reg[0],reg[1])
-            pointer = self.regmap[category][reg]
-        
-        addr = self.regmap[category][reg]["addr"]
-        if type(addr) is int:
-            addr = [addr,] # permits simplified declaration
-        # bit masking
-        masks = None
-        if "mask" in self.regmap[category][reg]:
-            masks = self.regmap[category][reg]["mask"]
-            if type(masks) is int:
-                masks = [masks,]
-        # interpretation
-        if "cast" in self.regmap[category][reg]:
-            cast = self.regmap[category][reg]["cast"]
-        else:
-            cast = hex # default cast()
-
-        data = 0
-        for i in range (0, len(addr)):
-            raw = self.read_byte(addr[i])
-            if masks is not None:
-                raw &= masks[i]
-            data |= raw << (8*i)
-        return cast(data)
-
     def update (self):
         """
-        Reads all known register
+        Reads all known registers to current value
         """
-        pass
+        (r0, end) = self.range()
+        for addr in range(r0, end): # over entire mmap
+            # registers for this address
+            regs = AD9546.RegistersByAddress(self.regmap, addr)
+            if len(regs) == 0: # unused address
+                continue # avoids reading: increases update speed
+            raw = self.read_byte(addr)
+            print("raw: ", hex(raw))
+            for reg in regs:
+                if len(reg["addr"]) == 1: 
+                    # this reg only involves this addr
+                    mask = reg["mask"][0]
+                    shift = binary_shift(mask)
+                    data = (raw & mask) >> shift 
+                    d = self.interprator.interprate(
+                        reg["format"],
+                        data)
+                    print("addr:", hex(addr), "mask:", hex(mask), "shift:", shift, "data:", d)
 
     def apply (self):
         """
         Applies all register values
         """
         pass
+    
+    def io_update (self):
+        """ 
+        Performs special `I/O update` operation. 
+        Refer to device datasheet 
+        """
+        self.write_data(0x000F, 0x01)
+    
+    def calibrate (self, sysclk=True, all=True):
+        """
+        Reruns a device calibration
+        """
+        # reset reg
+        self.write_data(0x2000, 0x00)
+        self.io_update()
+        # assign bits
+        v = 0
+        if sysclk:
+            value |= 0x04
+        if all:
+            value |= 0x02
+        self.write_data(0x2000, value)
+        self.io_update()
+        # clear bits
+        if sysclk:
+            value &= 0xFB
+        if all:
+            value &= 0xFD
+        self.write_data(0x2000, value)
+        self.io_update()
