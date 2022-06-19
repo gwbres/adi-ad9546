@@ -27,7 +27,7 @@ def BuildRegMap():
     Builds memory map descriptor
     """
     return {
-        'chip': [{
+        'chip': {
             'type': {
                 # cast(), when interprating this register's data
                 # hex() is default value and can be omitted
@@ -46,15 +46,15 @@ def BuildRegMap():
                 'addr': [0x0C, 0x0D],
                 'value': None,
             }, # chip::vendor
-        }], # chip::
-        'serial': [{
+        }, # chip::
+        'serial': {
             'soft-reset': {
                 'cast': bool,
                 'addr': 0x0B,
                 'mask': 0x01,
                 'value': None,
             }, # serial::softreset
-            'spi': [{
+            'spi': {
                 'version': {
                     'addr': 0x0B,
                     'value': None,
@@ -77,8 +77,8 @@ def BuildRegMap():
                     'mask': 0x08,
                     'value': None,
                 }, # serial::spi::sdo
-            }],
-        }], # serial::
+            },
+        }, # serial::
     }
 
 class AD9546 :
@@ -94,13 +94,45 @@ class AD9546 :
             * `fake`: emulates HW access, for testing purpopses
         
         address: I2C slave address, expected
-        when provided a /dev/i2c-x entry
+        when /dev/i2c-x entry is provided
         """
-        self.loadRegMap()
-        # creates bus handle
-        self.__handle(bus, address=address)
+        self.loadRegMap() # internal register descriptor
+        self.__make_handle(bus, address=address) # H/W access handle
 
-    def __handle (self, bus, address=None):
+    def RegisterAttributes (mmap, reg):
+        """
+        Returns attributes by searching through register map
+        """
+        for key in mmap.keys():
+            if "addr" in mmap[key]:
+                if key == reg:
+                    return mmap[key]
+            else:
+                v = AD9546.RegisterAttributes(mmap[key], reg)
+                if v is not None:
+                    return v
+        return None
+
+    def RegistersByAddress (mmap, addr):
+        """
+        Returns list of registers refering to given address
+        """
+        result = []
+        for key in mmap.keys():
+            if "addr" in mmap[key]:
+                a = mmap[key]["addr"]
+                if type(a) is int:
+                    a = [a,]
+                if addr in a:
+                    result.append(mmap[key])
+            else:
+                found = AD9546.RegistersByAddress(mmap[key], addr)
+                if len(found) > 0:
+                    for item in found:
+                        result.append(item)
+        return result
+    
+    def __make_handle (self, bus, address=None):
         """
         Creates handle for bus communication,
         TODO: manage SPI case
@@ -138,7 +170,7 @@ class AD9546 :
         """
         return type(self.handle) is SMBus
     
-    def __fake (self):
+    def __is_fake (self):
         """
         Returns true if HW access is emulated
         """
@@ -149,7 +181,7 @@ class AD9546 :
         Opens device for Rd/Wr operations
         TODO: manage SPI case
         """
-        if not self.__fake():
+        if not self.__is_fake():
             if self.uses_i2c():
                 self.handle.open(self.bus)
 
@@ -158,7 +190,7 @@ class AD9546 :
         Closes supposedly opened device
         TODO: manage SPI case
         """
-        if not self.__fake():
+        if not self.__is_fake():
             self.handle.close()
     
     def loadRegMap (self):
@@ -168,7 +200,7 @@ class AD9546 :
         """
         self.regmap = BuildRegMap()
 
-    def __write_data (self, addr, data):
+    def write_byte (self, addr, data):
         """ 
         Writes data (uint8_t) to given address (uint16_t)
         TODO: manage SPI low level case
@@ -178,14 +210,14 @@ class AD9546 :
         if self.uses_i2c():
             self.handle.write_i2c_block_data(self.slv_addr, msb, [lsb, data & 0xFF])
 
-    def __read_data (self, addr):
+    def read_byte (self, addr):
         """ 
         Reads data (uint8_t) at given address (uint16_t) 
         TODO: manage SPI low level case
         """
         msb = (addr & 0xFF00)>>8
         lsb = addr & 0xFF
-        if self.__fake():
+        if self.__is_fake():
             import random
             return random.randint(0, 255)
         else:
@@ -230,7 +262,7 @@ class AD9546 :
 
         data = 0
         for i in range (0, len(addr)):
-            raw = self.__read_data(addr[i])
+            raw = self.read_byte(addr[i])
             if masks is not None:
                 raw &= masks[i]
             data |= raw << (8*i)
