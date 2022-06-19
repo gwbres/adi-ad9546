@@ -3,7 +3,7 @@
 [![Python application](https://github.com/gwbres/adi-ad9546/actions/workflows/python-app.yml/badge.svg)](https://github.com/gwbres/adi-ad9546/actions/workflows/python-app.yml)
 [![PyPI version](https://badge.fury.io/py/adi-ad9546.svg)](http://badge.fury.io/py/adi-ad9546)
 
-Set of tools to interact & program AD9546/45 integrated circuits, by Analog Devices.
+API and set of tools to interact with AD9546/45 integrated circuits, by Analog Devices.
 
 Use [these tools](https://github.com/gwbres/adi-ad9548)
 to interact with AD9548/47 older chipsets.
@@ -12,11 +12,8 @@ These scripts are not Windows compatible.
 These scripts expect a `/dev/i2c-X` entry, they do not manage the device
 through SPI at the moment.
 
-## Install 
-
-```shell
-python setup.py install
-```
+AD9546 and AD9545 are complex devices. This API
+is designed to make operating those devices easier.
 
 ## Dependencies
 
@@ -26,6 +23,12 @@ Install requirements with
 
 ```shell
 pip3 install -r requirements.txt
+```
+
+## Install 
+
+```shell
+python setup.py install
 ```
 
 ## API

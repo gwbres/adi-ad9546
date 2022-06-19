@@ -132,15 +132,6 @@ def main (argv):
 
     if args.info:
         status['info'] = {}
-        status['info']['chip-type'] = hex(dev.read_data(0x0003))
-        data = dev.read_data(0x0004)
-        data |= dev.read_data(0x0005)<<8
-        data |= dev.read_data(0x0006)<<16
-        status['info']['device-code'] = hex(data) 
-        status['info']['spi-version'] = hex(dev.read_data(0x000B))
-        data  = dev.read_data(0x000C)
-        data |= dev.read_data(0x000D)<<8
-        status['info']['vendor'] = hex(data) 
     if args.serial:
         status['serial'] = {}
         r = dev.read_data(0x0000)
