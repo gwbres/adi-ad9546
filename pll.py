@@ -68,14 +68,14 @@ def main (argv):
             r = dev.read_data(0x2105)    
             dev.write_data(0x2105, r | 0x01)
         if args.channel == 'all' or args.channel == '1':
-            r = dev.read_data(0x2206)    
+            r = dev.read_data(0x2205) 
             dev.write_data(0x2206, r | 0x01)
     if args.holdover:
         if args.channel == 'all' or args.channel == '0':
             r = dev.read_data(0x2105)    
             dev.write_data(0x2105, r | 0x02)
         if args.channel == 'all' or args.channel == '1':
-            r = dev.read_data(0x2206) 
+            r = dev.read_data(0x2205) 
             dev.write_data(0x2206, r | 0x02)
     dev.io_update()
 
