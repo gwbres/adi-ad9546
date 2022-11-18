@@ -112,6 +112,8 @@ def main (argv):
     args = parser.parse_args(argv)
     # open device
     dev = AD9546(args.bus, int(args.address, 16))
+    # I/O update is required priori reading some status registers
+    dev.io_update()
         
     status = {}
     done = {
