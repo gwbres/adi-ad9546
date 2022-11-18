@@ -635,6 +635,34 @@ At the moment, I hardcoded Core #0 (1st one) as the frequency source
 
 TODO
 
+## Skew measurement unit 
+
+AD9546/45 integrates a skew measurement system
+that is very convenient and serves as an input
+signal quality evaluation system.
+
+Reading the skew measurement monitoring and reading
+is done with the status script:
+
+```shell
+# general report
+status.py 0 0x4A --skew
+
+# skew raw readings 
+# A negative value means the target source leads the ref. source.
+# Returned value in [ps]
+status.py 0 0x4A \
+    --skew \
+    --filter-by-key offset # raw data
+    --unpack # very raw data [ps]
+```
+
+There are two options to perform skew measurements
+* either ref. and source share same frequency,
+this is controlled in 0x2A14.
+* or ref. and source drift/beat one against another,
+and we evaluate skew drift over time (0x3A3A)
+
 ## IRQ events
 
 `status.py --irq` allows reading the current asserted IRQ flags.  
@@ -729,3 +757,8 @@ TODO
 ```shell
 TODO
 ```
+
+## TODO
+
+These scripts are work in progress.   
+`grep -r "TODO"` to depict current uncertainties 

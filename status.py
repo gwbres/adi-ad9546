@@ -81,6 +81,7 @@ def main (argv):
         ('ccdpll', 'Common Clock DPLL core infos'),
         ("uts",  "User Time Stamping cores status + readings"),
         ("iuts", "Inverse UTS cores status + readings"),
+        ('skew', "Integrated Skew measurement system"),
         ("irq", "IRQ registers"),
         ("watchdog", "Watchdog timer period"),
         ("eeprom", "EEPROM controller status"),
@@ -491,6 +492,36 @@ def main (argv):
             status['ref-input'][ref]['fast'] = bool((r&0x02)>>1)
             status['ref-input'][ref]['slow'] = bool((r&0x01)>>0)
             base += 1
+
+    if args.skew:
+        status['skew'] = {}
+        base = 0x3A2C
+        v = dev.read_data(base +0)
+        v+= dev.read_data(base +1)<<8
+        v+= dev.read_data(base +2)<<16
+        v+= dev.read_data(base +3)<<24
+        v+= dev.read_data(base +4)<<32
+        v+= dev.read_data(base +5)<<40
+        v+= dev.read_data(base +6)<<48
+        r = dev.read_data(base+7)
+        v += (r & 0x1F) << 56 #TODO lire 0x3A3A
+        status['skew']['offset'] = {}
+        status['skew']['offset']['value'] = v/1000 * pow(2,-16) #TODO /1000: typo in datasheet?
+        status['skew']['offset']['complete'] = bool((r & 0x80)>>7)
+
+        v = dev.read_data(0x3A34)
+        v+= dev.read_data(0x3A35)<<8
+        v+= dev.read_data(0x3A36)<<16
+        v+= dev.read_data(0x3A37)<<24
+        v+= dev.read_data(0x3A38)<<32
+        v+= dev.read_data(0x3A39)<<40
+        v+= dev.read_data(0x3A3A)<<48
+        r = dev.read_data(0x3A3B)
+        v+= (r & 0x1F) <<56 # TODO lire 0x3A34
+        status['skew']['drift'] = {}
+        tref_src = 1 #TODO
+        status['skew']['drift']['value'] = v *pow(2,-16)*1E-12 /tref_src 
+        status['skew']['drift']['complete'] = bool((r & 0x80)>>7)
     
     if args.irq:
         status['irq'] = {}
@@ -498,7 +529,7 @@ def main (argv):
             status['irq'][attr] = {}
         for ref in ['a','aa','b','bb']:
             status['irq']['ref'][ref] = {}
-        for ch in [0,1]:
+        for ch in ['0','1']:
             status['irq']['dpll'][ch] = {}
             status['irq']['utsp'][ch] = {}
             status['irq']['aux-nco'][ch] = {}
@@ -535,28 +566,30 @@ def main (argv):
 
         r = dev.read_data(0x300F)
         status['irq']['skew']['update'] = bool((r & 0x10)>>4) 
-        status['irq']['utsp'][1]['update'] = bool((r & 0x08)>>3) 
-        status['irq']['utsp'][0]['update'] = bool((r & 0x04)>>2) 
-        status['irq']['aux-nco'][1]['event'] = bool((r & 0x02)>>1) 
-        status['irq']['aux-nco'][0]['event'] = bool((r & 0x01)>>0) 
+        status['irq']['utsp']['1']['update'] = bool((r & 0x08)>>3) 
+        status['irq']['utsp']['0']['update'] = bool((r & 0x04)>>2) 
+        status['irq']['aux-nco']['1']['event'] = bool((r & 0x02)>>1) 
+        status['irq']['aux-nco']['0']['event'] = bool((r & 0x01)>>0) 
         
         r = dev.read_data(0x3010)
-        status['irq']['dpll'][0]['freq-unclamped'] = bool((r&0x80)>>7)
-        status['irq']['dpll'][0]['freq-clamped'] = bool((r&0x40)>>6)
-        status['irq']['dpll'][0]['slew-limiter-inactive'] = bool((r&0x20)>>5)
-        status['irq']['dpll'][0]['slew-limiter-active'] = bool((r&0x10)>>4)
-        status['irq']['dpll'][0]['freq-unlocked'] = bool((r&0x08)>>3)
-        status['irq']['dpll'][0]['freq-locked'] = bool((r&0x04)>>2)
-        status['irq']['dpll'][0]['phase-unlocked'] = bool((r&0x02)>>1)
-        status['irq']['dpll'][0]['phase-locked'] = bool((r&0x01)>>0)
+        status['irq']['dpll']['0']['freq-unclamped'] = bool((r&0x80)>>7)
+        status['irq']['dpll']['0']['freq-clamped'] = bool((r&0x40)>>6)
+        status['irq']['dpll']['0']['slew-limiter-inactive'] = bool((r&0x20)>>5)
+        status['irq']['dpll']['0']['slew-limiter-active'] = bool((r&0x10)>>4)
+        status['irq']['dpll']['0']['freq-unlocked'] = bool((r&0x08)>>3)
+        status['irq']['dpll']['0']['freq-locked'] = bool((r&0x04)>>2)
+        status['irq']['dpll']['0']['phase-unlocked'] = bool((r&0x02)>>1)
+        status['irq']['dpll']['0']['phase-locked'] = bool((r&0x01)>>0)
         r = dev.read_data(0x3011)
-        status['irq']['dpll'][0]['ref-switch'] = bool((r&0x80)>>7)
-        status['irq']['dpll'][0]['free-run'] = bool((r&0x40)>>6)
-        status['irq']['dpll'][0]['holdover'] = bool((r&0x20)>>5)
-        status['irq']['dpll'][0]['hitless-entered'] = bool((r&0x10)>>4)
-        status['irq']['dpll'][0]['hitless-exit'] = bool((r&0x08)>>3)
-        status['irq']['dpll'][0]['holdover-ftw-upd'] = bool((r&0x04)>>1)
-        status['irq']['dpll'][0]['phase-step'] = bool((r&0x01)>>0)
+        status['irq']['dpll']['0']['ref-switch'] = bool((r&0x80)>>7)
+        status['irq']['dpll']['0']['free-run'] = bool((r&0x40)>>6)
+        status['irq']['dpll']['0']['holdover'] = bool((r&0x20)>>5)
+        status['irq']['dpll']['0']['hitless-entered'] = bool((r&0x10)>>4)
+        status['irq']['dpll']['0']['hitless-exit'] = bool((r&0x08)>>3)
+        status['irq']['dpll']['0']['holdover-ftw-upd'] = bool((r&0x04)>>1)
+        status['irq']['dpll']['0']['phase-step'] = bool((r&0x01)>>0)
+
+        #TODO dpll '1'
         
     if args.watchdog:
         status['watchdog'] = {}
@@ -955,12 +988,10 @@ def main (argv):
         status['ccdpll']['active'] = bool((r & 0x01)>>0)
 
     if args.uts:
+        status['uts'] = {}
         dev.io_update() # triggers UTPSx latching, that
             # we deal with at the very end
 
-        status['uts'] = {}
-        base = 0x0E00
-        offset = 0x05
         formats = {
             0: 'normal',
             1: 'ptp',
@@ -982,9 +1013,16 @@ def main (argv):
             14: 'iuts1',
         }
 
+        timescales = {
+            0: "aux-nco0",
+            1: "ccs",
+            2: "aux-nco1",
+        }
+        
         for c in range (9):
             status['uts'][str(c)] = {}
-            r = dev.read_data(base + c*offset) & 0x0F
+        
+            r = dev.read_data(0x0E00 + c*0x05) & 0x0F
             status['uts'][str(c)]['format'] = formats[(r & 0x02)>>1] 
             status['uts'][str(c)]['enabled'] = bool((r&0x01)>>0)
             flags = (r & 0x1C)>>2
@@ -1026,13 +1064,13 @@ def main (argv):
             status['uts'][str(c)]['flags']['format'] = fmt
             status['uts'][str(c)]['flags']['tag'] = tag
 
-            r = dev.read_data(base+1 + c*offset)
+            r = dev.read_data(0xE00+1 + c*0x05)
             status['uts'][str(c)]['tagged-timestamps'] = bool((r&0x10)>>4)
             status['uts'][str(c)]['source'] = sources[(r & 0x1F)]
 
-            v = dev.read_data(base+2 +c*offset)
-            v += dev.read_data(base+3 +c*offset) << 8
-            v += dev.read_data(base+4 +c*offset) << 16
+            v = dev.read_data(0xE00+2 +c*0x05)
+            v += dev.read_data(0xE00+3 +c*0x05) << 8
+            v += dev.read_data(0xE00+4 +c*0x05) << 16
             status['uts'][str(c)]['reading'] = sign_extend(v,48) * pow(2,-48) # 1 bit = 1sec/2^48
 
         r = dev.read_data(0x0E2D)
@@ -1062,6 +1100,20 @@ def main (argv):
         else:
             ns = sign_extend(v0, 48)
             status['uts']['fifo']['timecode']['ns'] = ns * pow(2,-48)
+
+        source_kinds = {
+            0: "all",
+            1: "only-tagged",
+        }
+
+        base = 0x2A12
+        for ch in range (2):
+            status['utsp'] = {}
+            status['utsp'][str(ch)] = {}
+            r = dev.read_data(base +ch)
+            status['utsp'][str(ch)]['time-scale'] = timescales[(r&0xC0)>>6] 
+            status['utsp'][str(ch)]['source'] = source_kinds[(r&0x40)>>5]
+            status['utsp'][str(ch)]['timestamp-source'] = sources[(r & 0x1F)]
 
         base = 0x3A14
         for ch in range(2):
