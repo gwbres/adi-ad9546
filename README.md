@@ -552,8 +552,9 @@ of the desired type.
 
 * `--free-run`: forces clock to free run state, `--type` is disregarded 
 because `digital` is implied. 
-* `--holdover`: forces clock to holdover state, `--type` is disregarded 
+* `--holdover 1`: forces clock to holdover state, `--type` is disregarded 
 because `digital` is implied. 
+* `--holdover 0`: recovers from forced holdover 
 
 ## Power down script
 
