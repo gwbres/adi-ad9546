@@ -35,8 +35,8 @@ def main (argv):
         help="Select which channel (PLLx) to configure. Defaults to `all`. Refer to README",
     )
     flags = [
-        ("free-run", None, [], "Force PLLx to free run state"),
-        ("holdover", None, [], "Force PLLx to holdover state"),
+        ("free-run", int, [0,1], "Force PLLx to free run state"),
+        ("holdover", int, [0,1], "Force PLLx to holdover state"),
     ]
     
     for (v_label, v_type, v_choices, v_helper) in flags:
@@ -65,18 +65,30 @@ def main (argv):
 
     if args.free_run:
         if args.channel == 'all' or args.channel == '0':
-            r = dev.read_data(0x2105)    
-            dev.write_data(0x2105, r | 0x01)
+            r = dev.read_data(0x2105) 
+            if args.free_run == 1: 
+                dev.write_data(0x2105, r | 0x01)
+            else:
+                dev.write_data(0x2105, r & 0xFE)
         if args.channel == 'all' or args.channel == '1':
             r = dev.read_data(0x2205) 
-            dev.write_data(0x2206, r | 0x01)
+            if args.free_run == 1:
+                dev.write_data(0x2205, r | 0x01)
+            else:
+                dev.write_data(0x2205, r & 0xFE)
     if args.holdover:
         if args.channel == 'all' or args.channel == '0':
             r = dev.read_data(0x2105)    
-            dev.write_data(0x2105, r | 0x02)
+            if args.holdover == 1:
+                dev.write_data(0x2105, r | 0x02)
+            else:
+                dev.write_data(0x2105, r & 0xFD)
         if args.channel == 'all' or args.channel == '1':
             r = dev.read_data(0x2205) 
-            dev.write_data(0x2206, r | 0x02)
+            if args.holdover == 1:
+                dev.write_data(0x2205, r | 0x02)
+            else:
+                dev.write_data(0x2205, r & 0xFD)
     dev.io_update()
 
 if __name__ == "__main__":
